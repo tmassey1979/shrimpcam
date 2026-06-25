@@ -206,6 +206,9 @@ function App() {
 
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#main-content">
+        Skip to main content
+      </a>
       <header className="topbar">
         <div>
           <p className="eyebrow">Shrimp Cam</p>
@@ -221,12 +224,12 @@ function App() {
         </div>
       </header>
 
-      <main className="content">
+      <main id="main-content" className="content" tabIndex={-1}>
         {!isOnline ? (
           <OfflineShellPanel metadata={cachedShellMetadata} />
         ) : null}
         {reconnectNotice ? (
-          <div className="reconnect-banner" role="status">
+          <div className="reconnect-banner" role="status" aria-live="polite">
             {reconnectNotice}
           </div>
         ) : null}
@@ -296,6 +299,7 @@ function App() {
               key={item.to}
               to={item.to}
               className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+              aria-label={item.label}
             >
               <span className="nav-icon" aria-hidden="true">
                 {item.icon}
@@ -598,7 +602,7 @@ function OfflineShellPanel({ metadata }: { metadata: CachedShellMetadata | null 
   const hasCachedMetadata = Boolean(metadata?.dashboard || metadata?.gallery);
 
   return (
-    <div className="offline-panel" role="status">
+    <div className="offline-panel" role="status" aria-live="polite">
       <div>
         <p className="eyebrow">Offline Shell</p>
         <h2>{hasCachedMetadata ? "Cached view available" : "Initial online visit required"}</h2>
@@ -762,8 +766,16 @@ function DashboardScreen({
           <p className="eyebrow">Fallbacks</p>
           {dashboard.healthError || dashboard.capturesError ? (
             <>
-              {dashboard.healthError ? <p>{dashboard.healthError}</p> : null}
-              {dashboard.capturesError ? <p>{dashboard.capturesError}</p> : null}
+              {dashboard.healthError ? (
+                <p className="form-error" role="alert">
+                  {dashboard.healthError}
+                </p>
+              ) : null}
+              {dashboard.capturesError ? (
+                <p className="form-error" role="alert">
+                  {dashboard.capturesError}
+                </p>
+              ) : null}
               <p>Use refresh to retry, or open Settings to review system status.</p>
             </>
           ) : (
@@ -874,7 +886,7 @@ function GalleryScreen({
             </button>
           </div>
 
-          <div className="gallery-summary" role="status">
+          <div className="gallery-summary" role="status" aria-live="polite">
             {gallery.isLoading
               ? "Loading captures..."
               : `${gallery.totalItems} capture${gallery.totalItems === 1 ? "" : "s"} found${
@@ -882,7 +894,11 @@ function GalleryScreen({
                 }.`}
           </div>
 
-          {gallery.error ? <p className="form-error">{gallery.error}</p> : null}
+          {gallery.error ? (
+            <p className="form-error" role="alert">
+              {gallery.error}
+            </p>
+          ) : null}
 
           {gallery.isLoading ? <LoadingSkeleton label="Loading capture list" compact /> : null}
 
@@ -903,6 +919,7 @@ function GalleryScreen({
                 key={capture.id}
                 className={gallery.selectedCapture?.id === capture.id ? "capture-list-item active" : "capture-list-item"}
                 onClick={() => selectCapture(capture)}
+                aria-pressed={gallery.selectedCapture?.id === capture.id}
               >
                 <span>{formatDateTime(capture.capturedAtUtc)}</span>
                 <strong>{capture.fileName}</strong>
@@ -1066,7 +1083,7 @@ function LiveViewScreen({ auth }: { auth: AuthContext }) {
             </div>
           </dl>
           {message ? (
-            <p className="live-message" role={message.includes("failed") || streamUnavailable ? "alert" : "status"}>
+            <p className="live-message" role={message.includes("failed") || streamUnavailable ? "alert" : "status"} aria-live="polite">
               {message}
             </p>
           ) : null}
@@ -1414,7 +1431,7 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
             </fieldset>
 
             {state.message ? (
-              <p className="live-message" role={Object.keys(state.errors).length > 0 ? "alert" : "status"}>
+              <p className="live-message" role={Object.keys(state.errors).length > 0 ? "alert" : "status"} aria-live="polite">
                 {state.message}
               </p>
             ) : null}

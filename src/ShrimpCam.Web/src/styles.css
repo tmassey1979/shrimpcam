@@ -47,9 +47,43 @@ a {
   text-decoration: none;
 }
 
+button,
+a,
+input,
+select {
+  touch-action: manipulation;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[tabindex="-1"]:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
 .app-shell {
   min-height: 100vh;
-  padding: 1rem 1rem 6rem;
+  padding: 1rem 1rem calc(6rem + env(safe-area-inset-bottom));
+}
+
+.skip-link {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 20;
+  transform: translateY(-150%);
+  padding: 0.85rem 1rem;
+  border-radius: 999px;
+  background: #f7feff;
+  color: #071218;
+  font-weight: 800;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
 }
 
 .topbar,
@@ -698,7 +732,8 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.6rem;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
   padding: 0.7rem 0.9rem;
   border-radius: 0.9rem;
   border: 1px solid rgba(124, 224, 234, 0.26);
@@ -709,7 +744,7 @@ a {
 }
 
 .ghost-button {
-  min-height: 2.35rem;
+  min-height: 2.75rem;
   padding: 0.55rem 0.75rem;
   background: rgba(255, 255, 255, 0.06);
 }
@@ -783,7 +818,7 @@ a {
   position: fixed;
   left: 1rem;
   right: 1rem;
-  bottom: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom));
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0.5rem;
@@ -796,6 +831,8 @@ a {
   display: grid;
   gap: 0.3rem;
   justify-items: center;
+  align-content: center;
+  min-height: 4rem;
   padding: 0.65rem 0.4rem;
   border-radius: 1rem;
   color: var(--text-soft);
@@ -822,7 +859,7 @@ a {
   .app-shell {
     max-width: 960px;
     margin: 0 auto;
-    padding-bottom: 7rem;
+    padding-bottom: calc(7rem + env(safe-area-inset-bottom));
   }
 
   .screen,
@@ -877,5 +914,16 @@ a {
   .stream-frame,
   .stream-frame img {
     min-height: 24rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
