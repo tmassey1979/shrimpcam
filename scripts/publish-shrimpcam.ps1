@@ -10,6 +10,7 @@ $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 $outputRootPath = Join-Path $repoRoot $OutputRoot
 $apiOutputPath = Join-Path $outputRootPath "api"
 $webOutputPath = Join-Path $outputRootPath "web"
+$apiWebRootPath = Join-Path $repoRoot "src/ShrimpCam.Api/wwwroot"
 
 if (Test-Path -LiteralPath $outputRootPath) {
     Remove-Item -LiteralPath $outputRootPath -Recurse -Force
@@ -17,6 +18,10 @@ if (Test-Path -LiteralPath $outputRootPath) {
 
 New-Item -ItemType Directory -Path $apiOutputPath | Out-Null
 New-Item -ItemType Directory -Path $webOutputPath | Out-Null
+if (Test-Path -LiteralPath $apiWebRootPath) {
+    Remove-Item -LiteralPath $apiWebRootPath -Recurse -Force
+}
+New-Item -ItemType Directory -Path $apiWebRootPath | Out-Null
 
 Push-Location (Join-Path $repoRoot "src/ShrimpCam.Web")
 try {
@@ -26,6 +31,7 @@ try {
 
     npm run build
     Copy-Item -Path "dist\*" -Destination $webOutputPath -Recurse
+    Copy-Item -Path "dist\*" -Destination $apiWebRootPath -Recurse
 }
 finally {
     Pop-Location

@@ -61,6 +61,8 @@ builder.Services.AddRateLimiter(
 
 var app = builder.Build();
 var buildMetadata = BuildMetadata.FromAssembly(typeof(Program).Assembly);
+var webRootPath = app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+var hasWebShell = File.Exists(Path.Combine(webRootPath, "index.html"));
 
 var options = app.Services.GetRequiredService<IOptions<ShrimpCamOptions>>().Value;
 await app.Services.GetRequiredService<IApplicationDataInitializer>()
@@ -90,9 +92,15 @@ app.Use(
         context.Response.Headers.TryAdd("X-Content-Type-Options", "nosniff");
         context.Response.Headers.TryAdd("X-Frame-Options", "DENY");
         context.Response.Headers.TryAdd("Referrer-Policy", "no-referrer");
-        context.Response.Headers.TryAdd("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+        context.Response.Headers.TryAdd("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' ws: wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
         await next(context).ConfigureAwait(false);
     });
+
+if (hasWebShell)
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+}
 
 app.UseRateLimiter();
 app.UseAuthentication();
@@ -718,6 +726,11 @@ app.MapGet(
             },
             session.ContentType);
     });
+
+if (hasWebShell)
+{
+    app.MapFallbackToFile("index.html");
+}
 
 app.Run();
 

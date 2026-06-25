@@ -4,6 +4,8 @@ obj/
 .vscode/
 TestResults/
 artifacts/
+src/ShrimpCam.Api/data/
+src/ShrimpCam.Api/wwwroot/
 coverage/
 coverage-report/
 *.coverage

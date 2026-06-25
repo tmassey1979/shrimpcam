@@ -3,6 +3,18 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
+  server: {
+    proxy: {
+      "/audit": "http://localhost:5098",
+      "/auth": "http://localhost:5098",
+      "/backups": "http://localhost:5098",
+      "/captures": "http://localhost:5098",
+      "/diagnostics": "http://localhost:5098",
+      "/health": "http://localhost:5098",
+      "/settings": "http://localhost:5098",
+      "/stream": "http://localhost:5098"
+    }
+  },
   plugins: [
     react(),
     VitePWA({
