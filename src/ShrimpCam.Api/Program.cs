@@ -10,6 +10,7 @@ using ShrimpCam.Core.Authentication;
 using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Captures;
 using ShrimpCam.Core.Configuration;
+using ShrimpCam.Core.Diagnostics;
 using ShrimpCam.Core.Health;
 using ShrimpCam.Core.Persistence;
 using ShrimpCam.Core.Settings;
@@ -69,6 +70,27 @@ app.MapGet(
             ? Results.Json(payload, statusCode: StatusCodes.Status503ServiceUnavailable)
             : Results.Ok(payload);
     });
+
+app.MapGet(
+    "/diagnostics/bundle",
+    async (IDiagnosticsBundleService diagnosticsBundleService, CancellationToken cancellationToken) =>
+    {
+        var bundle = await diagnosticsBundleService.GenerateAsync(cancellationToken).ConfigureAwait(false);
+
+        return Results.Ok(
+            new
+            {
+                generatedAtUtc = bundle.GeneratedAtUtc,
+                applicationVersion = buildMetadata.Version,
+                informationalVersion = buildMetadata.InformationalVersion,
+                sourceRevision = buildMetadata.SourceRevision,
+                buildConfiguration = buildMetadata.BuildConfiguration,
+                health = bundle.Health,
+                configuration = bundle.Configuration,
+                recentAuditEvents = bundle.RecentAuditEvents,
+            });
+    })
+    .RequireAuthorization(AuthorizationPolicies.Administrator);
 
 app.MapPost(
     "/auth/bootstrap-admin",

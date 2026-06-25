@@ -6,11 +6,11 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 03:19:49 -05:00 |
+| Last refreshed | 2026-06-25 03:25:18 -05:00 |
 | Total stories | 49 |
-| Accepted stories | 34 |
-| Remaining stories | 15 |
-| Overall completion | 69.4% |
+| Accepted stories | 35 |
+| Remaining stories | 14 |
+| Overall completion | 71.4% |
 
 ## Epic Progress
 
@@ -18,24 +18,23 @@
 | --- | --- | --- | --- |
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
 | Epic 2: Camera, Capture, and Streaming | 11 | 11 | 100% |
-| Epic 3: API, Security, and Operations | 11 | 16 | 68.8% |
+| Epic 3: API, Security, and Operations | 12 | 16 | 75% |
 | Epic 4: PWA Product Experience | 0 | 10 | 0% |
 
 ## Latest Completed Stories
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-ASO-312 | Diagnostics and support bundle API | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-ASO-311 | Structured application logs | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-ASO-310 | Degraded startup and runtime resilience | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-ASO-309 | Audit and security event logging | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-ASO-308 | Capture browsing APIs | Epic 3: API, Security, and Operations | 2026-06-25 |  |
-| SC-ASO-307 | Settings management API | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 
 ## Next Unaccepted Stories
 
 | Story | Title | Epic |
 | --- | --- | --- |
-| SC-ASO-312 | Diagnostics and support bundle API | Epic 3: API, Security, and Operations |
 | SC-ASO-313 | Backup and export workflow | Epic 3: API, Security, and Operations |
 | SC-ASO-314 | Restore and import workflow | Epic 3: API, Security, and Operations |
 | SC-ASO-315 | Deployment support for Windows service and systemd | Epic 3: API, Security, and Operations |
@@ -45,3 +44,4 @@
 | SC-PWA-03 | Dashboard Overview | Epic 4: PWA Product Experience |
 | SC-PWA-04 | Live View And Manual Snapshot UX | Epic 4: PWA Product Experience |
 | SC-PWA-05 | Gallery Browsing And Full-Screen Viewer | Epic 4: PWA Product Experience |
+| SC-PWA-06 | Settings And System Status Experience | Epic 4: PWA Product Experience |

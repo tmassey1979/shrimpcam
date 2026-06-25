@@ -4,6 +4,7 @@ using ShrimpCam.Core.Audit;
 using ShrimpCam.Core.Authentication;
 using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Captures;
+using ShrimpCam.Core.Diagnostics;
 using ShrimpCam.Core.Health;
 using ShrimpCam.Core.Persistence;
 using ShrimpCam.Core.Settings;
@@ -11,6 +12,7 @@ using ShrimpCam.Infrastructure.Cameras;
 using ShrimpCam.Infrastructure.Cameras.Linux;
 using ShrimpCam.Infrastructure.Cameras.Windows;
 using ShrimpCam.Infrastructure.Captures;
+using ShrimpCam.Infrastructure.Diagnostics;
 using ShrimpCam.Infrastructure.Health;
 using ShrimpCam.Infrastructure.IO;
 using ShrimpCam.Infrastructure.Persistence;
@@ -29,6 +31,7 @@ public static class DependencyInjection
         services.AddSingleton<IFileSystem, SystemFileSystem>();
         services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
         services.AddSingleton<IAuthenticationService, LocalAuthenticationService>();
+        services.AddSingleton<IDiagnosticsBundleService, DiagnosticsBundleService>();
         services.AddSingleton<IApplicationHealthService, ApplicationHealthService>();
         services.AddSingleton<IDatabaseHealthProbe, SqliteDatabaseHealthProbe>();
         services.AddSingleton<IEditableSettingsService>(
