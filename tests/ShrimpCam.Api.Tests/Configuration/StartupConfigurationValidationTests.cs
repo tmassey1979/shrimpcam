@@ -1,10 +1,13 @@
 using System.Net;
 using System.Net.Http.Json;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using ShrimpCam.Core.Health;
 
 #nullable enable
 #pragma warning disable CA2007
@@ -15,7 +18,7 @@ public sealed class StartupConfigurationValidationTests
 {
     [Fact]
     [Trait("Category", "Api")]
-    public async Task Health_endpoint_exposes_values_from_valid_bound_configuration()
+    public async Task Health_endpoint_exposes_runtime_health_and_build_metadata_from_valid_configuration()
     {
         var rootPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
@@ -38,9 +41,11 @@ public sealed class StartupConfigurationValidationTests
             var payload = await response.Content.ReadFromJsonAsync<HealthResponseContract>().ConfigureAwait(true);
 
             payload.Should().NotBeNull();
-            payload!.CameraPlatform.Should().Be("Windows");
-            payload.CaptureIntervalMinutes.Should().Be(5);
-            payload.HostMode.Should().Be("InternetExposed");
+            payload!.Status.Should().Be(HealthStatusLevel.Healthy);
+            payload.Components.Should().ContainKey("database");
+            payload.Components.Should().ContainKey("storage");
+            payload.Components.Should().ContainKey("camera");
+            payload.Components["database"].Status.Should().Be(HealthStatusLevel.Healthy);
             payload.ApplicationVersion.Should().Be("0.1.0.0");
             payload.InformationalVersion.Should().Be("0.1.0+sha.local");
             payload.SourceRevision.Should().Be("local");
@@ -121,13 +126,14 @@ public sealed class StartupConfigurationValidationTests
 
     private sealed record HealthResponseContract(
         string Status,
-        string CameraPlatform,
-        int CaptureIntervalMinutes,
-        string HostMode,
+        DateTimeOffset CheckedAtUtc,
+        Dictionary<string, HealthComponentContract> Components,
         string ApplicationVersion,
         string InformationalVersion,
         string SourceRevision,
         string BuildConfiguration);
+
+    private sealed record HealthComponentContract(string Status, string? Detail);
 
     private sealed class ConfigurationWebApplicationFactory(
         IReadOnlyDictionary<string, string>? overrides = null) : WebApplicationFactory<Program>
@@ -144,6 +150,9 @@ public sealed class StartupConfigurationValidationTests
             builder.ConfigureAppConfiguration(
                 (_, configBuilder) => configBuilder.AddInMemoryCollection(
                     overrides.Select(pair => new KeyValuePair<string, string?>(pair.Key, pair.Value))));
+
+            builder.ConfigureServices(
+                services => services.AddSingleton<IDataProtectionProvider>(new EphemeralDataProtectionProvider()));
         }
     }
 

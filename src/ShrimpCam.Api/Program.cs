@@ -8,6 +8,7 @@ using ShrimpCam.Core.Authentication;
 using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Captures;
 using ShrimpCam.Core.Configuration;
+using ShrimpCam.Core.Health;
 using ShrimpCam.Core.Persistence;
 using ShrimpCam.Infrastructure;
 
@@ -43,18 +44,24 @@ app.UseAuthorization();
 
 app.MapGet(
     "/health",
-    (IOptions<ShrimpCamOptions> optionsAccessor) => Results.Ok(
-        new
+    async (IApplicationHealthService applicationHealthService, CancellationToken cancellationToken) =>
+    {
+        var report = await applicationHealthService.GetCurrentAsync(cancellationToken).ConfigureAwait(false);
+        var payload = new
         {
-            status = "ok",
-            cameraPlatform = optionsAccessor.Value.Camera.Platform,
-            captureIntervalMinutes = optionsAccessor.Value.Capture.IntervalMinutes,
-            hostMode = optionsAccessor.Value.Security.HostMode,
+            status = report.Status,
+            checkedAtUtc = report.CheckedAtUtc,
+            components = report.Components,
             applicationVersion = buildMetadata.Version,
             informationalVersion = buildMetadata.InformationalVersion,
             sourceRevision = buildMetadata.SourceRevision,
             buildConfiguration = buildMetadata.BuildConfiguration,
-        }));
+        };
+
+        return report.Status == HealthStatusLevel.Unhealthy
+            ? Results.Json(payload, statusCode: StatusCodes.Status503ServiceUnavailable)
+            : Results.Ok(payload);
+    });
 
 app.MapPost(
     "/auth/bootstrap-admin",
