@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-using System.Linq;
 using System.Xml.Linq;
 using ShrimpCam.Core.Abstractions;
 using ShrimpCam.Infrastructure;

@@ -4,6 +4,14 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latestMajor</LangVersion>
+    <Deterministic>true</Deterministic>
+    <Version Condition="'$(Version)' == ''">0.1.0</Version>
+    <AssemblyVersion Condition="'$(AssemblyVersion)' == ''">0.1.0.0</AssemblyVersion>
+    <FileVersion Condition="'$(FileVersion)' == ''">0.1.0.0</FileVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <ShrimpCamSourceRevision Condition="'$(ShrimpCamSourceRevision)' == '' and '$(SHRIMPCAM_SOURCE_REVISION)' != ''">$(SHRIMPCAM_SOURCE_REVISION)</ShrimpCamSourceRevision>
+    <ShrimpCamSourceRevision Condition="'$(ShrimpCamSourceRevision)' == ''">local</ShrimpCamSourceRevision>
+    <InformationalVersion Condition="'$(InformationalVersion)' == ''">$(Version)+sha.$(ShrimpCamSourceRevision)</InformationalVersion>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <AnalysisMode>Recommended</AnalysisMode>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>

@@ -1,12 +1,22 @@
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using ShrimpCam.Core.Configuration;
 
 namespace ShrimpCam.Core.Tests.Configuration;
 
 public sealed class ShrimpCamOptionsValidationTests
 {
+    private static readonly string[] ExpectedInvalidMemberNames =
+    [
+        "Platform",
+        "Source",
+        "IntervalMinutes",
+        "ActiveStartHourUtc",
+        "ActiveEndHourUtc",
+        "ImageRootPath",
+        "RetentionDays",
+        "HostMode",
+    ];
+
     [Fact]
     [Trait("Category", "Unit")]
     public void Default_options_match_expected_bootstrap_values()
@@ -53,21 +63,10 @@ public sealed class ShrimpCamOptionsValidationTests
         var results = ValidateNested(options);
 
         results.Should().NotBeEmpty();
-        results.SelectMany(result => result.MemberNames).Should().Contain(
-            new[]
-            {
-                "Platform",
-                "Source",
-                "IntervalMinutes",
-                "ActiveStartHourUtc",
-                "ActiveEndHourUtc",
-                "ImageRootPath",
-                "RetentionDays",
-                "HostMode",
-            });
+        results.SelectMany(result => result.MemberNames).Should().Contain(ExpectedInvalidMemberNames);
     }
 
-    private static IReadOnlyList<ValidationResult> ValidateNested(ShrimpCamOptions options)
+    private static List<ValidationResult> ValidateNested(ShrimpCamOptions options)
     {
         var results = new List<ValidationResult>();
 

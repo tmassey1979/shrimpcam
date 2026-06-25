@@ -1,8 +1,5 @@
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http.Json;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
@@ -32,6 +29,10 @@ public sealed class StartupConfigurationValidationTests
         payload!.CameraPlatform.Should().Be("Windows");
         payload.CaptureIntervalMinutes.Should().Be(5);
         payload.HostMode.Should().Be("InternetExposed");
+        payload.ApplicationVersion.Should().Be("0.1.0.0");
+        payload.InformationalVersion.Should().Be("0.1.0+sha.local");
+        payload.SourceRevision.Should().Be("local");
+        payload.BuildConfiguration.Should().Be("Debug");
     }
 
     [Fact]
@@ -56,7 +57,11 @@ public sealed class StartupConfigurationValidationTests
         string Status,
         string CameraPlatform,
         int CaptureIntervalMinutes,
-        string HostMode);
+        string HostMode,
+        string ApplicationVersion,
+        string InformationalVersion,
+        string SourceRevision,
+        string BuildConfiguration);
 
     private sealed class ConfigurationWebApplicationFactory(
         IReadOnlyDictionary<string, string>? overrides = null) : WebApplicationFactory<Program>

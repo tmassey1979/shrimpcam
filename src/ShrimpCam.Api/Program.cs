@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using ShrimpCam.Api.Build;
 using ShrimpCam.Api.Configuration;
 using ShrimpCam.Core.Configuration;
 using ShrimpCam.Infrastructure;
@@ -11,6 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+var buildMetadata = BuildMetadata.FromAssembly(typeof(Program).Assembly);
 
 _ = app.Services.GetRequiredService<IOptions<ShrimpCamOptions>>().Value;
 
@@ -30,6 +32,10 @@ app.MapGet(
             cameraPlatform = options.Value.Camera.Platform,
             captureIntervalMinutes = options.Value.Capture.IntervalMinutes,
             hostMode = options.Value.Security.HostMode,
+            applicationVersion = buildMetadata.Version,
+            informationalVersion = buildMetadata.InformationalVersion,
+            sourceRevision = buildMetadata.SourceRevision,
+            buildConfiguration = buildMetadata.BuildConfiguration,
         }));
 
 app.Run();
