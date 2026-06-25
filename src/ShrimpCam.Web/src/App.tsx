@@ -140,6 +140,18 @@ type CachedShellMetadata = {
   };
 };
 
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+};
+
+type InstallPromptState = {
+  canPrompt: boolean;
+  isInstalled: boolean;
+  message: string;
+  promptInstall: () => Promise<void>;
+};
+
 type AuthContext = {
   session: Session | null;
   isAuthenticated: boolean;
@@ -182,6 +194,7 @@ const navItems: NavItem[] = [
 function App() {
   const auth = useAuthSession();
   const isOnline = useOnlineStatus();
+  const installPrompt = useInstallPrompt();
   const [cachedShellMetadata, setCachedShellMetadata] = useState<CachedShellMetadata | null>(() => readCachedShellMetadata());
   const statusLabel = isOnline ? "Connected" : "Offline";
   const shellMessage = isOnline
@@ -216,6 +229,7 @@ function App() {
           <p className="eyebrow">Secure Shell</p>
           <h2>{auth.isAuthenticated ? "Session active" : "Sign-in required"}</h2>
           <p>{shellMessage}</p>
+          <InstallPromptPanel installPrompt={installPrompt} />
         </section>
 
         <Routes>
@@ -370,6 +384,80 @@ function useAuthSession(): AuthContext {
       }
     }),
     [navigate, session]
+  );
+}
+
+function useInstallPrompt(): InstallPromptState {
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstalled, setIsInstalled] = useState(() => isStandaloneDisplay());
+  const [message, setMessage] = useState(
+    isStandaloneDisplay()
+      ? "Shrimp Cam is installed and running in standalone mode."
+      : "Install Shrimp Cam from your browser menu if the install button is not available."
+  );
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setDeferredPrompt(event as BeforeInstallPromptEvent);
+      setMessage("Install Shrimp Cam for home-screen launch and standalone display.");
+    };
+
+    const handleAppInstalled = () => {
+      setDeferredPrompt(null);
+      setIsInstalled(true);
+      setMessage("Shrimp Cam was installed. Reopen it from your app launcher or home screen.");
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
+
+  return {
+    canPrompt: deferredPrompt !== null,
+    isInstalled,
+    message,
+    promptInstall: async () => {
+      if (!deferredPrompt) {
+        setMessage(getManualInstallGuidance());
+        return;
+      }
+
+      await deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      setDeferredPrompt(null);
+      setMessage(
+        choice.outcome === "accepted"
+          ? "Install accepted. Reopen Shrimp Cam from your app launcher or home screen."
+          : getManualInstallGuidance()
+      );
+    }
+  };
+}
+
+function InstallPromptPanel({ installPrompt }: { installPrompt: InstallPromptState }) {
+  return (
+    <div className="install-panel">
+      <div>
+        <p className="eyebrow">Installable PWA</p>
+        <strong>{installPrompt.isInstalled ? "Installed" : "Add Shrimp Cam to this device"}</strong>
+        <span>{installPrompt.message}</span>
+      </div>
+      {!installPrompt.isInstalled ? (
+        <button
+          type="button"
+          className={installPrompt.canPrompt ? "primary-button" : "secondary-button"}
+          onClick={() => void installPrompt.promptInstall()}
+        >
+          {installPrompt.canPrompt ? "Install app" : "How to install"}
+        </button>
+      ) : null}
+    </div>
   );
 }
 
@@ -1377,6 +1465,18 @@ function flattenValidationErrors(errors?: Record<string, string[]>) {
 function toInteger(value: string) {
   const parsed = Number.parseInt(value, 10);
   return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function isStandaloneDisplay() {
+  const navigatorWithStandalone = window.navigator as Navigator & { standalone?: boolean };
+  return window.matchMedia("(display-mode: standalone)").matches || navigatorWithStandalone.standalone === true;
+}
+
+function getManualInstallGuidance() {
+  const isAppleTouchBrowser = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+  return isAppleTouchBrowser
+    ? "Use Share, then Add to Home Screen to install Shrimp Cam on this device."
+    : "Use your browser menu and choose Install app or Add to Home screen when supported.";
 }
 
 function readStoredSession(): Session | null {

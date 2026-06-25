@@ -130,6 +130,11 @@ a {
   padding: 1rem;
 }
 
+.hero-card {
+  display: grid;
+  gap: 0.75rem;
+}
+
 .hero-card p,
 .screen-copy,
 .stat-card span,
@@ -168,6 +173,28 @@ a {
 .offline-cache-grid {
   display: grid;
   gap: 0.85rem;
+}
+
+.install-panel {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(124, 224, 234, 0.18);
+  border-radius: 1rem;
+  background: rgba(124, 224, 234, 0.08);
+}
+
+.install-panel div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.install-panel strong {
+  color: #ffffff;
+}
+
+.install-panel span {
+  color: var(--text-soft);
 }
 
 .status-pill {
@@ -764,6 +791,11 @@ a {
 
   .offline-cache-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .install-panel {
+    grid-template-columns: 1fr auto;
+    align-items: center;
   }
 
   .gallery-layout {
