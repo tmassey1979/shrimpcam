@@ -453,6 +453,45 @@ Scenario: Settings save feedback is clear
   And validation or server errors remain attached to the affected fields
 ```
 
+### SC-PWA-16 Complete PWA Lifecycle Playwright Coverage
+
+**User story:** As a Shrimp Cam operator, I want the PWA lifecycle and failure states covered by Playwright tests so that the mobile UI remains reliable across install, offline, auth expiration, dashboard failures, and unknown routes.
+
+**Dependencies:** SC-PWA-07, SC-PWA-08, SC-PWA-09, SC-PWA-11
+
+**Test expectations:**
+- Samsung S26 Playwright tests cover offline cached shell metadata, reconnect messaging, install prompt lifecycle, app-installed state, auth expiration, unknown-route recovery, and dashboard API failures.
+- Tests use mocked API/browser events rather than timing-sensitive real service worker or hardware behavior.
+- Existing PWA happy-path and negative-path tests continue to pass.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: Offline shell uses cached metadata
+  Given a signed-in user has loaded dashboard and gallery data
+  When the browser goes offline
+  Then the shell shows cached metadata and stale/offline guidance
+  And returning online updates the connection message
+
+Scenario: Install prompt lifecycle is represented
+  Given the browser emits a beforeinstallprompt event
+  When the user opens the install action
+  Then Shrimp Cam exposes install-specific guidance or prompt state
+  And installed or dismissed outcomes are displayed clearly
+
+Scenario: Auth and error routes are resilient
+  Given an authenticated API call returns unauthorized or an unknown route is opened
+  When the app handles the response or route
+  Then the user receives clear recovery guidance
+  And protected session state is not trusted
+
+Scenario: Dashboard API failures are visible
+  Given health or capture loading fails
+  When the dashboard renders
+  Then the failure state is actionable
+  And stale success messaging is not shown
+```
+
 ## Delivery Notes
 
 - Story sequencing should start with shell and routing, then move through authentication, core screens, resilience behavior, and final accessibility hardening.

@@ -6,9 +6,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 16:41:19 -05:00 |
-| Total stories | 60 |
-| Accepted stories | 60 |
+| Last refreshed | 2026-06-25 16:46:08 -05:00 |
+| Total stories | 61 |
+| Accepted stories | 61 |
 | Remaining stories | 0 |
 | Overall completion | 100% |
 
@@ -19,17 +19,17 @@
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
 | Epic 2: Camera, Capture, and Streaming | 13 | 13 | 100% |
 | Epic 3: API, Security, and Operations | 20 | 20 | 100% |
-| Epic 4: PWA Product Experience | 15 | 15 | 100% |
+| Epic 4: PWA Product Experience | 16 | 16 | 100% |
 
 ## Latest Completed Stories
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-PWA-16 | Complete PWA Lifecycle Playwright Coverage | Epic 4: PWA Product Experience | 2026-06-25 |  |
 | SC-ASO-320 | Harden Default Administrator Initialization For Internet Exposure | Epic 3: API, Security, and Operations | 2026-06-25 | d8b3088 |
 | SC-CAM-17 | Report Manual Capture Health Transitions | Epic 2: Camera, Capture, and Streaming | 2026-06-25 | 1a33ba9 |
 | SC-ASO-319 | Redact authentication secrets from audit logs | Epic 3: API, Security, and Operations | 2026-06-25 | 6e1c096 |
 | SC-ASO-318 | Protect camera operation endpoints | Epic 3: API, Security, and Operations | 2026-06-25 | fc50404 |
-| SC-CAM-16 | Coordinate Live Stream And Timelapse Camera Access | Epic 2: Camera, Capture, and Streaming | 2026-06-25 | a857f68 |
 
 ## Next Unaccepted Stories
 
