@@ -32,6 +32,7 @@ public sealed class CameraLiveStreamServiceTests
         var service = new CameraLiveStreamService(
             asyncDelay,
             commandFactory,
+            new AlwaysAvailableCameraResourceCoordinator(),
             cameraStatusService,
             processStreamRunner,
             new ListLogger<CameraLiveStreamService>());
@@ -53,6 +54,34 @@ public sealed class CameraLiveStreamServiceTests
 
     [Fact]
     [Trait("Category", "Integration")]
+    public async Task Start_async_returns_camera_busy_without_starting_process_when_resource_is_reserved()
+    {
+        var asyncDelay = Substitute.For<IAsyncDelay>();
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var processStreamRunner = Substitute.For<IProcessStreamRunner>();
+        var logger = new ListLogger<CameraLiveStreamService>();
+        var options = CreateOptions();
+
+        var service = new CameraLiveStreamService(
+            asyncDelay,
+            commandFactory,
+            new BusyCameraResourceCoordinator(),
+            cameraStatusService,
+            processStreamRunner,
+            logger);
+
+        var result = await service.StartAsync(options, CancellationToken.None).ConfigureAwait(true);
+
+        result.Succeeded.Should().BeFalse();
+        result.FailureReason.Should().Be(CameraLiveStreamFailureReasons.CameraBusy);
+        commandFactory.DidNotReceiveWithAnyArgs().BuildLiveStreamCommand(default!);
+        await processStreamRunner.DidNotReceiveWithAnyArgs().StartAsync(default!, default).ConfigureAwait(true);
+        cameraStatusService.Received(1).ReportDegraded(CameraLiveStreamFailureReasons.CameraBusy);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
     public async Task Start_async_returns_failure_and_logs_when_process_exits_without_stream_data()
     {
         var asyncDelay = Substitute.For<IAsyncDelay>();
@@ -69,7 +98,7 @@ public sealed class CameraLiveStreamServiceTests
         processStreamRunner.StartAsync(Arg.Any<ProcessRequest>(), Arg.Any<CancellationToken>())
             .Returns(processStream);
 
-        var service = new CameraLiveStreamService(asyncDelay, commandFactory, cameraStatusService, processStreamRunner, logger);
+        var service = new CameraLiveStreamService(asyncDelay, commandFactory, new AlwaysAvailableCameraResourceCoordinator(), cameraStatusService, processStreamRunner, logger);
 
         var result = await service.StartAsync(options, CancellationToken.None).ConfigureAwait(true);
 
@@ -97,7 +126,7 @@ public sealed class CameraLiveStreamServiceTests
         processStreamRunner.StartAsync(Arg.Any<ProcessRequest>(), Arg.Any<CancellationToken>())
             .Returns(processStream);
 
-        var service = new CameraLiveStreamService(asyncDelay, commandFactory, cameraStatusService, processStreamRunner, logger);
+        var service = new CameraLiveStreamService(asyncDelay, commandFactory, new AlwaysAvailableCameraResourceCoordinator(), cameraStatusService, processStreamRunner, logger);
 
         var result = await service.StartAsync(options, CancellationToken.None).ConfigureAwait(true);
 
@@ -131,7 +160,7 @@ public sealed class CameraLiveStreamServiceTests
         processStreamRunner.StartAsync(Arg.Any<ProcessRequest>(), Arg.Any<CancellationToken>())
             .Returns(firstStream, secondStream);
 
-        var service = new CameraLiveStreamService(asyncDelay, commandFactory, cameraStatusService, processStreamRunner, logger);
+        var service = new CameraLiveStreamService(asyncDelay, commandFactory, new AlwaysAvailableCameraResourceCoordinator(), cameraStatusService, processStreamRunner, logger);
 
         var result = await service.StartAsync(options, CancellationToken.None).ConfigureAwait(true);
         var payload = await ReadUntilAsync(result.Session!.Content, "frame-02").ConfigureAwait(true);
@@ -166,7 +195,7 @@ public sealed class CameraLiveStreamServiceTests
         processStreamRunner.StartAsync(Arg.Any<ProcessRequest>(), Arg.Any<CancellationToken>())
             .Returns(firstStream, failedReconnect1, failedReconnect2);
 
-        var service = new CameraLiveStreamService(asyncDelay, commandFactory, cameraStatusService, processStreamRunner, logger);
+        var service = new CameraLiveStreamService(asyncDelay, commandFactory, new AlwaysAvailableCameraResourceCoordinator(), cameraStatusService, processStreamRunner, logger);
 
         var result = await service.StartAsync(options, CancellationToken.None).ConfigureAwait(true);
         using var reader = new StreamReader(result.Session!.Content, Encoding.ASCII, leaveOpen: true);
@@ -189,6 +218,18 @@ public sealed class CameraLiveStreamServiceTests
             ReconnectRetryAttempts = reconnectRetryAttempts,
             ReconnectBackoffSeconds = 1,
         };
+
+    private sealed class AlwaysAvailableCameraResourceCoordinator : ICameraResourceCoordinator
+    {
+        public ValueTask<CameraResourceLease?> TryAcquireAsync(string owner, CancellationToken cancellationToken) =>
+            ValueTask.FromResult<CameraResourceLease?>(new CameraResourceLease(owner));
+    }
+
+    private sealed class BusyCameraResourceCoordinator : ICameraResourceCoordinator
+    {
+        public ValueTask<CameraResourceLease?> TryAcquireAsync(string owner, CancellationToken cancellationToken) =>
+            ValueTask.FromResult<CameraResourceLease?>(null);
+    }
 
     private static async Task<string> ReadUntilAsync(Stream stream, string marker)
     {

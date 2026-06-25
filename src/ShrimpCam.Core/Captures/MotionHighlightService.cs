@@ -8,6 +8,7 @@ namespace ShrimpCam.Core.Captures;
 
 public sealed class MotionHighlightService(
     ICameraCommandFactory cameraCommandFactory,
+    ICameraResourceCoordinator cameraResourceCoordinator,
     ICameraStatusService cameraStatusService,
     ICaptureRecordRepository captureRecordRepository,
     ICaptureStorage captureStorage,
@@ -57,6 +58,21 @@ public sealed class MotionHighlightService(
         CancellationToken cancellationToken)
     {
         var stagedFilePath = fileSystem.GetTemporaryFilePath(".jpg");
+        var cameraLease = await cameraResourceCoordinator
+            .TryAcquireAsync(nameof(MotionHighlightService), cancellationToken)
+            .ConfigureAwait(false);
+
+        if (cameraLease is null)
+        {
+            DeleteIfPresent(stagedFilePath);
+            cameraStatusService.ReportDegraded(ManualCaptureFailureReasons.CameraBusy);
+            await stateStore.SaveAsync(
+                    options.Storage,
+                    CreateUpdatedState(state, motionEvent, eventFingerprint, captured: false),
+                    cancellationToken)
+                .ConfigureAwait(false);
+            return MotionHighlightResult.Failed(ManualCaptureFailureReasons.CameraBusy);
+        }
 
         try
         {
@@ -97,6 +113,10 @@ public sealed class MotionHighlightService(
         {
             DeleteIfPresent(stagedFilePath);
             throw;
+        }
+        finally
+        {
+            await cameraLease.DisposeAsync().ConfigureAwait(false);
         }
     }
 

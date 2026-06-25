@@ -8,6 +8,7 @@ namespace ShrimpCam.Infrastructure.Cameras;
 internal sealed class CameraLiveStreamService(
     IAsyncDelay asyncDelay,
     ICameraCommandFactory commandFactory,
+    ICameraResourceCoordinator cameraResourceCoordinator,
     ICameraStatusService cameraStatusService,
     IProcessStreamRunner processStreamRunner,
     ILogger<CameraLiveStreamService> logger) : ICameraLiveStreamService
@@ -35,9 +36,20 @@ internal sealed class CameraLiveStreamService(
     {
         ArgumentNullException.ThrowIfNull(options);
 
+        var cameraLease = await cameraResourceCoordinator
+            .TryAcquireAsync(nameof(CameraLiveStreamService), cancellationToken)
+            .ConfigureAwait(false);
+
+        if (cameraLease is null)
+        {
+            cameraStatusService.ReportDegraded(CameraLiveStreamFailureReasons.CameraBusy);
+            return CameraLiveStreamStartResult.Failure(CameraLiveStreamFailureReasons.CameraBusy);
+        }
+
         var initialConnection = await TryOpenConnectionWithRetriesAsync(options, cancellationToken).ConfigureAwait(false);
         if (!initialConnection.Succeeded)
         {
+            await cameraLease.DisposeAsync().ConfigureAwait(false);
             StreamStartupFailed(logger, initialConnection.FailureReason!, null);
             cameraStatusService.ReportDegraded(initialConnection.FailureReason!);
             return CameraLiveStreamStartResult.Failure(CameraLiveStreamFailureReasons.CameraUnavailable);
@@ -47,6 +59,7 @@ internal sealed class CameraLiveStreamService(
 
         var content = new ReconnectingCameraStream(
             initialConnection.Connection!,
+            cameraLease,
             cameraStatusService,
             options,
             OpenConnectionAsync,
@@ -161,6 +174,7 @@ internal sealed class CameraLiveStreamService(
 
     private sealed class ReconnectingCameraStream(
         ActiveCameraStream activeStream,
+        CameraResourceLease cameraLease,
         ICameraStatusService cameraStatusService,
         CameraOptions options,
         Func<CameraOptions, CancellationToken, Task<StreamOpenResult>> openConnectionAsync,
@@ -233,6 +247,7 @@ internal sealed class CameraLiveStreamService(
             if (disposing)
             {
                 _activeStream.DisposeAsync().AsTask().GetAwaiter().GetResult();
+                cameraLease.DisposeAsync().AsTask().GetAwaiter().GetResult();
                 _disposed = true;
             }
 
@@ -248,6 +263,7 @@ internal sealed class CameraLiveStreamService(
 
             _disposed = true;
             await _activeStream.DisposeAsync().ConfigureAwait(false);
+            await cameraLease.DisposeAsync().ConfigureAwait(false);
             await base.DisposeAsync().ConfigureAwait(false);
         }
 

@@ -8,6 +8,7 @@ namespace ShrimpCam.Core.Captures;
 public sealed class ScheduledCaptureService(
     IAsyncDelay asyncDelay,
     ICameraCommandFactory cameraCommandFactory,
+    ICameraResourceCoordinator cameraResourceCoordinator,
     ICameraStatusService cameraStatusService,
     ICaptureRecordRepository captureRecordRepository,
     ICaptureStorage captureStorage,
@@ -72,6 +73,20 @@ public sealed class ScheduledCaptureService(
         {
             var stagedFilePath = fileSystem.GetTemporaryFilePath(".jpg");
             ProcessResult processResult;
+            var cameraLease = await cameraResourceCoordinator
+                .TryAcquireAsync(nameof(ScheduledCaptureService), cancellationToken)
+                .ConfigureAwait(false);
+
+            if (cameraLease is null)
+            {
+                DeleteIfPresent(stagedFilePath);
+                return await PersistFailureAsync(
+                        options,
+                        plan,
+                        ManualCaptureFailureReasons.CameraBusy,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+            }
 
             try
             {
@@ -92,6 +107,10 @@ public sealed class ScheduledCaptureService(
                         exception.Message,
                         cancellationToken)
                     .ConfigureAwait(false);
+            }
+            finally
+            {
+                await cameraLease.DisposeAsync().ConfigureAwait(false);
             }
 
             if (processResult.ExitCode != 0)

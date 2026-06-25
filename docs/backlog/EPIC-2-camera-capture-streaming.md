@@ -349,3 +349,40 @@ Scenario: Suppress repeated highlights during cooldown
   Then the system does not create another highlight capture
   And the system records that the event was suppressed by cooldown rules
 ```
+
+### SC-CAM-16 - Coordinate Live Stream And Timelapse Camera Access
+
+**User Story**  
+As a shrimp keeper, I want live streaming and scheduled timelapse capture to coordinate access to the webcam so that viewing the live feed does not corrupt or hang camera capture workflows.
+
+**Dependencies**
+- SC-CC-05
+- SC-CC-06
+
+**Test Expectations**
+- Unit tests cover camera resource arbitration, busy results, and release behavior.
+- Integration tests cover live stream ownership, manual capture busy responses, scheduled capture degraded state, and one owner at a time.
+- API tests verify manual capture returns an actionable busy error.
+
+**Acceptance Criteria**
+
+```gherkin
+Scenario: Scheduled capture runs while live view is active
+  Given the live stream is active for the configured camera
+  And the capture schedule reaches a valid capture window
+  When the scheduled capture worker attempts a timelapse frame
+  Then the application coordinates camera access without corrupting the stream or the capture
+  And the capture result is persisted or an actionable retry/degraded event is recorded
+
+Scenario: Manual capture receives a clear camera busy result
+  Given the camera resource is temporarily unavailable
+  When a user requests a manual snapshot
+  Then the API returns an actionable error instead of hanging
+  And the frontend can display that the camera is busy or retrying
+
+Scenario: Camera arbitration is covered by tests
+  Given stream, manual capture, and scheduled capture use the same camera source
+  When they overlap in unit or integration tests
+  Then only one camera process owns the source at a time
+  And backend coverage remains at or above 90% line coverage
+```

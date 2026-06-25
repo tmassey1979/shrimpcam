@@ -6,9 +6,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 07:11:06 -05:00 |
-| Total stories | 49 |
-| Accepted stories | 49 |
+| Last refreshed | 2026-06-25 16:16:23 -05:00 |
+| Total stories | 56 |
+| Accepted stories | 56 |
 | Remaining stories | 0 |
 | Overall completion | 100% |
 
@@ -17,19 +17,19 @@
 | Epic | Accepted | Total | Complete |
 | --- | --- | --- | --- |
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
-| Epic 2: Camera, Capture, and Streaming | 11 | 11 | 100% |
-| Epic 3: API, Security, and Operations | 16 | 16 | 100% |
-| Epic 4: PWA Product Experience | 10 | 10 | 100% |
+| Epic 2: Camera, Capture, and Streaming | 12 | 12 | 100% |
+| Epic 3: API, Security, and Operations | 17 | 17 | 100% |
+| Epic 4: PWA Product Experience | 15 | 15 | 100% |
 
 ## Latest Completed Stories
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
-| SC-PWA-10 | Accessibility And Touch Usability | Epic 4: PWA Product Experience | 2026-06-25 |  |
-| SC-PWA-09 | Loading, Error, And Reconnect States | Epic 4: PWA Product Experience | 2026-06-25 |  |
-| SC-PWA-08 | Installable PWA Behavior | Epic 4: PWA Product Experience | 2026-06-25 |  |
-| SC-PWA-07 | Offline Shell And Cached Core Experience | Epic 4: PWA Product Experience | 2026-06-25 |  |
-| SC-PWA-06 | Settings And System Status Experience | Epic 4: PWA Product Experience | 2026-06-25 |  |
+| SC-CAM-16 | Coordinate Live Stream And Timelapse Camera Access | Epic 2: Camera, Capture, and Streaming | 2026-06-25 |  |
+| SC-PWA-15 | Settings Reference Cleanup | Epic 4: PWA Product Experience | 2026-06-25 | 6b94624 |
+| SC-PWA-14 | Gallery Timeline Reference Cleanup | Epic 4: PWA Product Experience | 2026-06-25 | 326db40 |
+| SC-PWA-13 | Live View Reference Cleanup | Epic 4: PWA Product Experience | 2026-06-25 | 0591149 |
+| SC-PWA-12 | Dashboard Reference Cleanup | Epic 4: PWA Product Experience | 2026-06-25 | 326a40a |
 
 ## Next Unaccepted Stories
 

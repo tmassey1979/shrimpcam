@@ -7,6 +7,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ShrimpCam.Core.Abstractions;
+using ShrimpCam.Core.Cameras;
 
 #nullable enable
 #pragma warning disable CA2007
@@ -38,6 +39,35 @@ public sealed class ManualCaptureEndpointTests
             payload.RelativeImagePath.Should().Be("2026/06/24/20260624T230000000Z_manual.jpg");
             File.Exists(payload.ImagePath).Should().BeTrue();
             File.Exists(payload.MetadataPath).Should().BeTrue();
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
+    public async Task Manual_capture_busy_returns_conflict_without_persisted_metadata()
+    {
+        var rootPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            await using var factory = new ManualCaptureWebApplicationFactory(rootPath, shouldFail: false, cameraBusy: true);
+            using var client = factory.CreateClient();
+
+            var response = await client.PostAsync("/captures/manual", content: null).ConfigureAwait(true);
+
+            response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+
+            var payload = await response.Content.ReadFromJsonAsync<ManualCaptureFailureResponse>().ConfigureAwait(true);
+
+            payload.Should().NotBeNull();
+            payload!.Status.Should().Be("failed");
+            payload.Reason.Should().Be("cameraBusy");
+            Directory.GetFiles(rootPath, "*.jpg", SearchOption.AllDirectories).Should().BeEmpty();
+            Directory.GetFiles(rootPath, "*.json", SearchOption.AllDirectories).Should().BeEmpty();
         }
         finally
         {
@@ -85,7 +115,7 @@ public sealed class ManualCaptureEndpointTests
 
     private sealed record ManualCaptureFailureResponse(string Status, string Reason);
 
-    private sealed class ManualCaptureWebApplicationFactory(string rootPath, bool shouldFail) : WebApplicationFactory<Program>
+    private sealed class ManualCaptureWebApplicationFactory(string rootPath, bool shouldFail, bool cameraBusy = false) : WebApplicationFactory<Program>
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -107,8 +137,18 @@ public sealed class ManualCaptureEndpointTests
                 {
                     services.AddSingleton<IClock>(new FixedClock(new DateTimeOffset(2026, 06, 24, 23, 00, 00, TimeSpan.Zero)));
                     services.AddSingleton<IProcessRunner>(new StubProcessRunner(shouldFail));
+                    if (cameraBusy)
+                    {
+                        services.AddSingleton<ICameraResourceCoordinator>(new BusyCameraResourceCoordinator());
+                    }
                 });
         }
+    }
+
+    private sealed class BusyCameraResourceCoordinator : ICameraResourceCoordinator
+    {
+        public ValueTask<CameraResourceLease?> TryAcquireAsync(string owner, CancellationToken cancellationToken) =>
+            ValueTask.FromResult<CameraResourceLease?>(null);
     }
 
     private sealed class FixedClock(DateTimeOffset utcNow) : IClock

@@ -679,7 +679,9 @@ app.MapPost(
                     status = "failed",
                     reason = result.FailureReason,
                 },
-                statusCode: StatusCodes.Status503ServiceUnavailable);
+                statusCode: result.FailureReason == ManualCaptureFailureReasons.CameraBusy
+                    ? StatusCodes.Status409Conflict
+                    : StatusCodes.Status503ServiceUnavailable);
         }
 
         return Results.Ok(

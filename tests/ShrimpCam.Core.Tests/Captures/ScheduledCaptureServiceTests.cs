@@ -4,6 +4,7 @@ using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Captures;
 using ShrimpCam.Core.Configuration;
 using ShrimpCam.Core.Persistence;
+using ShrimpCam.Core.Tests.Cameras;
 
 #pragma warning disable CA2007
 
@@ -56,6 +57,7 @@ public sealed class ScheduledCaptureServiceTests
         var service = new ScheduledCaptureService(
             asyncDelay,
             commandFactory,
+            new AlwaysAvailableCameraResourceCoordinator(),
             cameraStatusService,
             captureRecordRepository,
             captureStorage,
@@ -111,6 +113,7 @@ public sealed class ScheduledCaptureServiceTests
         var service = new ScheduledCaptureService(
             asyncDelay,
             Substitute.For<ICameraCommandFactory>(),
+            new AlwaysAvailableCameraResourceCoordinator(),
             cameraStatusService,
             Substitute.For<ICaptureRecordRepository>(),
             Substitute.For<ICaptureStorage>(),
@@ -148,6 +151,7 @@ public sealed class ScheduledCaptureServiceTests
         var service = new ScheduledCaptureService(
             asyncDelay,
             commandFactory,
+            new AlwaysAvailableCameraResourceCoordinator(),
             cameraStatusService,
             captureRecordRepository,
             captureStorage,
@@ -197,6 +201,7 @@ public sealed class ScheduledCaptureServiceTests
         var service = new ScheduledCaptureService(
             asyncDelay,
             commandFactory,
+            new AlwaysAvailableCameraResourceCoordinator(),
             cameraStatusService,
             captureRecordRepository,
             captureStorage,
@@ -216,6 +221,56 @@ public sealed class ScheduledCaptureServiceTests
         await stateStore.Received(1).SaveAsync(
                 options.Storage,
                 new ScheduledCaptureState(dueInterval, ScheduledCaptureOutcome.Failed, ManualCaptureFailureReasons.CameraUnavailable),
+                Arg.Any<CancellationToken>())
+            .ConfigureAwait(true);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task Busy_camera_marks_due_interval_failed_without_starting_capture_process()
+    {
+        var asyncDelay = Substitute.For<IAsyncDelay>();
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var captureRecordRepository = Substitute.For<ICaptureRecordRepository>();
+        var captureStorage = Substitute.For<ICaptureStorage>();
+        var clock = Substitute.For<IClock>();
+        var fileSystem = Substitute.For<IFileSystem>();
+        var processRunner = Substitute.For<IProcessRunner>();
+        var stateStore = Substitute.For<IScheduledCaptureStateStore>();
+        var options = CreateOptions();
+        var stagedPath = "temp/scheduled.jpg";
+        var dueInterval = new DateTimeOffset(2026, 06, 24, 12, 00, 00, TimeSpan.Zero);
+
+        clock.UtcNow.Returns(new DateTimeOffset(2026, 06, 24, 12, 03, 00, TimeSpan.Zero));
+        stateStore.LoadAsync(options.Storage, Arg.Any<CancellationToken>()).Returns(ScheduledCaptureState.Empty);
+        fileSystem.GetTemporaryFilePath(".jpg").Returns(stagedPath);
+        fileSystem.FileExists(stagedPath).Returns(true);
+
+        var service = new ScheduledCaptureService(
+            asyncDelay,
+            commandFactory,
+            new BusyCameraResourceCoordinator(),
+            cameraStatusService,
+            captureRecordRepository,
+            captureStorage,
+            clock,
+            fileSystem,
+            processRunner,
+            stateStore);
+
+        var result = await service.RunDueCaptureAsync(options, CancellationToken.None).ConfigureAwait(true);
+
+        result.Outcome.Should().Be(ScheduledCaptureOutcome.Failed);
+        result.FailureReason.Should().Be(ManualCaptureFailureReasons.CameraBusy);
+        commandFactory.DidNotReceiveWithAnyArgs().BuildStillCaptureCommand(default!, default!);
+        await processRunner.DidNotReceiveWithAnyArgs().RunAsync(default!, default).ConfigureAwait(true);
+        await captureRecordRepository.DidNotReceiveWithAnyArgs().CreateAsync(default!, default).ConfigureAwait(true);
+        fileSystem.Received(1).DeleteFile(stagedPath);
+        cameraStatusService.Received(1).ReportDegraded(ManualCaptureFailureReasons.CameraBusy);
+        await stateStore.Received(1).SaveAsync(
+                options.Storage,
+                new ScheduledCaptureState(dueInterval, ScheduledCaptureOutcome.Failed, ManualCaptureFailureReasons.CameraBusy),
                 Arg.Any<CancellationToken>())
             .ConfigureAwait(true);
     }
@@ -251,6 +306,7 @@ public sealed class ScheduledCaptureServiceTests
         var service = new ScheduledCaptureService(
             asyncDelay,
             commandFactory,
+            new AlwaysAvailableCameraResourceCoordinator(),
             cameraStatusService,
             captureRecordRepository,
             captureStorage,
@@ -318,6 +374,7 @@ public sealed class ScheduledCaptureServiceTests
         var service = new ScheduledCaptureService(
             asyncDelay,
             commandFactory,
+            new AlwaysAvailableCameraResourceCoordinator(),
             cameraStatusService,
             captureRecordRepository,
             captureStorage,

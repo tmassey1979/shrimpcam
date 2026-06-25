@@ -4,6 +4,7 @@ using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Captures;
 using ShrimpCam.Core.Configuration;
 using ShrimpCam.Core.Persistence;
+using ShrimpCam.Core.Tests.Cameras;
 
 namespace ShrimpCam.Core.Tests.Captures;
 
@@ -48,6 +49,7 @@ public sealed class MotionHighlightServiceTests
 
         var service = new MotionHighlightService(
             cameraCommandFactory,
+            new AlwaysAvailableCameraResourceCoordinator(),
             cameraStatusService,
             captureRecordRepository,
             captureStorage,
@@ -97,6 +99,7 @@ public sealed class MotionHighlightServiceTests
 
         var service = new MotionHighlightService(
             cameraCommandFactory,
+            new AlwaysAvailableCameraResourceCoordinator(),
             cameraStatusService,
             Substitute.For<ICaptureRecordRepository>(),
             captureStorage,
@@ -133,6 +136,7 @@ public sealed class MotionHighlightServiceTests
 
         var service = new MotionHighlightService(
             cameraCommandFactory,
+            new AlwaysAvailableCameraResourceCoordinator(),
             cameraStatusService,
             Substitute.For<ICaptureRecordRepository>(),
             captureStorage,
@@ -180,6 +184,7 @@ public sealed class MotionHighlightServiceTests
 
         var service = new MotionHighlightService(
             cameraCommandFactory,
+            new AlwaysAvailableCameraResourceCoordinator(),
             cameraStatusService,
             Substitute.For<ICaptureRecordRepository>(),
             captureStorage,
@@ -211,6 +216,7 @@ public sealed class MotionHighlightServiceTests
 
         var service = new MotionHighlightService(
             cameraCommandFactory,
+            new AlwaysAvailableCameraResourceCoordinator(),
             cameraStatusService,
             Substitute.For<ICaptureRecordRepository>(),
             captureStorage,
@@ -252,6 +258,7 @@ public sealed class MotionHighlightServiceTests
 
         var service = new MotionHighlightService(
             cameraCommandFactory,
+            new AlwaysAvailableCameraResourceCoordinator(),
             cameraStatusService,
             captureRecordRepository,
             captureStorage,
@@ -274,6 +281,7 @@ public sealed class MotionHighlightServiceTests
     {
         var service = new MotionHighlightService(
             Substitute.For<ICameraCommandFactory>(),
+            new AlwaysAvailableCameraResourceCoordinator(),
             Substitute.For<ICameraStatusService>(),
             Substitute.For<ICaptureRecordRepository>(),
             Substitute.For<ICaptureStorage>(),
