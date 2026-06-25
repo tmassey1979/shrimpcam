@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>ShrimpCam.Infrastructure.Tests</AssemblyName>
+    <RootNamespace>ShrimpCam.Infrastructure.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup Condition="Exists('..\..\src\ShrimpCam.Core\ShrimpCam.Core.csproj')">
+    <ProjectReference Include="..\..\src\ShrimpCam.Core\ShrimpCam.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="Exists('..\..\src\ShrimpCam.Infrastructure\ShrimpCam.Infrastructure.csproj')">
+    <ProjectReference Include="..\..\src\ShrimpCam.Infrastructure\ShrimpCam.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

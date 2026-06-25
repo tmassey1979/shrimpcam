@@ -1,0 +1,17 @@
+bin/
+obj/
+.vs/
+.vscode/
+TestResults/
+artifacts/
+coverage/
+coverage-report/
+*.coverage
+*.coveragexml
+*.trx
+*.user
+*.suo
+*.ncrunchsolution
+*.ncrunchproject
+ReSharperCache/
+_ReSharper*/

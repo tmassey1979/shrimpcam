@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>ShrimpCam.Api.Tests</AssemblyName>
+    <RootNamespace>ShrimpCam.Api.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.6" />
+  </ItemGroup>
+
+  <ItemGroup Condition="Exists('..\..\src\ShrimpCam.Core\ShrimpCam.Core.csproj')">
+    <ProjectReference Include="..\..\src\ShrimpCam.Core\ShrimpCam.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="Exists('..\..\src\ShrimpCam.Infrastructure\ShrimpCam.Infrastructure.csproj')">
+    <ProjectReference Include="..\..\src\ShrimpCam.Infrastructure\ShrimpCam.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="Exists('..\..\src\ShrimpCam.Api\ShrimpCam.Api.csproj')">
+    <ProjectReference Include="..\..\src\ShrimpCam.Api\ShrimpCam.Api.csproj" />
+  </ItemGroup>
+</Project>

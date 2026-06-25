@@ -1,0 +1,44 @@
+<Project>
+  <PropertyGroup>
+    <IsTestProject>true</IsTestProject>
+    <IsPackable>false</IsPackable>
+    <DebugType>portable</DebugType>
+    <EnforceCoverage Condition="'$(EnforceCoverage)' == ''">false</EnforceCoverage>
+    <CoverageThreshold Condition="'$(CoverageThreshold)' == ''">90</CoverageThreshold>
+    <CoverageThresholdType Condition="'$(CoverageThresholdType)' == ''">line</CoverageThresholdType>
+    <CoverageThresholdStat Condition="'$(CoverageThresholdStat)' == ''">total</CoverageThresholdStat>
+    <CoverletOutputFormat Condition="'$(CoverletOutputFormat)' == ''">cobertura,json</CoverletOutputFormat>
+    <CoverletOutput Condition="'$(CoverletOutput)' == ''">$(MSBuildThisFileDirectory)TestResults\$(MSBuildProjectName)\coverage\</CoverletOutput>
+    <ExcludeByFile Condition="'$(ExcludeByFile)' == ''">**/Program.cs%2c**/*.g.cs%2c**/Migrations/*</ExcludeByFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(EnforceCoverage)' == 'true'">
+    <CollectCoverage>true</CollectCoverage>
+    <Threshold>$(CoverageThreshold)</Threshold>
+    <ThresholdType>$(CoverageThresholdType)</ThresholdType>
+    <ThresholdStat>$(CoverageThresholdStat)</ThresholdStat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="xunit.analyzers" Version="1.15.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <PackageReference Include="NSubstitute" Version="5.1.0" />
+    <PackageReference Include="coverlet.collector" Version="6.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.msbuild" Version="6.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>
