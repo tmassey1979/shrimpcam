@@ -307,8 +307,155 @@ Scenario: Accessibility or touch constraints would hide or block a primary actio
   And no core workflow depends on gesture-only interaction
 ```
 
+### SC-PWA-11 Reference-Led Aquarium Visual System
+
+**User story:** As a Shrimp Cam user, I want the PWA to match the approved aquarium reference renders so that the app feels polished, intentional, and consistent across every screen.
+
+**Implementation notes:** Use `docs/Generated image 1.png` through `docs/Generated image 4.png` as the visual target. Preserve existing functionality while replacing the current heavy header/card styling with a deep aquarium background, glass panels, teal/coral accent system, rounded mobile surfaces, and bottom-first navigation.
+
+**Dependencies:** SC-PWA-01, SC-PWA-03, SC-PWA-04, SC-PWA-05, SC-PWA-06
+
+**Test expectations:**
+- UI/component tests or snapshots for shared shell classes, navigation state, and major card variants.
+- Responsive layout checks for Samsung-class mobile viewport and desktop fallback.
+- Accessibility checks for contrast, focus visibility, and touch target size after the visual refresh.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: App shell matches the reference visual direction
+  Given the user opens the Shrimp Cam PWA on a Samsung-class phone viewport
+  When the app shell renders
+  Then the page uses an aquarium-inspired background with glassy panels and teal/coral accents
+  And the previous heavy header bar is not shown
+  And primary navigation is reachable from a mobile bottom navigation area
+
+Scenario: Visual refresh preserves usability and accessibility
+  Given the visual system has been applied
+  When the user navigates through core screens
+  Then text remains readable against the aquarium background
+  And interactive controls have visible focus and touch-friendly hit areas
+```
+
+### SC-PWA-12 Dashboard Reference Cleanup
+
+**User story:** As a Shrimp Cam operator, I want the dashboard to resemble the approved overview render so that I can quickly understand tank status from a polished mobile-first home screen.
+
+**Implementation notes:** Follow `docs/Generated image 1.png`: large Shrimp Cam branding, compact camera/next-timelapse cards, storage usage treatment, latest snapshot feature card, and quick action tiles.
+
+**Dependencies:** SC-PWA-03, SC-PWA-11
+
+**Test expectations:**
+- UI tests for dashboard health, next capture, storage, latest snapshot, and quick action rendering.
+- Empty/degraded-state checks for missing capture, camera offline, or unavailable health data.
+- Mobile viewport verification that quick actions and status cards do not overflow.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: Dashboard renders the approved overview layout
+  Given the dashboard data is available
+  When the user opens Dashboard
+  Then camera status, next timelapse, storage usage, latest snapshot, and quick actions are visible
+  And the layout follows the reference render hierarchy and spacing
+
+Scenario: Dashboard handles missing operational data
+  Given the latest snapshot or camera status is unavailable
+  When the dashboard loads
+  Then the dashboard still renders the reference-style shell
+  And the unavailable data is shown with clear fallback messaging
+```
+
+### SC-PWA-13 Live View Reference Cleanup
+
+**User story:** As a Shrimp Cam viewer, I want the live view to resemble the approved camera render so that monitoring the tank feels immersive while controls stay easy to reach.
+
+**Implementation notes:** Follow `docs/Generated image 2.png`: edge-to-edge stream, translucent top status pills, floating snapshot/retry controls, and a lower glass status panel.
+
+**Dependencies:** SC-PWA-04, SC-PWA-09, SC-PWA-11
+
+**Test expectations:**
+- UI tests for live stream loaded, stream error, reconnect, and manual snapshot states.
+- Mobile checks for floating control tray reachability and status panel layout.
+- Accessibility checks for all icon controls having visible labels.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: Live stream renders as an immersive camera view
+  Given the camera stream is available
+  When the user opens Live
+  Then the stream uses the dominant screen area
+  And stream status, quality, snapshot, and refresh controls overlay or sit near the feed without blocking it
+
+Scenario: Live view communicates stream failure clearly
+  Given the stream cannot start or disconnects
+  When the Live screen renders the failure state
+  Then the feed area keeps the reference-style layout
+  And the user sees a clear retry action and camera status context
+```
+
+### SC-PWA-14 Gallery Timeline Reference Cleanup
+
+**User story:** As a Shrimp Cam user, I want the gallery to resemble the approved timeline render so that browsing captures feels fast, visual, and organized by time.
+
+**Implementation notes:** Follow `docs/Generated image 3.png`: search/filter affordances, date chips, timeline/time-of-day filters, prominent selected capture, thumbnail rail, and bottom action bar.
+
+**Dependencies:** SC-PWA-05, SC-PWA-09, SC-PWA-11
+
+**Test expectations:**
+- UI tests for populated gallery, empty filter result, image-load failure, and selected-capture behavior.
+- API/UI integration tests for date filtering and reverse chronological capture ordering.
+- Mobile viewport checks for horizontal chip/thumbnail scrolling without page breakage.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: Gallery renders captures in a visual timeline
+  Given capture records and images are available
+  When the user opens Gallery
+  Then captures are shown in a reference-style timeline with a prominent latest or selected image
+  And date filters and thumbnail browsing are reachable on mobile
+
+Scenario: Gallery filters return no captures
+  Given the user applies a filter with no matching captures
+  When the gallery finishes loading
+  Then the reference-style gallery shell remains visible
+  And the user sees an empty state with a clear way to adjust filters
+```
+
+### SC-PWA-15 Settings Reference Cleanup
+
+**User story:** As a Shrimp Cam administrator, I want Settings to resemble the approved system-status render so that camera, schedule, storage, and system controls feel clear and production-ready.
+
+**Implementation notes:** Follow `docs/Generated image 4.png`: grouped settings rows, segmented interval/resolution controls where appropriate, camera-source picker, system-status section, and prominent save action.
+
+**Dependencies:** SC-PWA-06, SC-PWA-11, SC-ASO-307
+
+**Test expectations:**
+- UI tests for settings load, edit, validation, save success, save failure, and camera-source selection.
+- Mobile checks for grouped rows, save button reachability, and form controls at Samsung-class viewport.
+- Accessibility checks for labels, grouped controls, error text, and keyboard navigation.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: Settings render with reference-style grouped controls
+  Given the administrator is signed in
+  When Settings load successfully
+  Then capture interval, active hours, retention, stream resolution, camera source, and system status are grouped clearly
+  And the screen follows the reference render visual direction
+
+Scenario: Settings save feedback is clear
+  Given the administrator changes valid settings
+  When the administrator saves
+  Then the save action shows progress and completion feedback
+  And validation or server errors remain attached to the affected fields
+```
+
 ## Delivery Notes
 
 - Story sequencing should start with shell and routing, then move through authentication, core screens, resilience behavior, and final accessibility hardening.
+- Reference-led cleanup should start with `SC-PWA-11`, then proceed by screen from `SC-PWA-12` through `SC-PWA-15`.
 - Each story is expected to ship with automated coverage at the appropriate UI, API contract, and end-to-end layers in line with the project definition of done.
 - Any backend dependency not yet available should be mocked behind stable contracts so PWA implementation can proceed in parallel without weakening acceptance coverage.

@@ -57,10 +57,19 @@ These stories should land before most feature work begins:
 - `SC-ASO-312` Diagnostics and support bundle API
 - `SC-ASO-315` Deployment support for Windows service and `systemd`
 - `SC-ASO-316` External-hosting hardening baseline
+- `SC-ASO-317` Startup default administrator initialization
 - `SC-PWA-07` Offline shell and cached core experience
 - `SC-PWA-08` Installable PWA behavior
 - `SC-PWA-09` Loading, error, and reconnect states
 - `SC-PWA-10` Accessibility and touch usability
+
+### Wave 3B: Reference-led UI cleanup
+
+- `SC-PWA-11` Reference-led aquarium visual system
+- `SC-PWA-12` Dashboard reference cleanup
+- `SC-PWA-13` Live view reference cleanup
+- `SC-PWA-14` Gallery timeline reference cleanup
+- `SC-PWA-15` Settings reference cleanup
 
 ### Wave 4: Backup, restore, and advanced media
 
@@ -72,7 +81,7 @@ These stories should land before most feature work begins:
 
 ## Priority guidance
 
-- `P0`: `SC-PF-001` through `SC-PF-009`, `SC-PF-011`, `SC-PF-012`, `SC-ASO-301` through `SC-ASO-316`, `SC-CC-01` through `SC-CC-09`, `SC-PWA-01` through `SC-PWA-10`
+- `P0`: `SC-PF-001` through `SC-PF-009`, `SC-PF-011`, `SC-PF-012`, `SC-ASO-301` through `SC-ASO-317`, `SC-CC-01` through `SC-CC-09`, `SC-PWA-01` through `SC-PWA-15`
 - `P1`: `SC-ASO-313`, `SC-ASO-314`, `SC-CC-10`
 - `P2`: `SC-CC-11`, `SC-PF-010`
 
@@ -82,6 +91,7 @@ These stories should land before most feature work begins:
 - Dashboard, live view, gallery, and settings screens depend on `SC-ASO-306` through `SC-ASO-308`
 - Manual capture, scheduled capture, and live view depend on `SC-CC-03` and `SC-CC-08`
 - degraded mode, reconnect UX, and diagnostics depend on `SC-CC-07`, `SC-ASO-306`, `SC-ASO-310`, and `SC-PWA-09`
+- reference-led UI cleanup depends on the approved render assets in `docs/Generated image 1.png` through `docs/Generated image 4.png`
 - production release sign-off depends on `SC-ASO-315`, `SC-ASO-316`, and the `P0` test suite
 
 ## Release completion bar

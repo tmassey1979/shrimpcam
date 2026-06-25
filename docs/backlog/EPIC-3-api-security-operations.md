@@ -495,8 +495,45 @@ Scenario: Reject unsafe external-hosting configuration
   Then the configuration is rejected with actionable validation errors
 ```
 
+### SC-ASO-317 - Startup default administrator initialization
+
+**User story**  
+As a Shrimp Cam operator, I want a default administrator initialized during startup so that a fresh Raspberry Pi or Windows install can be accessed without running a separate PowerShell bootstrap command.
+
+**Implementation notes**  
+The first-release default account is `admin` with initial password `AdminPass1234`. The initializer must only create this account when no Administrator role assignment exists. The password should be configurable for deployment overrides and treated as an initial setup credential that should be changed after first sign-in.
+
+**Dependencies**  
+SC-ASO-301, SC-ASO-302, SC-ASO-303, SC-ASO-304
+
+**Test expectations**  
+Unit and API/startup tests cover fresh database initialization, no-op behavior when an administrator already exists, successful sign-in with the startup-created default user, and preservation of existing administrator accounts.
+
+**Acceptance criteria**
+
+```gherkin
+Scenario: Fresh install creates the default administrator
+  Given Shrimp Cam starts with an initialized database that has no administrator
+  When startup initialization completes
+  Then an enabled user named "admin" exists
+  And the user has the Administrator role
+  And the user can sign in with the configured initial password
+
+Scenario: Existing administrator is preserved
+  Given Shrimp Cam starts with an existing administrator account
+  When startup initialization completes
+  Then no replacement default administrator is created
+  And the existing administrator credentials remain valid
+
+Scenario: Configured startup credential is invalid
+  Given the configured initial administrator password does not satisfy the password policy
+  When startup initialization attempts to create the default administrator
+  Then startup fails with an actionable configuration or initialization error
+```
+
 ## Delivery Notes
 
 - Recommended implementation order: `SC-ASO-301` through `SC-ASO-316` in sequence, with `SC-ASO-306` to `SC-ASO-311` parallelizable after authentication foundations land.
+- Startup default administrator initialization should be treated as a first-run convenience story and revisited before internet-exposed release hardening.
 - All API-facing stories should include OpenAPI updates, authorization annotations, and problem-details error responses as part of implementation.
 - All operational stories should prefer redaction-by-default for secrets, credentials, and host-specific sensitive paths unless explicitly needed for recovery.
