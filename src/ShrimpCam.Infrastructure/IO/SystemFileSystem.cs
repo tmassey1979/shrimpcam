@@ -9,4 +9,12 @@ internal sealed class SystemFileSystem : IFileSystem
     public bool DirectoryExists(string path) => Directory.Exists(path);
 
     public void CreateDirectory(string path) => Directory.CreateDirectory(path);
+
+    public bool FileExists(string path) => File.Exists(path);
+
+    public void MoveFile(string sourcePath, string destinationPath) => File.Move(sourcePath, destinationPath);
+
+    public void DeleteFile(string path) => File.Delete(path);
+
+    public void WriteAllText(string path, string contents) => File.WriteAllText(path, contents);
 }

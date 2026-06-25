@@ -6,18 +6,18 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-24 23:03:22 -05:00 |
+| Last refreshed | 2026-06-24 23:09:28 -05:00 |
 | Total stories | 49 |
-| Accepted stories | 15 |
-| Remaining stories | 34 |
-| Overall completion | 30.6% |
+| Accepted stories | 16 |
+| Remaining stories | 33 |
+| Overall completion | 32.7% |
 
 ## Epic Progress
 
 | Epic | Accepted | Total | Complete |
 | --- | --- | --- | --- |
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
-| Epic 2: Camera, Capture, and Streaming | 3 | 11 | 27.3% |
+| Epic 2: Camera, Capture, and Streaming | 4 | 11 | 36.4% |
 | Epic 3: API, Security, and Operations | 0 | 16 | 0% |
 | Epic 4: PWA Product Experience | 0 | 10 | 0% |
 
@@ -25,11 +25,11 @@
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-CC-08 | Store Captures with Deterministic Naming and Layout | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 | SC-CC-03 | Generate OS-Specific Camera Commands | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 | SC-CC-02 | Discover Cameras on Windows Hosts | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 | SC-CC-01 | Discover Cameras on Linux Hosts | Epic 2: Camera, Capture, and Streaming | 2026-06-24 | f5f4f8e |
 | SC-PF-010 | Publish build and version metadata | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 | 6813ce3 |
-| SC-PF-009 | Enforce coverage thresholds | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 | 93ab714 |
 
 ## Next Unaccepted Stories
 
@@ -39,9 +39,9 @@
 | SC-CC-05 | Run Scheduled Timelapse Capture | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-06 | Stream Live MJPEG Video | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-07 | Recover from Camera Disconnects and Stream Failures | Epic 2: Camera, Capture, and Streaming |
-| SC-CC-08 | Store Captures with Deterministic Naming and Layout | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-09 | Clean Up Expired Capture Files | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-10 | Generate Daily Timelapse Videos | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-11 | Capture Motion-Triggered Highlights | Epic 2: Camera, Capture, and Streaming |
 | SC-ASO-301 | SQLite schema and repository foundation | Epic 3: API, Security, and Operations |
 | SC-ASO-302 | Local account authentication | Epic 3: API, Security, and Operations |
+| SC-ASO-303 | Bootstrap administrator flow | Epic 3: API, Security, and Operations |
