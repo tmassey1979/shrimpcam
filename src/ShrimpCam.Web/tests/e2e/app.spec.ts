@@ -111,6 +111,14 @@ test("updates settings with discovered camera options", async ({ page }) => {
 
   await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
   await expect(page.getByText("Found 2 cameras for Windows.")).toBeVisible();
+  await expect(page.getByLabel("Settings summary")).toContainText("Logi C270 HD WebCam");
+  await expect(page.getByLabel("Settings summary")).toContainText("1280x720");
+  await expect(page.getByLabel("Camera resolution controls")).toBeVisible();
+  await expect(page.getByLabel("Stream width")).toHaveValue("1280");
+  await expect(page.getByLabel("Stream FPS")).toHaveValue("15");
+  await page.getByLabel("Camera source selector").selectOption("@device_pnp_integrated");
+  await expect(page.getByLabel("Selected camera source")).toHaveValue("@device_pnp_integrated");
+  await page.getByLabel("Stream width").fill("1024");
   await page.getByLabel("Selected camera source").fill("Integrated Webcam");
   await page.getByLabel("Interval minutes").fill("10");
   await page.getByRole("button", { name: "Save settings" }).click();

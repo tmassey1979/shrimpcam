@@ -53,10 +53,11 @@ test("keeps gallery usable for empty filters and protected image failures", asyn
 });
 
 test("blocks invalid settings and preserves edits after server rejection", async ({ page }) => {
-  await mockShrimpCamApi(page, { settingsSaveStatus: 403 });
+  await mockShrimpCamApi(page, { settingsSaveStatus: 403, cameraDiscoveryStatus: 503 });
   await signIn(page);
   await navigateInApp(page, "/settings");
   await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
+  await expect(page.getByText("Camera discovery failed. You can keep the saved source or enter a custom source.")).toBeVisible();
 
   await page.getByLabel("Selected camera source").fill("");
   await page.getByRole("button", { name: "Save settings" }).click();

@@ -1063,6 +1063,42 @@ select:focus-visible,
   margin: 0;
 }
 
+.settings-summary-strip {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.settings-summary-strip article {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid rgba(124, 224, 234, 0.18);
+  border-radius: 1.15rem;
+  background:
+    radial-gradient(circle at 15% 8%, rgba(54, 214, 198, 0.14), transparent 4.5rem),
+    rgba(255, 255, 255, 0.045);
+}
+
+.settings-summary-strip span,
+.settings-summary-strip small {
+  color: var(--text-soft);
+}
+
+.settings-summary-strip span {
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.settings-summary-strip strong,
+.settings-summary-strip small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .settings-form fieldset {
   display: grid;
   gap: 0.85rem;
@@ -1109,6 +1145,13 @@ select:focus-visible,
   width: 1.35rem;
   min-height: 1.35rem;
   accent-color: var(--accent);
+}
+
+.resolution-grid {
+  padding: 0.85rem;
+  border: 1px solid rgba(255, 248, 237, 0.12);
+  border-radius: 1.15rem;
+  background: rgba(4, 27, 35, 0.42);
 }
 
 .field-error {
@@ -1351,6 +1394,10 @@ select:focus-visible,
   .settings-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: end;
+  }
+
+  .settings-summary-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .live-stage {

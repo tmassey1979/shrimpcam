@@ -1589,6 +1589,28 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
               </button>
             </div>
 
+            <div className="settings-summary-strip" aria-label="Settings summary">
+              <article>
+                <span>Camera</span>
+                <strong>{form.camera.platform}</strong>
+                <small>{form.camera.source || "No source selected"}</small>
+              </article>
+              <article>
+                <span>Timelapse</span>
+                <strong>{form.capture.enabled ? `${form.capture.intervalMinutes} min` : "Paused"}</strong>
+                <small>
+                  UTC {form.capture.activeStartHourUtc}:00-{form.capture.activeEndHourUtc}:00
+                </small>
+              </article>
+              <article>
+                <span>Stream</span>
+                <strong>
+                  {form.camera.streamWidth}x{form.camera.streamHeight}
+                </strong>
+                <small>{form.camera.streamFramesPerSecond} FPS live feed</small>
+              </article>
+            </div>
+
             <fieldset>
               <legend>Capture Schedule</legend>
               <label>
@@ -1661,6 +1683,7 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
               <label>
                 <span>Camera source</span>
                 <select
+                  aria-label="Camera source selector"
                   value={getCameraSelectValue(state.cameras, form.camera.source)}
                   onChange={(event) => {
                     if (event.target.value === "__custom") {
@@ -1725,6 +1748,83 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
                     }
                   />
                   <FieldError message={state.errors["storage.retentionDays"]} />
+                </label>
+              </div>
+              <div className="settings-grid resolution-grid" aria-label="Camera resolution controls">
+                <label>
+                  <span>Capture width</span>
+                  <input
+                    type="number"
+                    min="320"
+                    max="7680"
+                    value={form.camera.captureWidth}
+                    onChange={(event) =>
+                      updateForm((current) => ({
+                        ...current,
+                        camera: { ...current.camera, captureWidth: toInteger(event.target.value) }
+                      }))
+                    }
+                  />
+                </label>
+                <label>
+                  <span>Capture height</span>
+                  <input
+                    type="number"
+                    min="240"
+                    max="4320"
+                    value={form.camera.captureHeight}
+                    onChange={(event) =>
+                      updateForm((current) => ({
+                        ...current,
+                        camera: { ...current.camera, captureHeight: toInteger(event.target.value) }
+                      }))
+                    }
+                  />
+                </label>
+                <label>
+                  <span>Stream width</span>
+                  <input
+                    type="number"
+                    min="320"
+                    max="3840"
+                    value={form.camera.streamWidth}
+                    onChange={(event) =>
+                      updateForm((current) => ({
+                        ...current,
+                        camera: { ...current.camera, streamWidth: toInteger(event.target.value) }
+                      }))
+                    }
+                  />
+                </label>
+                <label>
+                  <span>Stream height</span>
+                  <input
+                    type="number"
+                    min="240"
+                    max="2160"
+                    value={form.camera.streamHeight}
+                    onChange={(event) =>
+                      updateForm((current) => ({
+                        ...current,
+                        camera: { ...current.camera, streamHeight: toInteger(event.target.value) }
+                      }))
+                    }
+                  />
+                </label>
+                <label>
+                  <span>Stream FPS</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="60"
+                    value={form.camera.streamFramesPerSecond}
+                    onChange={(event) =>
+                      updateForm((current) => ({
+                        ...current,
+                        camera: { ...current.camera, streamFramesPerSecond: toInteger(event.target.value) }
+                      }))
+                    }
+                  />
                 </label>
               </div>
             </fieldset>
