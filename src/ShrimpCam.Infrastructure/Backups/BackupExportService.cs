@@ -12,11 +12,11 @@ internal sealed class BackupExportService(
     IClock clock,
     IOptions<ShrimpCamOptions> options,
     IDiagnosticsBundleService diagnosticsBundleService,
-    IBackupStorageCapacityProbe capacityProbe) : IBackupExportService
+    IBackupStorageCapacityProbe capacityProbe) : IBackupExportService, IDisposable
 {
     private const int ManifestVersion = 1;
     private const long MinimumRequiredFreeBytes = 10L * 1024L * 1024L;
-    private static readonly SemaphoreSlim ExportLock = new(1, 1);
+    private readonly SemaphoreSlim exportLock = new(1, 1);
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = true,
@@ -27,7 +27,7 @@ internal sealed class BackupExportService(
         cancellationToken.ThrowIfCancellationRequested();
 
         var startedAtUtc = clock.UtcNow;
-        if (!await ExportLock.WaitAsync(0, cancellationToken).ConfigureAwait(false))
+        if (!await exportLock.WaitAsync(0, cancellationToken).ConfigureAwait(false))
         {
             return BackupExportResult.Failure(BackupExportFailureReasons.ExportAlreadyRunning, startedAtUtc, clock.UtcNow);
         }
@@ -38,8 +38,13 @@ internal sealed class BackupExportService(
         }
         finally
         {
-            _ = ExportLock.Release();
+            _ = exportLock.Release();
         }
+    }
+
+    public void Dispose()
+    {
+        exportLock.Dispose();
     }
 
     private async Task<BackupExportResult> ExportCoreAsync(DateTimeOffset startedAtUtc, CancellationToken cancellationToken)
