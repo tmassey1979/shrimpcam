@@ -1247,51 +1247,40 @@ function LiveViewScreen({ auth }: { auth: AuthContext }) {
       title="Live"
       description="A mobile-friendly camera feed with stream status, reconnect controls, and manual snapshot capture."
     >
-      <div className="live-layout">
-        <article className="stream-card">
-          <div className="stream-header">
-            <div>
-              <p className="eyebrow">Camera Feed</p>
-              <strong>{streamStatus === "online" ? "Live stream online" : "Waiting for stream"}</strong>
+      <article className={`live-stage ${streamUnavailable ? "offline" : ""}`} aria-label="Immersive live camera stage">
+        <div className="live-stage-top">
+          <div>
+            <p className="eyebrow">Camera Feed</p>
+            <strong>{streamStatus === "online" ? "Live stream online" : "Waiting for stream"}</strong>
+          </div>
+          <span className={`status-pill ${streamStatus}`}>{streamStatus}</span>
+        </div>
+
+        <div className="stream-frame">
+          {streamUnavailable ? (
+            <div className="stream-fallback" role="status">
+              <strong>Stream unavailable</strong>
+              <span>Retry the stream or check camera status if the Logitech webcam is disconnected.</span>
             </div>
-            <span className={`status-pill ${streamStatus}`}>{streamStatus}</span>
-          </div>
+          ) : null}
+          <img
+            alt="Live shrimp tank camera feed"
+            onError={() => {
+              setStreamStatus("offline");
+              setMessage("The live stream is unavailable. Retry the stream or check device status.");
+            }}
+            onLoad={() => {
+              setStreamStatus("online");
+              setMessage("Live stream is online.");
+            }}
+            src={`/stream/live?view=${streamVersion}`}
+          />
+        </div>
 
-          <div className={`stream-frame ${streamUnavailable ? "offline" : ""}`}>
-            {streamUnavailable ? (
-              <div className="stream-fallback" role="status">
-                <strong>Stream unavailable</strong>
-                <span>Retry the stream or check camera status if the Logitech webcam is disconnected.</span>
-              </div>
-            ) : null}
-            <img
-              alt="Live shrimp tank camera feed"
-              onError={() => {
-                setStreamStatus("offline");
-                setMessage("The live stream is unavailable. Retry the stream or check device status.");
-              }}
-              onLoad={() => {
-                setStreamStatus("online");
-                setMessage("Live stream is online.");
-              }}
-              src={`/stream/live?view=${streamVersion}`}
-            />
-          </div>
-
-          <div className="action-row">
-            <button type="button" className="secondary-button" onClick={retryStream}>
-              Retry stream
-            </button>
-            <span className="support-copy">If the stream drops, Shrimp Cam keeps the shell usable while you reconnect.</span>
-          </div>
-        </article>
-
-        <article className="capture-card">
-          <p className="eyebrow">Manual Snapshot</p>
-          <h3>Capture the moment</h3>
-          <p>
-            Take a still image from the current camera source. The timestamp updates here after a successful capture.
-          </p>
+        <div className="live-control-tray" aria-label="Live camera controls">
+          <button type="button" className="secondary-button" onClick={retryStream}>
+            Retry stream
+          </button>
           <button
             type="button"
             className="primary-button"
@@ -1300,6 +1289,14 @@ function LiveViewScreen({ auth }: { auth: AuthContext }) {
           >
             {isCapturing ? "Capturing..." : "Capture snapshot"}
           </button>
+        </div>
+
+        <div className="live-status-panel">
+          <div>
+            <p className="eyebrow">Manual Snapshot</p>
+            <h3>Capture the moment</h3>
+            <p>Take a still image from the current camera source without leaving the live tank view.</p>
+          </div>
           <dl className="capture-facts">
             <div>
               <dt>Last manual capture</dt>
@@ -1315,8 +1312,8 @@ function LiveViewScreen({ auth }: { auth: AuthContext }) {
               {message}
             </p>
           ) : null}
-        </article>
-      </div>
+        </div>
+      </article>
     </ScreenFrame>
   );
 }

@@ -26,6 +26,8 @@ test("communicates live stream and manual snapshot failures", async ({ page }) =
   await navigateInApp(page, "/live");
 
   await expect(page.getByText("Stream unavailable")).toBeVisible();
+  await expect(page.getByLabel("Immersive live camera stage")).toBeVisible();
+  await expect(page.getByLabel("Live camera controls")).toBeVisible();
   await expect(page.getByRole("button", { name: "Capture snapshot" })).toBeDisabled();
 
   await page.getByRole("button", { name: "Retry stream" }).click();

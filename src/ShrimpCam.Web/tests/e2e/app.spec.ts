@@ -60,8 +60,11 @@ test("captures a manual snapshot from live view after stream recovery", async ({
   await navigateInApp(page, "/live");
 
   await expect(page.getByRole("heading", { name: "Live" })).toBeVisible();
+  await expect(page.getByLabel("Immersive live camera stage")).toBeVisible();
+  await expect(page.getByLabel("Live camera controls")).toBeVisible();
   await page.getByAltText("Live shrimp tank camera feed").dispatchEvent("load");
   await expect(page.getByText("Live stream is online.")).toBeVisible();
+  await expect(page.getByText("Capture the moment")).toBeVisible();
 
   await page.getByRole("button", { name: "Capture snapshot" }).click();
   await expect(page.getByText("Snapshot captured. Gallery history will include the new still image.")).toBeVisible();

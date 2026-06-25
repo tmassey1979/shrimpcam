@@ -674,80 +674,128 @@ select:focus-visible,
     linear-gradient(145deg, rgba(46, 184, 211, 0.78), rgba(15, 111, 139, 0.78));
 }
 
-.live-layout {
+.live-stage {
+  position: relative;
   display: grid;
-  gap: 0.85rem;
-}
-
-.stream-card,
-.capture-card {
-  display: grid;
-  gap: 0.9rem;
+  gap: 1rem;
+  min-height: min(44rem, calc(100svh - 13rem));
+  overflow: hidden;
   padding: 1rem;
-  border: 1px solid var(--line);
-  border-radius: 1.5rem;
-  background: var(--surface-strong);
+  border: 1px solid rgba(124, 224, 234, 0.28);
+  border-radius: 2rem;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(54, 214, 198, 0.26), transparent 11rem),
+    radial-gradient(circle at 86% 22%, rgba(255, 184, 118, 0.18), transparent 9rem),
+    linear-gradient(160deg, rgba(4, 24, 31, 0.92), rgba(8, 62, 75, 0.72)),
+    rgba(5, 34, 44, 0.86);
+  box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.34);
 }
 
-.stream-header {
+.live-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(110deg, transparent 0 24%, rgba(255, 248, 237, 0.08) 28%, transparent 34% 100%),
+    repeating-linear-gradient(90deg, rgba(255, 248, 237, 0.025) 0 1px, transparent 1px 3.25rem);
+  mix-blend-mode: screen;
+}
+
+.live-stage-top,
+.live-control-tray,
+.live-status-panel {
+  position: relative;
+  z-index: 2;
+  border: 1px solid rgba(255, 248, 237, 0.16);
+  background: rgba(4, 27, 35, 0.68);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 1.2rem 3rem rgba(0, 0, 0, 0.24);
+}
+
+.live-stage-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.85rem;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 1.35rem;
 }
 
-.stream-header strong {
+.live-stage-top strong {
   display: block;
   font-size: 1.1rem;
 }
 
 .stream-frame {
   position: relative;
+  z-index: 1;
   display: grid;
   place-items: center;
-  min-height: 18rem;
+  min-height: 20rem;
   overflow: hidden;
-  border: 1px solid rgba(124, 224, 234, 0.2);
-  border-radius: 1.25rem;
+  border: 1px solid rgba(124, 224, 234, 0.18);
+  border-radius: 1.65rem;
   background:
-    radial-gradient(circle at 50% 0%, rgba(124, 224, 234, 0.16), transparent 36%),
+    radial-gradient(circle at 50% 0%, rgba(124, 224, 234, 0.18), transparent 34%),
     linear-gradient(145deg, rgba(3, 13, 17, 0.96), rgba(9, 38, 46, 0.92));
 }
 
 .stream-frame img {
   display: block;
   width: 100%;
-  min-height: 18rem;
-  max-height: 70vh;
+  min-height: 20rem;
+  max-height: 64vh;
   object-fit: cover;
 }
 
-.stream-frame.offline img {
+.live-stage.offline .stream-frame img {
   visibility: hidden;
 }
 
 .stream-fallback {
   position: absolute;
   inset: 1rem;
-  z-index: 1;
+  z-index: 2;
   display: grid;
   place-content: center;
   gap: 0.45rem;
   padding: 1rem;
-  border: 1px dashed rgba(255, 184, 118, 0.36);
-  border-radius: 1rem;
-  background: rgba(64, 30, 18, 0.72);
+  border: 1px dashed rgba(255, 184, 118, 0.42);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 184, 118, 0.22), transparent 52%),
+    rgba(64, 30, 18, 0.78);
   color: #ffdbc4;
   text-align: center;
 }
 
-.capture-card h3,
-.capture-card p,
+.live-control-tray {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  padding: 0.7rem;
+  border-radius: 1.25rem;
+}
+
+.live-control-tray button {
+  min-height: 3.1rem;
+}
+
+.live-status-panel {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+  border-radius: 1.45rem;
+}
+
+.live-status-panel h3,
+.live-status-panel p,
 .capture-facts {
   margin: 0;
 }
 
-.capture-card p,
+.live-status-panel p,
 .capture-facts dd,
 .capture-facts dt,
 .live-message {
@@ -1212,9 +1260,18 @@ select:focus-visible,
     align-items: end;
   }
 
-  .live-layout {
-    grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.75fr);
+  .live-stage {
+    min-height: 42rem;
+    grid-template-rows: auto minmax(24rem, 1fr) auto;
+  }
+
+  .live-status-panel {
+    grid-template-columns: minmax(0, 1.1fr) minmax(15rem, 0.9fr);
     align-items: start;
+  }
+
+  .live-message {
+    grid-column: 1 / -1;
   }
 
   .stream-frame,
