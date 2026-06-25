@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { mockShrimpCamApi, signIn } from "./fixtures";
+import { mockShrimpCamApi, navigateInApp, signIn } from "./fixtures";
 
 test.beforeEach(async ({ page }) => {
   await mockShrimpCamApi(page);
@@ -25,6 +25,21 @@ test("protects routes and signs in to the dashboard", async ({ page }) => {
   await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
 });
 
+test("renders the reference-led aquarium shell without the old heavy header", async ({ page }) => {
+  await signIn(page);
+
+  await expect(page.getByRole("banner")).toContainText("Shrimp Cam");
+  await expect(page.getByRole("banner")).toContainText("Your tank. Always in view.");
+  await expect(page.getByText("Reef watch")).toHaveCount(0);
+  await expect(page.getByText("Secure Shell")).toHaveCount(0);
+  await expect(page.getByLabel("Session and install status")).toContainText("Signed in as admin.");
+  await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
+
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await expect(page.getByRole("banner")).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
+});
+
 test("shows install guidance when the PWA is not installed", async ({ page }) => {
   await page.goto("/sign-in");
 
@@ -36,7 +51,7 @@ test("shows install guidance when the PWA is not installed", async ({ page }) =>
 
 test("captures a manual snapshot from live view after stream recovery", async ({ page }) => {
   await signIn(page);
-  await page.getByRole("link", { name: "Live" }).click({ force: true });
+  await navigateInApp(page, "/live");
 
   await expect(page.getByRole("heading", { name: "Live" })).toBeVisible();
   await page.getByAltText("Live shrimp tank camera feed").dispatchEvent("load");
@@ -56,7 +71,7 @@ test("browses gallery captures and applies a day filter", async ({ page }) => {
   });
 
   await signIn(page);
-  await page.getByRole("link", { name: "Gallery" }).click({ force: true });
+  await navigateInApp(page, "/gallery");
 
   await expect(page.getByRole("heading", { name: "Gallery" })).toBeVisible();
   await expect(page.getByText("2 captures found.")).toBeVisible();
@@ -74,7 +89,7 @@ test("browses gallery captures and applies a day filter", async ({ page }) => {
 
 test("updates settings with discovered camera options", async ({ page }) => {
   await signIn(page);
-  await page.getByRole("link", { name: "Settings" }).click({ force: true });
+  await navigateInApp(page, "/settings");
 
   await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
   await expect(page.getByText("Found 2 cameras for Windows.")).toBeVisible();

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { mockShrimpCamApi, signIn } from "./fixtures";
+import { mockShrimpCamApi, navigateInApp, signIn } from "./fixtures";
 
 test("shows actionable sign-in validation and failure feedback", async ({ page }) => {
   await mockShrimpCamApi(page);
@@ -19,17 +19,16 @@ test("shows actionable sign-in validation and failure feedback", async ({ page }
 test("communicates live stream and manual snapshot failures", async ({ page }) => {
   await mockShrimpCamApi(page, {
     manualCaptureStatus: 503,
-    manualCaptureBody: { status: "failed", reason: "Camera busy." }
+    manualCaptureBody: { status: "failed", reason: "Camera busy." },
+    streamFailuresBeforeSuccess: 1
   });
   await signIn(page);
-  await page.getByRole("link", { name: "Live" }).click({ force: true });
+  await navigateInApp(page, "/live");
 
-  await page.getByAltText("Live shrimp tank camera feed").dispatchEvent("error");
   await expect(page.getByText("Stream unavailable")).toBeVisible();
   await expect(page.getByRole("button", { name: "Capture snapshot" })).toBeDisabled();
 
   await page.getByRole("button", { name: "Retry stream" }).click();
-  await page.getByAltText("Live shrimp tank camera feed").dispatchEvent("load");
   await expect(page.getByText("Live stream is online.")).toBeVisible();
 
   await page.getByRole("button", { name: "Capture snapshot" }).click();
@@ -40,7 +39,7 @@ test("communicates live stream and manual snapshot failures", async ({ page }) =
 test("keeps gallery usable for empty filters and protected image failures", async ({ page }) => {
   await mockShrimpCamApi(page, { emptyFilteredCaptures: true, captureImageStatus: 500 });
   await signIn(page);
-  await page.getByRole("link", { name: "Gallery" }).click({ force: true });
+  await navigateInApp(page, "/gallery");
 
   await expect(page.getByText("Image unavailable")).toBeVisible();
   await page.getByLabel("Filter captures by day").fill("2026-06-24");
@@ -53,7 +52,8 @@ test("keeps gallery usable for empty filters and protected image failures", asyn
 test("blocks invalid settings and preserves edits after server rejection", async ({ page }) => {
   await mockShrimpCamApi(page, { settingsSaveStatus: 403 });
   await signIn(page);
-  await page.getByRole("link", { name: "Settings" }).click({ force: true });
+  await navigateInApp(page, "/settings");
+  await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
 
   await page.getByLabel("Selected camera source").fill("");
   await page.getByRole("button", { name: "Save settings" }).click();

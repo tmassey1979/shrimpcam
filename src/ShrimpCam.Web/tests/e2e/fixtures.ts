@@ -84,6 +84,7 @@ type MockShrimpCamApiOptions = {
   settingsSaveStatus?: number;
   settingsSaveBody?: unknown;
   cameraDiscoveryStatus?: number;
+  streamFailuresBeforeSuccess?: number;
 };
 
 function captureListBody(items: typeof captures, totalItems = items.length) {
@@ -101,6 +102,7 @@ function captureListBody(items: typeof captures, totalItems = items.length) {
 }
 
 export async function mockShrimpCamApi(page: Page, options: MockShrimpCamApiOptions = {}) {
+  let remainingStreamFailures = options.streamFailuresBeforeSuccess ?? 0;
   await page.route("/auth/login", async (route) => {
     const body = route.request().postDataJSON() as { userName?: string; password?: string };
     if (body.userName === "admin" && body.password === "AdminPass1234") {
@@ -208,6 +210,12 @@ export async function mockShrimpCamApi(page: Page, options: MockShrimpCamApiOpti
   });
 
   await page.route(/\/stream\/live(?:\?.*)?$/, async (route) => {
+    if (remainingStreamFailures > 0) {
+      remainingStreamFailures -= 1;
+      await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ status: "failed" }) });
+      return;
+    }
+
     await route.fulfill({ status: 200, contentType: "image/png", body: pixel });
   });
 
@@ -275,4 +283,9 @@ export async function signIn(page: Page) {
   await page.getByLabel("Password").fill("AdminPass1234");
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+}
+
+export async function navigateInApp(page: Page, path: "/dashboard" | "/live" | "/gallery" | "/settings") {
+  await page.locator(`a[href="${path}"]`).evaluate((element) => (element as HTMLAnchorElement).click());
+  await page.waitForURL(`**${path}`);
 }

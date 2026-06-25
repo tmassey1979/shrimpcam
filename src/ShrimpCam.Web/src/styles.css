@@ -35,9 +35,37 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 34px 34px;
+    radial-gradient(ellipse at 18% 72%, rgba(28, 132, 102, 0.42), transparent 18rem),
+    radial-gradient(ellipse at 86% 48%, rgba(48, 144, 118, 0.34), transparent 20rem),
+    linear-gradient(180deg, rgba(13, 163, 177, 0.42), transparent 27rem),
+    linear-gradient(160deg, #063b46 0%, #052a35 42%, #031018 100%);
+}
+
+body::before,
+body::after {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  content: "";
+}
+
+body::before {
+  background:
+    radial-gradient(circle at 16% 26%, rgba(255, 248, 237, 0.13) 0 0.08rem, transparent 0.14rem),
+    radial-gradient(circle at 72% 18%, rgba(255, 248, 237, 0.1) 0 0.06rem, transparent 0.12rem),
+    radial-gradient(circle at 82% 36%, rgba(255, 248, 237, 0.11) 0 0.05rem, transparent 0.11rem),
+    linear-gradient(105deg, transparent 0 12%, rgba(124, 224, 234, 0.09) 13%, transparent 34%),
+    linear-gradient(128deg, transparent 0 48%, rgba(124, 224, 234, 0.07) 49%, transparent 68%);
+  background-size: auto, auto, auto, 34rem 100%, 42rem 100%;
+}
+
+body::after {
+  z-index: -1;
+  background:
+    radial-gradient(ellipse at 16% 103%, rgba(39, 150, 94, 0.68), transparent 18rem),
+    radial-gradient(ellipse at 72% 108%, rgba(57, 117, 72, 0.58), transparent 22rem),
+    linear-gradient(0deg, rgba(1, 13, 18, 0.78), transparent 21rem);
 }
 
 button,
@@ -96,16 +124,16 @@ select:focus-visible,
   transform: translateY(0);
 }
 
-.topbar,
-.hero-card,
+.app-header,
+.shell-status-card,
 .screen,
 .banner,
 .bottom-nav {
   backdrop-filter: blur(18px);
 }
 
-.topbar,
-.hero-card,
+.app-header,
+.shell-status-card,
 .screen,
 .banner,
 .bottom-nav,
@@ -116,18 +144,30 @@ select:focus-visible,
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
 }
 
-.topbar {
+.app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.85rem;
-  border-color: rgba(255, 248, 237, 0.26);
-  border-radius: 1.75rem;
+  padding: max(1rem, env(safe-area-inset-top)) 0.35rem 0.4rem;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.app-header::before {
+  position: absolute;
+  top: 0.7rem;
+  right: 1rem;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 999px;
   background:
-    linear-gradient(135deg, rgba(255, 248, 237, 0.18), rgba(255, 248, 237, 0.05)),
-    radial-gradient(circle at 12% 0%, rgba(255, 176, 95, 0.35), transparent 18rem),
-    rgba(4, 30, 37, 0.72);
+    radial-gradient(circle at 35% 34%, rgba(255, 255, 255, 0.28), transparent 20%),
+    linear-gradient(145deg, rgba(54, 214, 198, 0.56), rgba(7, 64, 78, 0.54));
+  opacity: 0.55;
+  pointer-events: none;
+  content: "";
 }
 
 .brand-lockup {
@@ -141,18 +181,42 @@ select:focus-visible,
   display: inline-grid;
   flex: 0 0 auto;
   place-items: center;
-  width: 3.35rem;
-  height: 3.35rem;
-  border: 1px solid rgba(255, 248, 237, 0.38);
-  border-radius: 1.15rem;
+  width: 4.1rem;
+  height: 3.2rem;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.shrimp-mark-body,
+.shrimp-mark-tail {
+  grid-area: 1 / 1;
+  display: block;
+}
+
+.shrimp-mark-body {
+  width: 2.9rem;
+  height: 1.5rem;
+  border-radius: 999px 1.1rem 1.1rem 999px;
+  transform: rotate(-17deg);
   background:
-    radial-gradient(circle at 30% 28%, #fff0bd, transparent 28%),
-    linear-gradient(145deg, #ff7247, #ffb05f 62%, #36d6c6);
-  color: #052027;
-  font-size: 0.82rem;
-  font-weight: 1000;
-  letter-spacing: 0.08em;
-  box-shadow: 0 16px 36px rgba(255, 114, 71, 0.26);
+    repeating-linear-gradient(90deg, transparent 0 0.45rem, rgba(255, 238, 211, 0.85) 0.45rem 0.64rem),
+    linear-gradient(135deg, #ff784e, #ffb05f);
+  box-shadow: 0 0.9rem 2rem rgba(255, 114, 71, 0.28);
+}
+
+.shrimp-mark-tail {
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-left: -2.1rem;
+  transform: rotate(-17deg);
+  border-radius: 0.2rem 999px 999px 0.2rem;
+  background: #ff7247;
+  clip-path: polygon(0 50%, 100% 0, 78% 50%, 100% 100%);
+}
+
+.brand-copy {
+  min-width: 0;
 }
 
 .brand-subtitle {
@@ -169,17 +233,19 @@ select:focus-visible,
   gap: 0.45rem;
 }
 
-.topbar h1,
-.hero-card h2,
+.app-header h1,
+.shell-status-card h2,
 .screen h2 {
   margin: 0;
   line-height: 1.1;
 }
 
-.topbar h1 {
-  font-size: clamp(1.45rem, 6vw, 2.2rem);
+.app-header h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.25rem, 10vw, 3.7rem);
   max-width: 12ch;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.055em;
+  text-shadow: 0 0.9rem 2.5rem rgba(0, 0, 0, 0.36);
 }
 
 .content {
@@ -198,7 +264,7 @@ select:focus-visible,
   color: var(--accent);
 }
 
-.hero-card,
+.shell-status-card,
 .screen,
 .banner,
 .stat-card,
@@ -210,22 +276,23 @@ select:focus-visible,
     var(--surface);
 }
 
-.hero-card,
+.shell-status-card,
 .screen {
   padding: 1rem;
 }
 
-.hero-card {
+.shell-status-card {
   display: grid;
-  gap: 0.75rem;
+  gap: 0.8rem;
   border-color: rgba(54, 214, 198, 0.24);
+  border-radius: 1.5rem;
   background:
     radial-gradient(circle at 88% 14%, rgba(54, 214, 198, 0.22), transparent 14rem),
     linear-gradient(135deg, rgba(255, 176, 95, 0.14), rgba(255, 248, 237, 0.04)),
     rgba(7, 44, 51, 0.72);
 }
 
-.hero-card p,
+.shell-status-card p,
 .screen-copy,
 .stat-card span,
 .support-copy,
@@ -930,11 +997,15 @@ select:focus-visible,
 .nav-icon {
   display: inline-grid;
   place-items: center;
-  width: 2rem;
-  height: 2rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid rgba(255, 248, 237, 0.18);
   border-radius: 999px;
-  background: rgba(255, 248, 237, 0.12);
-  font-size: 0.72rem;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255, 248, 237, 0.18), transparent 28%),
+    rgba(255, 248, 237, 0.1);
+  font-size: 0.58rem;
+  letter-spacing: -0.04em;
 }
 
 .nav-link.active .nav-icon {
@@ -949,7 +1020,7 @@ select:focus-visible,
   }
 
   .screen,
-  .hero-card {
+  .shell-status-card {
     padding: 1.25rem;
   }
 

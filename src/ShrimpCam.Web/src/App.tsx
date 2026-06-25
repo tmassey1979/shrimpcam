@@ -205,10 +205,10 @@ const sessionStorageKey = "shrimpcam.session";
 const shellMetadataStorageKey = "shrimpcam.shellMetadata";
 
 const navItems: NavItem[] = [
-  { to: "/dashboard", label: "Dashboard", icon: "DB" },
-  { to: "/live", label: "Live", icon: "LV" },
-  { to: "/gallery", label: "Gallery", icon: "GL" },
-  { to: "/settings", label: "Settings", icon: "ST" }
+  { to: "/dashboard", label: "Dashboard", icon: "Home" },
+  { to: "/live", label: "Live", icon: "Cam" },
+  { to: "/gallery", label: "Gallery", icon: "Shot" },
+  { to: "/settings", label: "Settings", icon: "Tune" }
 ];
 
 function App() {
@@ -229,18 +229,19 @@ function App() {
       <a className="skip-link" href="#main-content">
         Skip to main content
       </a>
-      <header className="topbar">
+      <header className="app-header">
         <div className="brand-lockup">
           <span className="brand-mark" aria-hidden="true">
-            SC
+            <span className="shrimp-mark-body" />
+            <span className="shrimp-mark-tail" />
           </span>
-          <div>
-            <p className="eyebrow">Shrimp Cam</p>
-            <h1>Reef watch</h1>
+          <div className="brand-copy">
+            <p className="eyebrow">Your tank. Always in view.</p>
+            <h1>Shrimp Cam</h1>
             <span className="brand-subtitle">Timelapse, live view, and tank status</span>
           </div>
         </div>
-        <div className="topbar-actions">
+        <div className="topbar-actions" aria-label="Connection and session status">
           <span className={`status-pill ${isOnline ? "online" : "offline"}`}>{statusLabel}</span>
           {auth.isAuthenticated ? (
             <button type="button" className="ghost-button" onClick={() => void auth.signOut()}>
@@ -260,10 +261,11 @@ function App() {
           </div>
         ) : null}
 
-        <section className="hero-card">
-          <p className="eyebrow">Secure Shell</p>
-          <h2>{auth.isAuthenticated ? "Session active" : "Sign-in required"}</h2>
-          <p>{shellMessage}</p>
+        <section className="shell-status-card" aria-label="Session and install status">
+          <div>
+            <p className="eyebrow">{auth.isAuthenticated ? "Session active" : "Sign-in required"}</p>
+            <p>{shellMessage}</p>
+          </div>
           {!installPrompt.isInstalled ? <InstallPromptPanel installPrompt={installPrompt} /> : null}
         </section>
 
