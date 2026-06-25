@@ -6,6 +6,10 @@ public sealed class StorageOptions
 {
     [Required]
     [MinLength(1)]
+    public string DatabasePath { get; init; } = string.Empty;
+
+    [Required]
+    [MinLength(1)]
     public string ImageRootPath { get; init; } = string.Empty;
 
     [Required]

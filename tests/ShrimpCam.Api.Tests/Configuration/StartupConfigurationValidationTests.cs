@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -16,23 +17,40 @@ public sealed class StartupConfigurationValidationTests
     [Trait("Category", "Api")]
     public async Task Health_endpoint_exposes_values_from_valid_bound_configuration()
     {
-        await using var factory = new ConfigurationWebApplicationFactory();
-        using var client = factory.CreateClient();
+        var rootPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
-        var response = await client.GetAsync("/health").ConfigureAwait(true);
+        try
+        {
+            var overrides = new Dictionary<string, string>
+            {
+                ["ShrimpCam:Storage:DatabasePath"] = Path.Combine(rootPath, "shrimpcam.db"),
+                ["ShrimpCam:Storage:ImageRootPath"] = Path.Combine(rootPath, "images"),
+                ["ShrimpCam:Storage:TimelapseRootPath"] = Path.Combine(rootPath, "timelapse"),
+            };
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+            await using var factory = new ConfigurationWebApplicationFactory(overrides);
+            using var client = factory.CreateClient();
 
-        var payload = await response.Content.ReadFromJsonAsync<HealthResponseContract>().ConfigureAwait(true);
+            var response = await client.GetAsync("/health").ConfigureAwait(true);
 
-        payload.Should().NotBeNull();
-        payload!.CameraPlatform.Should().Be("Windows");
-        payload.CaptureIntervalMinutes.Should().Be(5);
-        payload.HostMode.Should().Be("InternetExposed");
-        payload.ApplicationVersion.Should().Be("0.1.0.0");
-        payload.InformationalVersion.Should().Be("0.1.0+sha.local");
-        payload.SourceRevision.Should().Be("local");
-        payload.BuildConfiguration.Should().Be("Debug");
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var payload = await response.Content.ReadFromJsonAsync<HealthResponseContract>().ConfigureAwait(true);
+
+            payload.Should().NotBeNull();
+            payload!.CameraPlatform.Should().Be("Windows");
+            payload.CaptureIntervalMinutes.Should().Be(5);
+            payload.HostMode.Should().Be("InternetExposed");
+            payload.ApplicationVersion.Should().Be("0.1.0.0");
+            payload.InformationalVersion.Should().Be("0.1.0+sha.local");
+            payload.SourceRevision.Should().Be("local");
+            payload.BuildConfiguration.Should().Be("Debug");
+            File.Exists(Path.Combine(rootPath, "shrimpcam.db")).Should().BeTrue();
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
     }
 
     [Fact]
@@ -51,6 +69,54 @@ public sealed class StartupConfigurationValidationTests
         var act = () => Task.Run(() => factory.CreateClient());
 
         await act.Should().ThrowAsync<OptionsValidationException>().ConfigureAwait(true);
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
+    public async Task Newer_database_schema_version_blocks_startup_with_clear_error()
+    {
+        var rootPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        var databasePath = Path.Combine(rootPath, "shrimpcam.db");
+        Directory.CreateDirectory(rootPath);
+
+        try
+        {
+            using (var connection = new SqliteConnection($"Data Source={databasePath}"))
+            {
+                connection.Open();
+                using var command = connection.CreateCommand();
+                command.CommandText =
+                    """
+                    CREATE TABLE schema_version (
+                        version INTEGER NOT NULL,
+                        applied_at_utc TEXT NOT NULL
+                    );
+
+                    INSERT INTO schema_version (version, applied_at_utc)
+                    VALUES (99, '2026-06-25T00:00:00.0000000Z');
+                    """;
+                _ = command.ExecuteNonQuery();
+            }
+
+            var overrides = new Dictionary<string, string>
+            {
+                ["ShrimpCam:Storage:DatabasePath"] = databasePath,
+                ["ShrimpCam:Storage:ImageRootPath"] = Path.Combine(rootPath, "images"),
+                ["ShrimpCam:Storage:TimelapseRootPath"] = Path.Combine(rootPath, "timelapse"),
+            };
+
+            await using var factory = new ConfigurationWebApplicationFactory(overrides);
+            var act = () => Task.Run(() => factory.CreateClient());
+
+            await act.Should()
+                .ThrowAsync<InvalidOperationException>()
+                .WithMessage("*newer than this application supports*")
+                .ConfigureAwait(true);
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
     }
 
     private sealed record HealthResponseContract(
@@ -78,6 +144,31 @@ public sealed class StartupConfigurationValidationTests
             builder.ConfigureAppConfiguration(
                 (_, configBuilder) => configBuilder.AddInMemoryCollection(
                     overrides.Select(pair => new KeyValuePair<string, string?>(pair.Key, pair.Value))));
+        }
+    }
+
+    private static void DeleteDirectory(string rootPath)
+    {
+        for (var attempt = 0; attempt < 5; attempt++)
+        {
+            if (!Directory.Exists(rootPath))
+            {
+                return;
+            }
+
+            try
+            {
+                Directory.Delete(rootPath, recursive: true);
+                return;
+            }
+            catch (IOException) when (attempt < 4)
+            {
+                Thread.Sleep(100);
+            }
+            catch (IOException)
+            {
+                return;
+            }
         }
     }
 }

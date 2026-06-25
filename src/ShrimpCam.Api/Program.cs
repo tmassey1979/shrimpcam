@@ -4,6 +4,7 @@ using ShrimpCam.Api.Configuration;
 using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Captures;
 using ShrimpCam.Core.Configuration;
+using ShrimpCam.Core.Persistence;
 using ShrimpCam.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,7 +17,10 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 var buildMetadata = BuildMetadata.FromAssembly(typeof(Program).Assembly);
 
-_ = app.Services.GetRequiredService<IOptions<ShrimpCamOptions>>().Value;
+var options = app.Services.GetRequiredService<IOptions<ShrimpCamOptions>>().Value;
+await app.Services.GetRequiredService<IApplicationDataInitializer>()
+    .InitializeAsync(options.Storage, CancellationToken.None)
+    .ConfigureAwait(false);
 
 app.UseSwagger();
 
@@ -27,13 +31,13 @@ if (app.Environment.IsDevelopment())
 
 app.MapGet(
     "/health",
-    (IOptions<ShrimpCamOptions> options) => Results.Ok(
+    (IOptions<ShrimpCamOptions> optionsAccessor) => Results.Ok(
         new
         {
             status = "ok",
-            cameraPlatform = options.Value.Camera.Platform,
-            captureIntervalMinutes = options.Value.Capture.IntervalMinutes,
-            hostMode = options.Value.Security.HostMode,
+            cameraPlatform = optionsAccessor.Value.Camera.Platform,
+            captureIntervalMinutes = optionsAccessor.Value.Capture.IntervalMinutes,
+            hostMode = optionsAccessor.Value.Security.HostMode,
             applicationVersion = buildMetadata.Version,
             informationalVersion = buildMetadata.InformationalVersion,
             sourceRevision = buildMetadata.SourceRevision,
