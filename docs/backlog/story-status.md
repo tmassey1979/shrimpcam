@@ -1,0 +1,26 @@
+# Shrimp Cam Story Status
+
+> This file is the editable markdown source of truth for accepted stories and status notes.
+
+## Completed Stories
+
+| Story | Completed On | Commit |
+| --- | --- | --- |
+| SC-CC-01 | 2026-06-24 | f5f4f8e |
+| SC-PF-010 | 2026-06-24 | 6813ce3 |
+| SC-PF-009 | 2026-06-24 | 93ab714 |
+| SC-PF-002 | 2026-06-24 | 5413d2b |
+| SC-PF-008 | 2026-06-24 | fc106a6 |
+| SC-PF-007 | 2026-06-24 | d96d388 |
+| SC-PF-004 | 2026-06-24 | a8cc814 |
+| SC-PF-003 | 2026-06-24 | 51ad68a |
+| SC-PF-012 | 2026-06-24 | d94f409 |
+| SC-PF-011 | 2026-06-24 | 80bb62a |
+| SC-PF-006 | 2026-06-24 | 17b3757 |
+| SC-PF-005 | 2026-06-24 | c1c36d8 |
+| SC-PF-001 | 2026-06-24 | 0229802 |
+
+## Notes
+
+| Story | Note |
+| --- | --- |

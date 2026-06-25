@@ -1,10 +1,65 @@
 param(
-    [string]$StatusPath = "docs/backlog/story-status.json",
+    [string]$StatusPath = "docs/backlog/story-status.md",
     [string]$OutputPath = "PROJECT_STATUS.md",
     [int]$LatestCount = 5
 )
 
 $ErrorActionPreference = "Stop"
+
+function Parse-MarkdownTable {
+    param(
+        [string[]]$Lines,
+        [string]$Heading
+    )
+
+    $headingIndex = [Array]::IndexOf($Lines, $Heading)
+    if ($headingIndex -lt 0) {
+        return @()
+    }
+
+    $tableLines = [System.Collections.Generic.List[string]]::new()
+
+    for ($index = $headingIndex + 1; $index -lt $Lines.Length; $index++) {
+        $line = $Lines[$index]
+
+        if ($line.StartsWith("## ")) {
+            break
+        }
+
+        if ($line.Trim().StartsWith("|")) {
+            $tableLines.Add($line)
+        }
+    }
+
+    if ($tableLines.Count -lt 2) {
+        return @()
+    }
+
+    $headers = ($tableLines[0].Trim('|').Split('|') | ForEach-Object { $_.Trim() })
+    $entries = [System.Collections.Generic.List[object]]::new()
+
+    foreach ($line in $tableLines | Select-Object -Skip 2) {
+        if ($line -match '^\|\s*-+\s*(\|\s*-+\s*)+\|?$') {
+            continue
+        }
+
+        $cells = ($line.Trim('|').Split('|') | ForEach-Object { $_.Trim() })
+
+        if ($cells.Count -ne $headers.Count) {
+            continue
+        }
+
+        $entry = [ordered]@{}
+
+        for ($columnIndex = 0; $columnIndex -lt $headers.Count; $columnIndex++) {
+            $entry[$headers[$columnIndex]] = $cells[$columnIndex]
+        }
+
+        $entries.Add([pscustomobject]$entry)
+    }
+
+    return $entries
+}
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 $statusFile = Join-Path $repoRoot $StatusPath
@@ -15,7 +70,9 @@ if (-not (Test-Path $statusFile)) {
     throw "Status file '$StatusPath' was not found."
 }
 
-$storyStatus = Get-Content $statusFile -Raw | ConvertFrom-Json
+$statusLines = Get-Content $statusFile
+$completedEntries = Parse-MarkdownTable -Lines $statusLines -Heading "## Completed Stories"
+$noteEntries = Parse-MarkdownTable -Lines $statusLines -Heading "## Notes"
 $backlogFiles = Get-ChildItem -Path $backlogRoot -Filter "EPIC-*.md" | Sort-Object Name
 
 $stories = foreach ($file in $backlogFiles) {
@@ -43,13 +100,19 @@ foreach ($story in $stories) {
 }
 
 $completedLookup = @{}
-foreach ($entry in $storyStatus.completedStories) {
-    $completedLookup[$entry.id] = $entry
+foreach ($entry in $completedEntries) {
+    $completedLookup[$entry.Story] = [pscustomobject]@{
+        id = $entry.Story
+        completedOn = $entry."Completed On"
+        commit = $entry.Commit
+    }
 }
 
 $noteLookup = @{}
-foreach ($note in $storyStatus.notes) {
-    $noteLookup[$note.id] = $note.note
+foreach ($note in $noteEntries) {
+    if ($note.Story -and $note.Note) {
+        $noteLookup[$note.Story] = $note.Note
+    }
 }
 
 $storyRows = foreach ($story in $stories) {
@@ -81,8 +144,8 @@ $epicSummary = foreach ($epicGroup in ($storyRows | Group-Object Epic | Sort-Obj
     }
 }
 
-$latestStories = foreach ($entry in $storyStatus.completedStories | Select-Object -First $LatestCount) {
-    $story = $storyLookup[$entry.id]
+$latestStories = foreach ($entry in $completedEntries | Select-Object -First $LatestCount) {
+    $story = $storyLookup[$entry.Story]
     if ($null -eq $story) {
         continue
     }
@@ -91,8 +154,8 @@ $latestStories = foreach ($entry in $storyStatus.completedStories | Select-Objec
         Id = $story.Id
         Title = $story.Title
         Epic = $story.Epic
-        CompletedOn = [string]$entry.completedOn
-        Commit = [string]$entry.commit
+        CompletedOn = [string]$entry."Completed On"
+        Commit = [string]$entry.Commit
     }
 }
 
@@ -146,7 +209,7 @@ foreach ($story in $pendingStories) {
     $lines.Add("| $($story.Id) | $($story.Title) | $($story.Epic) |")
 }
 
-if ($storyStatus.notes.Count -gt 0) {
+if ($noteLookup.Count -gt 0) {
     $lines.Add("")
     $lines.Add("## Notes")
     $lines.Add("")

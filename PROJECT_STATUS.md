@@ -6,7 +6,7 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-24 22:52:32 -05:00 |
+| Last refreshed | 2026-06-24 22:57:20 -05:00 |
 | Total stories | 49 |
 | Accepted stories | 13 |
 | Remaining stories | 36 |
@@ -25,10 +25,10 @@
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
-| SC-CC-01 | Discover Cameras on Linux Hosts | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
-| SC-PF-010 | Publish build and version metadata | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 |  |
-| SC-PF-009 | Enforce coverage thresholds | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 |  |
-| SC-PF-002 | Enforce clean architecture boundaries | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 |  |
+| SC-CC-01 | Discover Cameras on Linux Hosts | Epic 2: Camera, Capture, and Streaming | 2026-06-24 | f5f4f8e |
+| SC-PF-010 | Publish build and version metadata | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 | 6813ce3 |
+| SC-PF-009 | Enforce coverage thresholds | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 | 93ab714 |
+| SC-PF-002 | Enforce clean architecture boundaries | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 | 5413d2b |
 | SC-PF-008 | Enable TDD-oriented test workflow | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 | fc106a6 |
 
 ## Next Unaccepted Stories
