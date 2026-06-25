@@ -70,6 +70,52 @@ app.MapPost(
             });
     });
 
+app.MapPost(
+    "/captures/highlights/motion",
+    async (MotionHighlightRequest request, IMotionHighlightService motionHighlightService, IOptions<ShrimpCamOptions> options, CancellationToken cancellationToken) =>
+    {
+        var result = await motionHighlightService.EvaluateAsync(
+                options.Value,
+                new MotionHighlightEvent(request.OccurredAtUtc, request.Score, request.EventId),
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        if (result.Outcome == MotionHighlightOutcome.Failed)
+        {
+            return Results.Json(
+                new
+                {
+                    status = "failed",
+                    outcome = result.Outcome,
+                    reason = result.FailureReason,
+                },
+                statusCode: StatusCodes.Status503ServiceUnavailable);
+        }
+
+        if (result.Capture is null)
+        {
+            return Results.Ok(
+                new
+                {
+                    status = "skipped",
+                    outcome = result.Outcome,
+                });
+        }
+
+        return Results.Ok(
+            new
+            {
+                status = "captured",
+                outcome = result.Outcome,
+                sourceType = result.Capture.SourceType,
+                capturedAtUtc = result.Capture.CapturedAtUtc,
+                fileName = result.Capture.FileName,
+                imagePath = result.Capture.ImagePath,
+                relativeImagePath = result.Capture.RelativeImagePath,
+                metadataPath = result.Capture.MetadataPath,
+            });
+    });
+
 app.MapGet(
     "/stream/live",
     async (ICameraLiveStreamService liveStreamService, IOptions<ShrimpCamOptions> options, CancellationToken cancellationToken) =>
@@ -105,5 +151,10 @@ app.MapGet(
     });
 
 app.Run();
+
+internal sealed record MotionHighlightRequest(
+    DateTimeOffset OccurredAtUtc,
+    double Score,
+    string? EventId);
 
 public partial class Program;

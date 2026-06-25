@@ -14,4 +14,12 @@ public sealed class CaptureOptions
 
     [Range(1, 24)]
     public int ActiveEndHourUtc { get; init; } = 22;
+
+    public bool MotionHighlightsEnabled { get; init; }
+
+    [Range(0.01d, 1d)]
+    public double MotionThreshold { get; init; } = 0.35d;
+
+    [Range(0, 86400)]
+    public int MotionCooldownSeconds { get; init; } = 300;
 }

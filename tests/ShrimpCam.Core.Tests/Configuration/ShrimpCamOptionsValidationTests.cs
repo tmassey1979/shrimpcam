@@ -19,6 +19,8 @@ public sealed class ShrimpCamOptionsValidationTests
         "IntervalMinutes",
         "ActiveStartHourUtc",
         "ActiveEndHourUtc",
+        "MotionThreshold",
+        "MotionCooldownSeconds",
         "ImageRootPath",
         "TimelapseRootPath",
         "RetentionDays",
@@ -44,6 +46,9 @@ public sealed class ShrimpCamOptionsValidationTests
         options.Capture.IntervalMinutes.Should().Be(5);
         options.Capture.ActiveStartHourUtc.Should().Be(6);
         options.Capture.ActiveEndHourUtc.Should().Be(22);
+        options.Capture.MotionHighlightsEnabled.Should().BeFalse();
+        options.Capture.MotionThreshold.Should().Be(0.35d);
+        options.Capture.MotionCooldownSeconds.Should().Be(300);
         options.Storage.ImageRootPath.Should().BeEmpty();
         options.Storage.TimelapseRootPath.Should().BeEmpty();
         options.Storage.RetentionDays.Should().Be(30);
@@ -68,7 +73,16 @@ public sealed class ShrimpCamOptionsValidationTests
                 ReconnectRetryAttempts = 2,
                 ReconnectBackoffSeconds = 1,
             },
-            Capture = new CaptureOptions { Enabled = true, IntervalMinutes = 5, ActiveStartHourUtc = 8, ActiveEndHourUtc = 20 },
+            Capture = new CaptureOptions
+            {
+                Enabled = true,
+                IntervalMinutes = 5,
+                ActiveStartHourUtc = 8,
+                ActiveEndHourUtc = 20,
+                MotionHighlightsEnabled = true,
+                MotionThreshold = 0.45d,
+                MotionCooldownSeconds = 180,
+            },
             Storage = new StorageOptions { ImageRootPath = "data/images", TimelapseRootPath = "data/timelapse", RetentionDays = 30 },
             Security = new SecurityOptions { HostMode = "InternetExposed" },
         };
@@ -94,7 +108,15 @@ public sealed class ShrimpCamOptionsValidationTests
                 ReconnectRetryAttempts = -1,
                 ReconnectBackoffSeconds = 0,
             },
-            Capture = new CaptureOptions { Enabled = true, IntervalMinutes = 0, ActiveStartHourUtc = -1, ActiveEndHourUtc = 25 },
+            Capture = new CaptureOptions
+            {
+                Enabled = true,
+                IntervalMinutes = 0,
+                ActiveStartHourUtc = -1,
+                ActiveEndHourUtc = 25,
+                MotionThreshold = 0d,
+                MotionCooldownSeconds = -1,
+            },
             Storage = new StorageOptions { ImageRootPath = string.Empty, TimelapseRootPath = string.Empty, RetentionDays = 0 },
             Security = new SecurityOptions { HostMode = "Unknown" },
         };

@@ -27,7 +27,9 @@ public static class DependencyInjection
         services.AddSingleton<ICaptureStorage, FileSystemCaptureStorage>();
         services.AddSingleton<ICaptureRetentionService, CaptureRetentionService>();
         services.AddSingleton<IDailyTimelapseService, DailyTimelapseService>();
+        services.AddSingleton<IMotionHighlightStateStore, MotionHighlightStateStore>();
         services.AddSingleton<IManualCaptureService, ManualCaptureService>();
+        services.AddSingleton<IMotionHighlightService, MotionHighlightService>();
         services.AddSingleton<IScheduledCaptureStateStore, ScheduledCaptureStateStore>();
         services.AddSingleton<IScheduledCaptureService, ScheduledCaptureService>();
         services.AddSingleton<ILinuxCameraDiscovery, LinuxCameraDiscovery>();
