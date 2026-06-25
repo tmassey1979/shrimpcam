@@ -82,6 +82,49 @@ type GalleryState = {
   imageFailed: boolean;
 };
 
+type SettingsResponse = {
+  camera: {
+    platform: string;
+    source: string;
+    captureWidth: number;
+    captureHeight: number;
+    streamWidth: number;
+    streamHeight: number;
+    streamFramesPerSecond: number;
+    reconnectRetryAttempts: number;
+    reconnectBackoffSeconds: number;
+  };
+  capture: {
+    enabled: boolean;
+    intervalMinutes: number;
+    activeStartHourUtc: number;
+    activeEndHourUtc: number;
+    motionHighlightsEnabled: boolean;
+    motionThreshold: number;
+    motionCooldownSeconds: number;
+  };
+  storage: {
+    retentionDays: number;
+  };
+  security: {
+    hostMode: string;
+  };
+};
+
+type SettingsState = {
+  form: SettingsResponse | null;
+  health: HealthResponse | null;
+  isLoading: boolean;
+  isSaving: boolean;
+  isDirty: boolean;
+  message: string | null;
+  errors: Record<string, string>;
+};
+
+type ValidationProblemResponse = {
+  errors?: Record<string, string[]>;
+};
+
 type AuthContext = {
   session: Session | null;
   isAuthenticated: boolean;
@@ -191,7 +234,7 @@ function App() {
             path="/settings"
             element={
               <ProtectedRoute auth={auth}>
-                <SettingsPlaceholder auth={auth} />
+                <SettingsScreen auth={auth} />
               </ProtectedRoute>
             }
           />
@@ -823,44 +866,349 @@ function LiveViewScreen({ auth }: { auth: AuthContext }) {
   );
 }
 
-function SettingsPlaceholder({ auth }: { auth: AuthContext }) {
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [isChecking, setIsChecking] = useState(false);
+function SettingsScreen({ auth }: { auth: AuthContext }) {
+  const [state, setState] = useState<SettingsState>({
+    form: null,
+    health: null,
+    isLoading: true,
+    isSaving: false,
+    isDirty: false,
+    message: null,
+    errors: {}
+  });
 
-  async function verifySession() {
-    setIsChecking(true);
-    setStatusMessage(null);
+  async function loadSettings() {
+    setState((current) => ({ ...current, isLoading: true, message: null, errors: {} }));
+
+    const [settingsResult, healthResult] = await Promise.allSettled([
+      auth.authenticatedFetch("/settings"),
+      fetch("/health")
+    ]);
+
+    let form: SettingsResponse | null = null;
+    let health: HealthResponse | null = null;
+    let message: string | null = null;
+
+    if (settingsResult.status === "fulfilled" && settingsResult.value.ok) {
+      form = (await settingsResult.value.json()) as SettingsResponse;
+    } else if (settingsResult.status === "fulfilled" && settingsResult.value.status === 403) {
+      message = "Your account can view protected app areas, but only administrators can edit settings.";
+    } else {
+      message = "Settings are unavailable. Sign in as an administrator or retry after the service reconnects.";
+    }
+
+    if (healthResult.status === "fulfilled" && healthResult.value.ok) {
+      health = (await healthResult.value.json()) as HealthResponse;
+    }
+
+    setState({
+      form,
+      health,
+      isLoading: false,
+      isSaving: false,
+      isDirty: false,
+      message,
+      errors: {}
+    });
+  }
+
+  useEffect(() => {
+    void loadSettings();
+  }, []);
+
+  function updateForm(mutator: (current: SettingsResponse) => SettingsResponse) {
+    setState((current) =>
+      current.form
+        ? {
+            ...current,
+            form: mutator(current.form),
+            isDirty: true,
+            message: null,
+            errors: {}
+          }
+        : current
+    );
+  }
+
+  async function saveSettings(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!state.form) {
+      return;
+    }
+
+    const clientErrors = validateSettings(state.form);
+    if (Object.keys(clientErrors).length > 0) {
+      setState((current) => ({
+        ...current,
+        errors: clientErrors,
+        message: "Fix the highlighted settings before saving.",
+        isSaving: false
+      }));
+      return;
+    }
+
+    setState((current) => ({ ...current, isSaving: true, message: "Saving settings...", errors: {} }));
+
     try {
-      const response = await auth.authenticatedFetch("/settings");
-      if (response.ok) {
-        setStatusMessage("Session verified. Settings can be loaded safely.");
-      } else if (response.status === 403) {
-        setStatusMessage("Your session is valid, but this account cannot edit settings.");
+      const response = await auth.authenticatedFetch("/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(state.form)
+      });
+
+      if (response.status === 403) {
+        setState((current) => ({
+          ...current,
+          isSaving: false,
+          message: "Only administrators can update Shrimp Cam settings."
+        }));
+        return;
       }
-    } finally {
-      setIsChecking(false);
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as ValidationProblemResponse | null;
+        setState((current) => ({
+          ...current,
+          isSaving: false,
+          errors: flattenValidationErrors(payload?.errors),
+          message: "The server rejected one or more settings. Your edits were preserved."
+        }));
+        return;
+      }
+
+      const saved = (await response.json()) as SettingsResponse;
+      setState((current) => ({
+        ...current,
+        form: saved,
+        isSaving: false,
+        isDirty: false,
+        message: "Settings saved. Refreshed values match the service response.",
+        errors: {}
+      }));
+    } catch {
+      setState((current) => ({
+        ...current,
+        isSaving: false,
+        message: "Settings could not be saved. Check the connection and try again."
+      }));
     }
   }
 
+  const form = state.form;
+  const camera = state.health?.components.camera;
+  const storage = state.health?.components.storage;
+  const database = state.health?.components.database;
+
   return (
-    <ScreenFrame title="Settings" description="Combined settings and device status layout stub for safe editing flows.">
-      <div className="list-card">
-        <div className="gallery-item">
-          <strong>Capture cadence</strong>
-          <span>Settings forms can be dropped into this shared shell without changing navigation.</span>
-        </div>
-        <div className="gallery-item">
-          <strong>System status</strong>
-          <span>Health details, validation, and save feedback can live side by side here.</span>
-        </div>
-        <div className="gallery-item">
-          <strong>Session check</strong>
-          <span>Protected requests return users to sign-in if the backend reports an expired session.</span>
-          <button type="button" className="secondary-button" disabled={isChecking} onClick={() => void verifySession()}>
-            {isChecking ? "Checking..." : "Verify session"}
-          </button>
-          {statusMessage ? <span>{statusMessage}</span> : null}
-        </div>
+    <ScreenFrame
+      title="Settings"
+      description="Review system health and safely update capture, camera, retention, and hosting preferences."
+    >
+      <div className="settings-layout">
+        <aside className="status-panel">
+          <div className="dashboard-toolbar">
+            <span>{state.isLoading ? "Loading settings..." : "Settings status loaded"}</span>
+            <button type="button" className="secondary-button" onClick={() => void loadSettings()}>
+              Refresh
+            </button>
+          </div>
+          <div className="stat-grid">
+            <StatCard eyebrow="App" value={state.health?.status ?? "Unknown"} detail={state.health?.checkedAtUtc ? `Checked ${formatDateTime(state.health.checkedAtUtc)}` : "Health check has not loaded."} />
+            <StatCard eyebrow="Camera" value={camera?.status ?? "Unknown"} detail={camera?.detail ?? "Camera status unavailable."} />
+            <StatCard eyebrow="Storage" value={storage?.status ?? "Unknown"} detail={storage?.detail ?? "Storage status unavailable."} />
+            <StatCard eyebrow="Database" value={database?.status ?? "Unknown"} detail={database?.detail ?? "Database status unavailable."} />
+          </div>
+        </aside>
+
+        {form ? (
+          <form className="settings-form" onSubmit={(event) => void saveSettings(event)}>
+            <div className="settings-form-header">
+              <div>
+                <p className="eyebrow">Editable Settings</p>
+                <h3>{state.isDirty ? "Unsaved changes" : "Current configuration"}</h3>
+              </div>
+              <button type="submit" className="primary-button" disabled={state.isSaving || !state.isDirty}>
+                {state.isSaving ? "Saving..." : "Save settings"}
+              </button>
+            </div>
+
+            <fieldset>
+              <legend>Capture Schedule</legend>
+              <label>
+                <span>Capture enabled</span>
+                <input
+                  type="checkbox"
+                  checked={form.capture.enabled}
+                  onChange={(event) =>
+                    updateForm((current) => ({
+                      ...current,
+                      capture: { ...current.capture, enabled: event.target.checked }
+                    }))
+                  }
+                />
+              </label>
+              <label>
+                <span>Interval minutes</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="1440"
+                  value={form.capture.intervalMinutes}
+                  onChange={(event) =>
+                    updateForm((current) => ({
+                      ...current,
+                      capture: { ...current.capture, intervalMinutes: toInteger(event.target.value) }
+                    }))
+                  }
+                />
+                <FieldError message={state.errors["capture.intervalMinutes"]} />
+              </label>
+              <div className="settings-grid">
+                <label>
+                  <span>Active start UTC</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="23"
+                    value={form.capture.activeStartHourUtc}
+                    onChange={(event) =>
+                      updateForm((current) => ({
+                        ...current,
+                        capture: { ...current.capture, activeStartHourUtc: toInteger(event.target.value) }
+                      }))
+                    }
+                  />
+                  <FieldError message={state.errors["capture.activeStartHourUtc"]} />
+                </label>
+                <label>
+                  <span>Active end UTC</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="24"
+                    value={form.capture.activeEndHourUtc}
+                    onChange={(event) =>
+                      updateForm((current) => ({
+                        ...current,
+                        capture: { ...current.capture, activeEndHourUtc: toInteger(event.target.value) }
+                      }))
+                    }
+                  />
+                  <FieldError message={state.errors["capture.activeEndHourUtc"]} />
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Camera And Storage</legend>
+              <label>
+                <span>Camera source</span>
+                <input
+                  value={form.camera.source}
+                  onChange={(event) =>
+                    updateForm((current) => ({
+                      ...current,
+                      camera: { ...current.camera, source: event.target.value }
+                    }))
+                  }
+                />
+                <FieldError message={state.errors["camera.source"]} />
+              </label>
+              <div className="settings-grid">
+                <label>
+                  <span>Platform</span>
+                  <select
+                    value={form.camera.platform}
+                    onChange={(event) =>
+                      updateForm((current) => ({
+                        ...current,
+                        camera: { ...current.camera, platform: event.target.value }
+                      }))
+                    }
+                  >
+                    <option value="Windows">Windows</option>
+                    <option value="Linux">Linux</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Retention days</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="3650"
+                    value={form.storage.retentionDays}
+                    onChange={(event) =>
+                      updateForm((current) => ({
+                        ...current,
+                        storage: { ...current.storage, retentionDays: toInteger(event.target.value) }
+                      }))
+                    }
+                  />
+                  <FieldError message={state.errors["storage.retentionDays"]} />
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Motion And Hosting</legend>
+              <label>
+                <span>Motion highlights</span>
+                <input
+                  type="checkbox"
+                  checked={form.capture.motionHighlightsEnabled}
+                  onChange={(event) =>
+                    updateForm((current) => ({
+                      ...current,
+                      capture: { ...current.capture, motionHighlightsEnabled: event.target.checked }
+                    }))
+                  }
+                />
+              </label>
+              <div className="settings-grid">
+                <label>
+                  <span>Motion threshold</span>
+                  <input
+                    type="number"
+                    min="0.01"
+                    max="1"
+                    step="0.01"
+                    value={form.capture.motionThreshold}
+                    onChange={(event) =>
+                      updateForm((current) => ({
+                        ...current,
+                        capture: { ...current.capture, motionThreshold: Number(event.target.value) }
+                      }))
+                    }
+                  />
+                  <FieldError message={state.errors["capture.motionThreshold"]} />
+                </label>
+                <label>
+                  <span>Host mode</span>
+                  <input
+                    value={form.security.hostMode}
+                    onChange={(event) =>
+                      updateForm((current) => ({
+                        ...current,
+                        security: { ...current.security, hostMode: event.target.value }
+                      }))
+                    }
+                  />
+                </label>
+              </div>
+            </fieldset>
+
+            {state.message ? (
+              <p className="live-message" role={Object.keys(state.errors).length > 0 ? "alert" : "status"}>
+                {state.message}
+              </p>
+            ) : null}
+          </form>
+        ) : (
+          <div className="empty-state">
+            <strong>Settings unavailable</strong>
+            <span>{state.message ?? "Sign in as an administrator to edit Shrimp Cam settings."}</span>
+          </div>
+        )}
       </div>
     </ScreenFrame>
   );
@@ -889,6 +1237,57 @@ function StatCard({ eyebrow, value, detail }: StatCardProps) {
       <span>{detail}</span>
     </article>
   );
+}
+
+function FieldError({ message }: { message?: string }) {
+  return message ? (
+    <span className="field-error" role="alert">
+      {message}
+    </span>
+  ) : null;
+}
+
+function validateSettings(settings: SettingsResponse) {
+  const errors: Record<string, string> = {};
+
+  if (!settings.camera.source.trim()) {
+    errors["camera.source"] = "Camera source is required.";
+  }
+
+  if (settings.capture.intervalMinutes < 1 || settings.capture.intervalMinutes > 1440) {
+    errors["capture.intervalMinutes"] = "Interval must be between 1 and 1440 minutes.";
+  }
+
+  if (settings.capture.activeStartHourUtc < 0 || settings.capture.activeStartHourUtc > 23) {
+    errors["capture.activeStartHourUtc"] = "Start hour must be between 0 and 23.";
+  }
+
+  if (settings.capture.activeEndHourUtc < 1 || settings.capture.activeEndHourUtc > 24) {
+    errors["capture.activeEndHourUtc"] = "End hour must be between 1 and 24.";
+  }
+
+  if (settings.capture.motionThreshold < 0.01 || settings.capture.motionThreshold > 1) {
+    errors["capture.motionThreshold"] = "Motion threshold must be between 0.01 and 1.";
+  }
+
+  if (settings.storage.retentionDays < 1 || settings.storage.retentionDays > 3650) {
+    errors["storage.retentionDays"] = "Retention must be between 1 and 3650 days.";
+  }
+
+  return errors;
+}
+
+function flattenValidationErrors(errors?: Record<string, string[]>) {
+  if (!errors) {
+    return {};
+  }
+
+  return Object.fromEntries(Object.entries(errors).map(([key, messages]) => [key, messages[0] ?? "Validation failed."]));
+}
+
+function toInteger(value: string) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isNaN(parsed) ? 0 : parsed;
 }
 
 function readStoredSession(): Session | null {
