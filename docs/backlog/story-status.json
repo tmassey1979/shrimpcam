@@ -1,6 +1,11 @@
 {
   "completedStories": [
     {
+      "id": "SC-PF-009",
+      "completedOn": "2026-06-24",
+      "commit": ""
+    },
+    {
       "id": "SC-PF-002",
       "completedOn": "2026-06-24",
       "commit": ""
@@ -51,10 +56,5 @@
       "commit": "0229802"
     }
   ],
-  "notes": [
-    {
-      "id": "SC-PF-009",
-      "note": "A historical commit added coverage collection settings, but the story is not accepted until 90% threshold enforcement is implemented."
-    }
-  ]
+  "notes": []
 }

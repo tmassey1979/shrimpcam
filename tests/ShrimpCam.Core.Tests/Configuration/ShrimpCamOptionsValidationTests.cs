@@ -9,6 +9,22 @@ public sealed class ShrimpCamOptionsValidationTests
 {
     [Fact]
     [Trait("Category", "Unit")]
+    public void Default_options_match_expected_bootstrap_values()
+    {
+        var options = new ShrimpCamOptions();
+
+        options.Camera.Platform.Should().Be("Windows");
+        options.Camera.Source.Should().BeEmpty();
+        options.Capture.IntervalMinutes.Should().Be(5);
+        options.Capture.ActiveStartHourUtc.Should().Be(6);
+        options.Capture.ActiveEndHourUtc.Should().Be(22);
+        options.Storage.ImageRootPath.Should().BeEmpty();
+        options.Storage.RetentionDays.Should().Be(30);
+        options.Security.HostMode.Should().Be("InternetExposed");
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
     public void Valid_options_pass_data_annotations_validation()
     {
         var options = new ShrimpCamOptions

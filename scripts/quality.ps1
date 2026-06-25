@@ -10,8 +10,7 @@ dotnet format ShrimpCam.sln --verify-no-changes --severity warn --no-restore
 dotnet test ShrimpCam.sln --no-build
 
 if ($EnforceCoverage) {
-    dotnet test ShrimpCam.sln --no-build -p:EnforceCoverage=true -p:CoverageThreshold=90
-    dotnet test ShrimpCam.sln --no-build --settings tests/coverlet.runsettings --collect:"XPlat Code Coverage"
+    powershell -ExecutionPolicy Bypass -File scripts/enforce-backend-coverage.ps1 -Threshold 90
 }
 
 Push-Location src/ShrimpCam.Web

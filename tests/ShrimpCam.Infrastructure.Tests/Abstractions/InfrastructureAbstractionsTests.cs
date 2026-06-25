@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,6 +47,21 @@ public sealed class InfrastructureAbstractionsTests
 
     [Fact]
     [Trait("Category", "Integration")]
+    public async Task Process_runner_rejects_blank_file_names()
+    {
+        var services = new ServiceCollection();
+        Infrastructure.DependencyInjection.AddInfrastructure(services);
+
+        using var provider = services.BuildServiceProvider();
+
+        var runner = provider.GetRequiredService<IProcessRunner>();
+        var act = () => runner.RunAsync(new ProcessRequest(string.Empty, string.Empty), CancellationToken.None);
+
+        await act.Should().ThrowAsync<ArgumentException>().ConfigureAwait(true);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
     public void File_system_combines_paths()
     {
         var services = new ServiceCollection();
@@ -57,6 +74,53 @@ public sealed class InfrastructureAbstractionsTests
 
         combined.Should().Contain("data");
         combined.Should().Contain("images");
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public void File_system_can_create_and_detect_directories()
+    {
+        var services = new ServiceCollection();
+        Infrastructure.DependencyInjection.AddInfrastructure(services);
+
+        using var provider = services.BuildServiceProvider();
+
+        var fileSystem = provider.GetRequiredService<IFileSystem>();
+        var directoryPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            fileSystem.DirectoryExists(directoryPath).Should().BeFalse();
+
+            fileSystem.CreateDirectory(directoryPath);
+
+            fileSystem.DirectoryExists(directoryPath).Should().BeTrue();
+        }
+        finally
+        {
+            if (Directory.Exists(directoryPath))
+            {
+                Directory.Delete(directoryPath, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public void Clock_returns_a_recent_utc_timestamp()
+    {
+        var services = new ServiceCollection();
+        Infrastructure.DependencyInjection.AddInfrastructure(services);
+
+        using var provider = services.BuildServiceProvider();
+
+        var clock = provider.GetRequiredService<IClock>();
+        var before = DateTimeOffset.UtcNow;
+        var now = clock.UtcNow;
+        var after = DateTimeOffset.UtcNow;
+
+        now.Should().BeOnOrAfter(before);
+        now.Should().BeOnOrBefore(after);
     }
 }
 
