@@ -6,7 +6,7 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 16:37:32 -05:00 |
+| Last refreshed | 2026-06-25 16:41:19 -05:00 |
 | Total stories | 60 |
 | Accepted stories | 60 |
 | Remaining stories | 0 |
@@ -25,7 +25,7 @@
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
-| SC-ASO-320 | Harden Default Administrator Initialization For Internet Exposure | Epic 3: API, Security, and Operations | 2026-06-25 |  |
+| SC-ASO-320 | Harden Default Administrator Initialization For Internet Exposure | Epic 3: API, Security, and Operations | 2026-06-25 | d8b3088 |
 | SC-CAM-17 | Report Manual Capture Health Transitions | Epic 2: Camera, Capture, and Streaming | 2026-06-25 | 1a33ba9 |
 | SC-ASO-319 | Redact authentication secrets from audit logs | Epic 3: API, Security, and Operations | 2026-06-25 | 6e1c096 |
 | SC-ASO-318 | Protect camera operation endpoints | Epic 3: API, Security, and Operations | 2026-06-25 | fc50404 |
