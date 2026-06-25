@@ -50,6 +50,38 @@ internal sealed class SqliteAuditRecordRepository(IOptions<ShrimpCamOptions> opt
         return Task.FromResult(reader.Read() ? ReadAuditRecord(reader) : null);
     }
 
+    public Task<AuditRecordPage> ListAsync(AuditRecordQuery query, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ArgumentOutOfRangeException.ThrowIfLessThan(query.PageNumber, 1);
+        ArgumentOutOfRangeException.ThrowIfLessThan(query.PageSize, 1);
+
+        using var connection = SqliteConnectionFactory.OpenConnection(options);
+        using var countCommand = connection.CreateCommand();
+        countCommand.CommandText = "SELECT COUNT(*) FROM audit_records;";
+        var totalItems = Convert.ToInt32(countCommand.ExecuteScalar(), System.Globalization.CultureInfo.InvariantCulture);
+
+        using var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            SELECT id, event_type, actor_user_name, outcome, detail, occurred_at_utc
+            FROM audit_records
+            ORDER BY occurred_at_utc DESC, id DESC
+            LIMIT $pageSize OFFSET $offset;
+            """;
+        command.Parameters.AddWithValue("$pageSize", query.PageSize);
+        command.Parameters.AddWithValue("$offset", (query.PageNumber - 1) * query.PageSize);
+
+        using var reader = command.ExecuteReader();
+        var items = new List<AuditRecord>();
+        while (reader.Read())
+        {
+            items.Add(ReadAuditRecord(reader));
+        }
+
+        return Task.FromResult(new AuditRecordPage(items, query.PageNumber, query.PageSize, totalItems));
+    }
+
     private static AuditRecord ReadAuditRecord(SqliteDataReader reader) =>
         new(
             Guid.Parse(reader.GetString(0)),

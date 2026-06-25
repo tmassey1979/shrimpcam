@@ -191,6 +191,61 @@ public sealed class SqlitePersistenceTests
             (await auditRepository.GetByIdAsync(auditId, CancellationToken.None).ConfigureAwait(true))
                 .Should()
                 .Be(new AuditRecord(auditId, "SettingsUpdated", "shrimp-admin", "Succeeded", "Capture interval changed", updatedAtUtc));
+            (await auditRepository.ListAsync(new AuditRecordQuery(1, 10), CancellationToken.None).ConfigureAwait(true))
+                .Items.Should()
+                .ContainSingle(record => record == new AuditRecord(auditId, "SettingsUpdated", "shrimp-admin", "Succeeded", "Capture interval changed", updatedAtUtc));
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Audit_repository_lists_recent_records_newest_first_with_paging()
+    {
+        var rootPath = CreateTempRoot();
+        var options = CreateShrimpCamOptions(rootPath);
+
+        try
+        {
+            var services = new ServiceCollection();
+            services.AddSingleton<IOptions<ShrimpCamOptions>>(Options.Create(options));
+            ShrimpCam.Infrastructure.DependencyInjection.AddInfrastructure(services);
+
+            using var provider = services.BuildServiceProvider();
+
+            await provider.GetRequiredService<IApplicationDataInitializer>()
+                .InitializeAsync(options.Storage, CancellationToken.None)
+                .ConfigureAwait(true);
+
+            var auditRepository = provider.GetRequiredService<IAuditRecordRepository>();
+            var olderRecord = new AuditRecord(
+                Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                "SignIn",
+                "shrimp-viewer",
+                "Succeeded",
+                "{}",
+                new DateTimeOffset(2026, 06, 24, 08, 00, 00, TimeSpan.Zero));
+            var newerRecord = new AuditRecord(
+                Guid.Parse("00000000-0000-0000-0000-000000000002"),
+                "SettingsUpdated",
+                "shrimp-admin",
+                "Succeeded",
+                "{}",
+                new DateTimeOffset(2026, 06, 25, 08, 00, 00, TimeSpan.Zero));
+
+            await auditRepository.CreateAsync(olderRecord, CancellationToken.None).ConfigureAwait(true);
+            await auditRepository.CreateAsync(newerRecord, CancellationToken.None).ConfigureAwait(true);
+
+            var page = await auditRepository.ListAsync(new AuditRecordQuery(1, 1), CancellationToken.None).ConfigureAwait(true);
+
+            page.Items.Should().ContainSingle(record => record == newerRecord);
+            page.TotalItems.Should().Be(2);
+            page.TotalPages.Should().Be(2);
+            page.HasPreviousPage.Should().BeFalse();
+            page.HasNextPage.Should().BeTrue();
         }
         finally
         {

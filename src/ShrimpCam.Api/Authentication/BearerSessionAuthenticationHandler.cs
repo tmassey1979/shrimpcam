@@ -3,6 +3,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using ShrimpCam.Core.Audit;
 using ShrimpCam.Core.Authentication;
 
 namespace ShrimpCam.Api.Authentication;
@@ -11,7 +12,8 @@ internal sealed class BearerSessionAuthenticationHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,
     UrlEncoder encoder,
-    ISessionAuthenticationService sessionAuthenticationService)
+    ISessionAuthenticationService sessionAuthenticationService,
+    IAuditEventService auditEventService)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     public const string SchemeName = "SessionBearer";
@@ -52,31 +54,59 @@ internal sealed class BearerSessionAuthenticationHandler(
         return AuthenticateResult.Success(ticket);
     }
 
-    protected override Task HandleChallengeAsync(AuthenticationProperties properties)
+    protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
     {
+        await auditEventService.RecordAsync(
+                new AuditEventRequest(
+                    AuditEventTypes.AuthorizationDenied,
+                    Context.User.Identity?.Name ?? "anonymous",
+                    AuditOutcomes.Denied,
+                    new Dictionary<string, string>
+                    {
+                        ["method"] = Request.Method,
+                        ["path"] = Request.Path,
+                        ["statusCode"] = StatusCodes.Status401Unauthorized.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    }),
+                Context.RequestAborted)
+            .ConfigureAwait(false);
+
         Response.StatusCode = StatusCodes.Status401Unauthorized;
         Response.ContentType = "application/problem+json";
 
-        return Response.WriteAsJsonAsync(
+        await Response.WriteAsJsonAsync(
             new ProblemDetails
             {
                 Title = "Authentication required.",
                 Detail = "A valid session token is required to access this endpoint.",
                 Status = StatusCodes.Status401Unauthorized,
-            });
+            }).ConfigureAwait(false);
     }
 
-    protected override Task HandleForbiddenAsync(AuthenticationProperties properties)
+    protected override async Task HandleForbiddenAsync(AuthenticationProperties properties)
     {
+        await auditEventService.RecordAsync(
+                new AuditEventRequest(
+                    AuditEventTypes.AuthorizationDenied,
+                    Context.User.Identity?.Name ?? "anonymous",
+                    AuditOutcomes.Denied,
+                    new Dictionary<string, string>
+                    {
+                        ["method"] = Request.Method,
+                        ["path"] = Request.Path,
+                        ["statusCode"] = StatusCodes.Status403Forbidden.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    }),
+                Context.RequestAborted)
+            .ConfigureAwait(false);
+
         Response.StatusCode = StatusCodes.Status403Forbidden;
         Response.ContentType = "application/problem+json";
 
-        return Response.WriteAsJsonAsync(
+        await Response.WriteAsJsonAsync(
             new ProblemDetails
             {
                 Title = "Forbidden.",
                 Detail = "The authenticated user does not have permission to access this endpoint.",
                 Status = StatusCodes.Status403Forbidden,
-            });
+            }).ConfigureAwait(false);
     }
 }

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using ShrimpCam.Core.Abstractions;
+using ShrimpCam.Core.Audit;
 using ShrimpCam.Core.Authentication;
 using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Captures;
@@ -24,6 +25,7 @@ public static class DependencyInjection
     {
         services.AddSingleton<IClock, SystemClock>();
         services.AddSingleton<IAsyncDelay, SystemAsyncDelay>();
+        services.AddSingleton<IAuditEventService, AuditEventService>();
         services.AddSingleton<IFileSystem, SystemFileSystem>();
         services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
         services.AddSingleton<IAuthenticationService, LocalAuthenticationService>();

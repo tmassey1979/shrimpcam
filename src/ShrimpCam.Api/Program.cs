@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using ShrimpCam.Api.Authentication;
 using ShrimpCam.Api.Build;
 using ShrimpCam.Api.Configuration;
+using ShrimpCam.Core.Audit;
 using ShrimpCam.Core.Authentication;
 using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Captures;
@@ -66,7 +67,11 @@ app.MapGet(
 
 app.MapPost(
     "/auth/bootstrap-admin",
-    async (BootstrapAdministratorHttpRequest request, IBootstrapAdministratorService bootstrapAdministratorService, CancellationToken cancellationToken) =>
+    async (
+        BootstrapAdministratorHttpRequest request,
+        IBootstrapAdministratorService bootstrapAdministratorService,
+        IAuditEventService auditEventService,
+        CancellationToken cancellationToken) =>
     {
         var result = await bootstrapAdministratorService.BootstrapAsync(
                 new BootstrapAdministratorRequest(request.UserName, request.Password),
@@ -75,6 +80,19 @@ app.MapPost(
 
         if (!result.Succeeded)
         {
+            await auditEventService.RecordAsync(
+                    new AuditEventRequest(
+                        AuditEventTypes.BootstrapAdministrator,
+                        request.UserName,
+                        AuditOutcomes.Failed,
+                        new Dictionary<string, string>
+                        {
+                            ["reason"] = result.FailureReason ?? "unknown",
+                            ["password"] = request.Password,
+                        }),
+                    cancellationToken)
+                .ConfigureAwait(false);
+
             return result.FailureReason switch
             {
                 BootstrapAdministratorFailureReasons.AlreadyConfigured => Results.Problem(
@@ -103,12 +121,25 @@ app.MapPost(
             };
         }
 
+        await auditEventService.RecordAsync(
+                new AuditEventRequest(
+                    AuditEventTypes.BootstrapAdministrator,
+                    result.User!.UserName,
+                    AuditOutcomes.Succeeded,
+                    new Dictionary<string, string>
+                    {
+                        ["userName"] = result.User.UserName,
+                        ["roleName"] = result.User.RoleName,
+                    }),
+                cancellationToken)
+            .ConfigureAwait(false);
+
         return Results.Created(
             "/auth/bootstrap-admin",
             new
             {
                 status = "bootstrapped",
-                userId = result.User!.UserId,
+                userId = result.User.UserId,
                 userName = result.User.UserName,
                 roleName = result.User.RoleName,
             });
@@ -117,7 +148,11 @@ app.MapPost(
 
 app.MapPost(
     "/auth/login",
-    async (LoginRequest request, ShrimpCam.Core.Authentication.IAuthenticationService authenticationService, CancellationToken cancellationToken) =>
+    async (
+        LoginRequest request,
+        ShrimpCam.Core.Authentication.IAuthenticationService authenticationService,
+        IAuditEventService auditEventService,
+        CancellationToken cancellationToken) =>
     {
         var result = await authenticationService.AuthenticateAsync(
                 new AuthenticationRequest(request.UserName, request.Password),
@@ -126,17 +161,43 @@ app.MapPost(
 
         if (!result.Succeeded)
         {
+            await auditEventService.RecordAsync(
+                    new AuditEventRequest(
+                        AuditEventTypes.SignIn,
+                        request.UserName,
+                        AuditOutcomes.Failed,
+                        new Dictionary<string, string>
+                        {
+                            ["reason"] = result.FailureReason ?? "unknown",
+                            ["password"] = request.Password,
+                        }),
+                    cancellationToken)
+                .ConfigureAwait(false);
+
             return Results.Problem(
                 title: "Authentication failed.",
                 detail: "Invalid username or password.",
                 statusCode: StatusCodes.Status401Unauthorized);
         }
 
+        await auditEventService.RecordAsync(
+                new AuditEventRequest(
+                    AuditEventTypes.SignIn,
+                    result.Session!.UserName,
+                    AuditOutcomes.Succeeded,
+                    new Dictionary<string, string>
+                    {
+                        ["sessionId"] = result.Session.SessionId.ToString(),
+                        ["token"] = result.Session.Token,
+                    }),
+                cancellationToken)
+            .ConfigureAwait(false);
+
         return Results.Ok(
             new
             {
                 status = "authenticated",
-                sessionId = result.Session!.SessionId,
+                sessionId = result.Session.SessionId,
                 userId = result.Session.UserId,
                 userName = result.Session.UserName,
                 token = result.Session.Token,
@@ -147,11 +208,28 @@ app.MapPost(
 
 app.MapPost(
         "/auth/logout",
-        [Authorize] async (HttpContext httpContext, ISessionRevocationService sessionRevocationService, CancellationToken cancellationToken) =>
+        [Authorize] async (
+            HttpContext httpContext,
+            ISessionRevocationService sessionRevocationService,
+            IAuditEventService auditEventService,
+            CancellationToken cancellationToken) =>
         {
+            var actor = httpContext.User.Identity?.Name ?? "anonymous";
             var sessionIdValue = httpContext.User.FindFirst("session_id")?.Value;
             if (!Guid.TryParse(sessionIdValue, out var sessionId))
             {
+                await auditEventService.RecordAsync(
+                        new AuditEventRequest(
+                            AuditEventTypes.SignOut,
+                            actor,
+                            AuditOutcomes.Failed,
+                            new Dictionary<string, string>
+                            {
+                                ["reason"] = "invalidSessionClaim",
+                            }),
+                        cancellationToken)
+                    .ConfigureAwait(false);
+
                 return Results.Problem(
                     title: "Authentication required.",
                     detail: "A valid session token is required to access this endpoint.",
@@ -161,17 +239,42 @@ app.MapPost(
             var result = await sessionRevocationService.RevokeAsync(sessionId, cancellationToken).ConfigureAwait(false);
             if (!result.Succeeded)
             {
+                await auditEventService.RecordAsync(
+                        new AuditEventRequest(
+                            AuditEventTypes.SignOut,
+                            actor,
+                            AuditOutcomes.Failed,
+                            new Dictionary<string, string>
+                            {
+                                ["sessionId"] = sessionId.ToString(),
+                                ["reason"] = result.FailureReason ?? "unknown",
+                            }),
+                        cancellationToken)
+                    .ConfigureAwait(false);
+
                 return Results.Problem(
                     title: "Session not found.",
                     detail: "The active session could not be located for logout.",
                     statusCode: StatusCodes.Status404NotFound);
             }
 
+            await auditEventService.RecordAsync(
+                    new AuditEventRequest(
+                        AuditEventTypes.SignOut,
+                        actor,
+                        AuditOutcomes.Succeeded,
+                        new Dictionary<string, string>
+                        {
+                            ["sessionId"] = result.RevokedSession!.Id.ToString(),
+                        }),
+                    cancellationToken)
+                .ConfigureAwait(false);
+
             return Results.Ok(
                 new
                 {
                     status = "signedOut",
-                    sessionId = result.RevokedSession!.Id,
+                    sessionId = result.RevokedSession.Id,
                     revokedAtUtc = result.RevokedSession.RevokedAtUtc,
                 });
         })
@@ -188,7 +291,12 @@ app.MapGet(
 
 app.MapPut(
         "/settings",
-        [Authorize(Policy = AuthorizationPolicies.Administrator)] async (UpdateSettingsHttpRequest request, IEditableSettingsService settingsService, CancellationToken cancellationToken) =>
+        [Authorize(Policy = AuthorizationPolicies.Administrator)] async (
+            HttpContext httpContext,
+            UpdateSettingsHttpRequest request,
+            IEditableSettingsService settingsService,
+            IAuditEventService auditEventService,
+            CancellationToken cancellationToken) =>
         {
             var settings = request.ToEditableSettings();
             var validation = settingsService.Validate(settings);
@@ -202,9 +310,44 @@ app.MapPut(
             }
 
             var updated = await settingsService.UpdateAsync(settings, cancellationToken).ConfigureAwait(false);
+            await auditEventService.RecordAsync(
+                    new AuditEventRequest(
+                        AuditEventTypes.SettingsUpdated,
+                        httpContext.User.Identity?.Name ?? "anonymous",
+                        AuditOutcomes.Succeeded,
+                        new Dictionary<string, string>
+                        {
+                            ["cameraSource"] = updated.Camera.Source,
+                            ["captureIntervalMinutes"] = updated.Capture.IntervalMinutes.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                            ["retentionDays"] = updated.Storage.RetentionDays.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                            ["hostMode"] = updated.Security.HostMode,
+                        }),
+                    cancellationToken)
+                .ConfigureAwait(false);
+
             return Results.Ok(SettingsEndpointMapping.ToSettingsResponse(updated));
         })
     .WithName("UpdateSettings");
+
+app.MapGet(
+        "/audit/events",
+        [Authorize(Policy = AuthorizationPolicies.Administrator)] async (
+            int? page,
+            int? pageSize,
+            IAuditRecordRepository auditRecordRepository,
+            CancellationToken cancellationToken) =>
+        {
+            var validation = AuditHistoryEndpointMapping.ValidateQuery(page, pageSize);
+            if (validation.Count > 0)
+            {
+                return Results.ValidationProblem(validation);
+            }
+
+            var query = new AuditRecordQuery(page ?? 1, pageSize ?? 25);
+            var auditPage = await auditRecordRepository.ListAsync(query, cancellationToken).ConfigureAwait(false);
+            return Results.Ok(AuditHistoryEndpointMapping.ToListResponse(auditPage));
+        })
+    .WithName("ListAuditEvents");
 
 app.MapGet(
         "/captures",
@@ -424,6 +567,54 @@ internal sealed record CaptureSettingsHttpRequest(
 internal sealed record StorageSettingsHttpRequest(int RetentionDays);
 
 internal sealed record SecuritySettingsHttpRequest(string HostMode);
+
+internal static class AuditHistoryEndpointMapping
+{
+    private const int MaxPageSize = 100;
+
+    public static Dictionary<string, string[]> ValidateQuery(int? page, int? pageSize)
+    {
+        var errors = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+
+        if (page is < 1)
+        {
+            errors["page"] = ["Page must be greater than or equal to 1."];
+        }
+
+        if (pageSize is < 1 or > MaxPageSize)
+        {
+            errors["pageSize"] = [$"Page size must be between 1 and {MaxPageSize}."];
+        }
+
+        return errors;
+    }
+
+    public static object ToListResponse(AuditRecordPage auditPage) =>
+        new
+        {
+            items = auditPage.Items.Select(ToAuditRecordResponse).ToArray(),
+            paging = new
+            {
+                auditPage.PageNumber,
+                auditPage.PageSize,
+                auditPage.TotalItems,
+                auditPage.TotalPages,
+                auditPage.HasPreviousPage,
+                auditPage.HasNextPage,
+            },
+        };
+
+    private static object ToAuditRecordResponse(AuditRecord auditRecord) =>
+        new
+        {
+            auditRecord.Id,
+            auditRecord.EventType,
+            auditRecord.ActorUserName,
+            auditRecord.Outcome,
+            auditRecord.Detail,
+            auditRecord.OccurredAtUtc,
+        };
+}
 
 internal static class CaptureBrowsingEndpointMapping
 {
