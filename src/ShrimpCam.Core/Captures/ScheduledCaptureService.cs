@@ -5,7 +5,9 @@ using ShrimpCam.Core.Configuration;
 namespace ShrimpCam.Core.Captures;
 
 public sealed class ScheduledCaptureService(
+    IAsyncDelay asyncDelay,
     ICameraCommandFactory cameraCommandFactory,
+    ICameraStatusService cameraStatusService,
     ICaptureStorage captureStorage,
     IClock clock,
     IFileSystem fileSystem,
@@ -64,16 +66,40 @@ public sealed class ScheduledCaptureService(
         ScheduledCapturePlan plan,
         CancellationToken cancellationToken)
     {
-        var stagedFilePath = fileSystem.GetTemporaryFilePath(".jpg");
-
-        try
+        for (var failureCount = 0; ; failureCount++)
         {
-            var command = cameraCommandFactory.BuildStillCaptureCommand(options.Camera, stagedFilePath);
-            var processResult = await processRunner.RunAsync(command, cancellationToken).ConfigureAwait(false);
+            var stagedFilePath = fileSystem.GetTemporaryFilePath(".jpg");
+            ProcessResult processResult;
+
+            try
+            {
+                var command = cameraCommandFactory.BuildStillCaptureCommand(options.Camera, stagedFilePath);
+                processResult = await processRunner.RunAsync(command, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                DeleteIfPresent(stagedFilePath);
+                if (await TryDelayForRetryAsync(options.Camera, failureCount + 1, cancellationToken).ConfigureAwait(false))
+                {
+                    continue;
+                }
+
+                return await PersistFailureAsync(
+                        options,
+                        plan,
+                        exception.Message,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+            }
 
             if (processResult.ExitCode != 0)
             {
                 DeleteIfPresent(stagedFilePath);
+                if (await TryDelayForRetryAsync(options.Camera, failureCount + 1, cancellationToken).ConfigureAwait(false))
+                {
+                    continue;
+                }
+
                 return await PersistFailureAsync(
                         options,
                         plan,
@@ -88,6 +114,8 @@ public sealed class ScheduledCaptureService(
                     cancellationToken)
                 .ConfigureAwait(false);
 
+            cameraStatusService.ReportOnline();
+
             await stateStore.SaveAsync(
                     options.Storage,
                     new ScheduledCaptureState(plan.IntervalStartUtc, ScheduledCaptureOutcome.Captured, null),
@@ -100,16 +128,6 @@ public sealed class ScheduledCaptureService(
                 plan.NextEligibleIntervalUtc,
                 capture);
         }
-        catch (Exception exception)
-        {
-            DeleteIfPresent(stagedFilePath);
-            return await PersistFailureAsync(
-                    options,
-                    plan,
-                    exception.Message,
-                    cancellationToken)
-                .ConfigureAwait(false);
-        }
     }
 
     private async Task<ScheduledCaptureRunResult> PersistFailureAsync(
@@ -118,6 +136,8 @@ public sealed class ScheduledCaptureService(
         string failureReason,
         CancellationToken cancellationToken)
     {
+        cameraStatusService.ReportDegraded(failureReason);
+
         await stateStore.SaveAsync(
                 options.Storage,
                 new ScheduledCaptureState(plan.IntervalStartUtc, ScheduledCaptureOutcome.Failed, failureReason),
@@ -137,5 +157,23 @@ public sealed class ScheduledCaptureService(
         {
             fileSystem.DeleteFile(stagedFilePath);
         }
+    }
+
+    private async Task<bool> TryDelayForRetryAsync(
+        CameraOptions options,
+        int failureCount,
+        CancellationToken cancellationToken)
+    {
+        if (!CameraRecoveryPlanner.ShouldRetry(options, failureCount))
+        {
+            return false;
+        }
+
+        await asyncDelay.DelayAsync(
+                CameraRecoveryPlanner.GetBackoffDelay(options, failureCount),
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        return true;
     }
 }

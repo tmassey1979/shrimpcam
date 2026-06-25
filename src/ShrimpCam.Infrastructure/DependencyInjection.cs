@@ -17,10 +17,12 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
         services.AddSingleton<IClock, SystemClock>();
+        services.AddSingleton<IAsyncDelay, SystemAsyncDelay>();
         services.AddSingleton<IFileSystem, SystemFileSystem>();
         services.AddSingleton<IProcessRunner, ProcessRunner>();
         services.AddSingleton<IProcessStreamRunner, ProcessStreamRunner>();
         services.AddSingleton<ICameraCommandFactory, CameraCommandFactory>();
+        services.AddSingleton<ICameraStatusService, CameraStatusService>();
         services.AddSingleton<ICameraLiveStreamService, CameraLiveStreamService>();
         services.AddSingleton<ICaptureStorage, FileSystemCaptureStorage>();
         services.AddSingleton<IManualCaptureService, ManualCaptureService>();

@@ -14,7 +14,9 @@ public sealed class ScheduledCaptureServiceTests
     [Trait("Category", "Unit")]
     public async Task Due_interval_captures_one_scheduled_frame_and_persists_state()
     {
+        var asyncDelay = Substitute.For<IAsyncDelay>();
         var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
         var captureStorage = Substitute.For<ICaptureStorage>();
         var clock = Substitute.For<IClock>();
         var fileSystem = Substitute.For<IFileSystem>();
@@ -48,7 +50,9 @@ public sealed class ScheduledCaptureServiceTests
             .Returns(storedCapture);
 
         var service = new ScheduledCaptureService(
+            asyncDelay,
             commandFactory,
+            cameraStatusService,
             captureStorage,
             clock,
             fileSystem,
@@ -59,6 +63,7 @@ public sealed class ScheduledCaptureServiceTests
 
         result.Outcome.Should().Be(ScheduledCaptureOutcome.Captured);
         result.Capture.Should().Be(storedCapture);
+        cameraStatusService.Received(1).ReportOnline();
         await stateStore.Received(1).SaveAsync(
                 options.Storage,
                 new ScheduledCaptureState(dueInterval, ScheduledCaptureOutcome.Captured, null),
@@ -70,6 +75,8 @@ public sealed class ScheduledCaptureServiceTests
     [Trait("Category", "Unit")]
     public async Task Disabled_schedule_returns_without_loading_or_saving_state()
     {
+        var asyncDelay = Substitute.For<IAsyncDelay>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
         var options = CreateOptions();
         options = new ShrimpCamOptions
         {
@@ -84,9 +91,12 @@ public sealed class ScheduledCaptureServiceTests
                 ActiveEndHourUtc = 22,
             },
         };
+
         var stateStore = Substitute.For<IScheduledCaptureStateStore>();
         var service = new ScheduledCaptureService(
+            asyncDelay,
             Substitute.For<ICameraCommandFactory>(),
+            cameraStatusService,
             Substitute.For<ICaptureStorage>(),
             CreateClock(new DateTimeOffset(2026, 06, 24, 12, 03, 00, TimeSpan.Zero)),
             Substitute.For<IFileSystem>(),
@@ -104,7 +114,9 @@ public sealed class ScheduledCaptureServiceTests
     [Trait("Category", "Unit")]
     public async Task Outside_schedule_window_records_a_skip_for_the_interval()
     {
+        var asyncDelay = Substitute.For<IAsyncDelay>();
         var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
         var captureStorage = Substitute.For<ICaptureStorage>();
         var clock = Substitute.For<IClock>();
         var fileSystem = Substitute.For<IFileSystem>();
@@ -117,7 +129,9 @@ public sealed class ScheduledCaptureServiceTests
         stateStore.LoadAsync(options.Storage, Arg.Any<CancellationToken>()).Returns(ScheduledCaptureState.Empty);
 
         var service = new ScheduledCaptureService(
+            asyncDelay,
             commandFactory,
+            cameraStatusService,
             captureStorage,
             clock,
             fileSystem,
@@ -139,7 +153,9 @@ public sealed class ScheduledCaptureServiceTests
     [Trait("Category", "Unit")]
     public async Task Failed_camera_capture_marks_interval_failed_for_future_progress()
     {
+        var asyncDelay = Substitute.For<IAsyncDelay>();
         var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
         var captureStorage = Substitute.For<ICaptureStorage>();
         var clock = Substitute.For<IClock>();
         var fileSystem = Substitute.For<IFileSystem>();
@@ -159,7 +175,9 @@ public sealed class ScheduledCaptureServiceTests
             .Returns(new ProcessResult(1, string.Empty, "camera unavailable"));
 
         var service = new ScheduledCaptureService(
+            asyncDelay,
             commandFactory,
+            cameraStatusService,
             captureStorage,
             clock,
             fileSystem,
@@ -170,12 +188,70 @@ public sealed class ScheduledCaptureServiceTests
 
         result.Outcome.Should().Be(ScheduledCaptureOutcome.Failed);
         result.FailureReason.Should().Be(ManualCaptureFailureReasons.CameraUnavailable);
-        fileSystem.Received(1).DeleteFile(stagedPath);
+        fileSystem.Received(3).DeleteFile(stagedPath);
+        await asyncDelay.Received(2).DelayAsync(Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>()).ConfigureAwait(true);
+        cameraStatusService.Received(1).ReportDegraded(ManualCaptureFailureReasons.CameraUnavailable);
         await stateStore.Received(1).SaveAsync(
                 options.Storage,
                 new ScheduledCaptureState(dueInterval, ScheduledCaptureOutcome.Failed, ManualCaptureFailureReasons.CameraUnavailable),
                 Arg.Any<CancellationToken>())
             .ConfigureAwait(true);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Temporary_capture_failure_retries_and_recovers_without_restart()
+    {
+        var asyncDelay = Substitute.For<IAsyncDelay>();
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var captureStorage = Substitute.For<ICaptureStorage>();
+        var clock = Substitute.For<IClock>();
+        var fileSystem = Substitute.For<IFileSystem>();
+        var processRunner = Substitute.For<IProcessRunner>();
+        var stateStore = Substitute.For<IScheduledCaptureStateStore>();
+        var options = CreateOptions();
+        var stagedPath = "temp/scheduled.jpg";
+        var dueInterval = new DateTimeOffset(2026, 06, 24, 12, 00, 00, TimeSpan.Zero);
+        var command = new ProcessRequest("ffmpeg", "-args");
+        var storedCapture = new StoredCapture(
+            "data/images/2026/06/24/scheduled.jpg",
+            "data/images/2026/06/24/scheduled.json",
+            "2026/06/24/scheduled.jpg",
+            "scheduled.jpg",
+            dueInterval,
+            CaptureSourceTypes.Scheduled);
+
+        clock.UtcNow.Returns(new DateTimeOffset(2026, 06, 24, 12, 03, 00, TimeSpan.Zero));
+        stateStore.LoadAsync(options.Storage, Arg.Any<CancellationToken>()).Returns(ScheduledCaptureState.Empty);
+        fileSystem.GetTemporaryFilePath(".jpg").Returns(stagedPath);
+        fileSystem.FileExists(stagedPath).Returns(true);
+        commandFactory.BuildStillCaptureCommand(options.Camera, stagedPath).Returns(command);
+        processRunner.RunAsync(command, Arg.Any<CancellationToken>())
+            .Returns(
+                new ProcessResult(1, string.Empty, "camera unavailable"),
+                new ProcessResult(0, string.Empty, string.Empty));
+        captureStorage.StoreAsync(Arg.Any<StorageOptions>(), Arg.Any<CaptureStorageRequest>(), Arg.Any<CancellationToken>())
+            .Returns(storedCapture);
+
+        var service = new ScheduledCaptureService(
+            asyncDelay,
+            commandFactory,
+            cameraStatusService,
+            captureStorage,
+            clock,
+            fileSystem,
+            processRunner,
+            stateStore);
+
+        var result = await service.RunDueCaptureAsync(options, CancellationToken.None).ConfigureAwait(true);
+
+        result.Outcome.Should().Be(ScheduledCaptureOutcome.Captured);
+        await asyncDelay.Received(1)
+            .DelayAsync(TimeSpan.FromSeconds(1), Arg.Any<CancellationToken>())
+            .ConfigureAwait(true);
+        cameraStatusService.Received(1).ReportOnline();
+        cameraStatusService.DidNotReceiveWithAnyArgs().ReportDegraded(default!);
     }
 
     private static ShrimpCamOptions CreateOptions() =>
@@ -185,6 +261,8 @@ public sealed class ScheduledCaptureServiceTests
             {
                 Platform = CameraPlatforms.Windows,
                 Source = "Logitech C920",
+                ReconnectRetryAttempts = 2,
+                ReconnectBackoffSeconds = 1,
             },
             Capture = new CaptureOptions
             {

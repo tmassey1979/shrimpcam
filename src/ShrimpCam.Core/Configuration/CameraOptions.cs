@@ -26,4 +26,10 @@ public sealed class CameraOptions
 
     [Range(1, 120)]
     public int StreamFramesPerSecond { get; init; } = 15;
+
+    [Range(0, 10)]
+    public int ReconnectRetryAttempts { get; init; } = 2;
+
+    [Range(1, 60)]
+    public int ReconnectBackoffSeconds { get; init; } = 1;
 }

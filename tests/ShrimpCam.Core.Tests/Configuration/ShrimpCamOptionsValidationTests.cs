@@ -14,6 +14,8 @@ public sealed class ShrimpCamOptionsValidationTests
         "StreamWidth",
         "StreamHeight",
         "StreamFramesPerSecond",
+        "ReconnectRetryAttempts",
+        "ReconnectBackoffSeconds",
         "IntervalMinutes",
         "ActiveStartHourUtc",
         "ActiveEndHourUtc",
@@ -35,6 +37,8 @@ public sealed class ShrimpCamOptionsValidationTests
         options.Camera.StreamWidth.Should().Be(1280);
         options.Camera.StreamHeight.Should().Be(720);
         options.Camera.StreamFramesPerSecond.Should().Be(15);
+        options.Camera.ReconnectRetryAttempts.Should().Be(2);
+        options.Camera.ReconnectBackoffSeconds.Should().Be(1);
         options.Capture.Enabled.Should().BeFalse();
         options.Capture.IntervalMinutes.Should().Be(5);
         options.Capture.ActiveStartHourUtc.Should().Be(6);
@@ -59,6 +63,8 @@ public sealed class ShrimpCamOptionsValidationTests
                 StreamWidth = 1280,
                 StreamHeight = 720,
                 StreamFramesPerSecond = 15,
+                ReconnectRetryAttempts = 2,
+                ReconnectBackoffSeconds = 1,
             },
             Capture = new CaptureOptions { Enabled = true, IntervalMinutes = 5, ActiveStartHourUtc = 8, ActiveEndHourUtc = 20 },
             Storage = new StorageOptions { ImageRootPath = "data/images", RetentionDays = 30 },
@@ -83,6 +89,8 @@ public sealed class ShrimpCamOptionsValidationTests
                 StreamWidth = 0,
                 StreamHeight = 0,
                 StreamFramesPerSecond = 0,
+                ReconnectRetryAttempts = -1,
+                ReconnectBackoffSeconds = 0,
             },
             Capture = new CaptureOptions { Enabled = true, IntervalMinutes = 0, ActiveStartHourUtc = -1, ActiveEndHourUtc = 25 },
             Storage = new StorageOptions { ImageRootPath = string.Empty, RetentionDays = 0 },
