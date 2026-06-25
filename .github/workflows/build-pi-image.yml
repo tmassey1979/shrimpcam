@@ -1,6 +1,9 @@
 name: build-pi-image
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       hostname:
@@ -16,11 +19,23 @@ jobs:
   build-image:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
+
+    env:
+      DEFAULT_IMAGE_URL: https://downloads.raspberrypi.com/raspios_lite_arm64_latest
+      DEFAULT_HOSTNAME: shrimpcam
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Resolve release version
+        run: |
+          base_version="$(tr -d '[:space:]' < VERSION)"
+          short_sha="${GITHUB_SHA::7}"
+          release_version="${base_version}.${GITHUB_RUN_NUMBER}.${short_sha}"
+          echo "RELEASE_VERSION=${release_version}" >> "${GITHUB_ENV}"
+          echo "TAG_NAME=v${release_version}" >> "${GITHUB_ENV}"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -49,20 +64,44 @@ jobs:
 
       - name: Build Raspberry Pi image
         env:
-          SHRIMPCAM_HOSTNAME: ${{ inputs.hostname }}
+          IMAGE_URL: ${{ inputs.image_url || env.DEFAULT_IMAGE_URL }}
+          SHRIMPCAM_HOSTNAME: ${{ inputs.hostname || env.DEFAULT_HOSTNAME }}
           SHRIMPCAM_WIFI_SSID: ${{ secrets.PI_WIFI_SSID }}
           SHRIMPCAM_WIFI_PSK: ${{ secrets.PI_WIFI_PSK }}
           SHRIMPCAM_WIFI_COUNTRY: ${{ secrets.PI_WIFI_COUNTRY }}
         run: |
           chmod +x scripts/pi-image/build-pi-image.sh deploy/raspberry-pi/firstboot-provision.sh
           ./scripts/pi-image/build-pi-image.sh \
-            "${{ inputs.image_url }}" \
+            "${IMAGE_URL}" \
             "artifacts/publish/pi/api" \
             "artifacts/publish/pi/web" \
             "artifacts/pi-image"
 
+      - name: Version image artifact
+        run: |
+          image_path="$(find artifacts/pi-image -maxdepth 1 -name '*.img.xz' | head -n 1)"
+          versioned_image="artifacts/pi-image/shrimpcam-pi-${RELEASE_VERSION}.img.xz"
+          mv "${image_path}" "${versioned_image}"
+          sha256sum "${versioned_image}" > "artifacts/pi-image/shrimpcam-pi-${RELEASE_VERSION}.sha256"
+
       - name: Upload image artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: shrimpcam-pi-image
+          name: shrimpcam-pi-${{ env.RELEASE_VERSION }}
           path: artifacts/pi-image/*
+
+      - name: Create alpha release
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          name: Shrimp Cam ${{ env.RELEASE_VERSION }}
+          prerelease: true
+          body: |
+            Alpha release generated from `${{ github.sha }}` on `main`.
+
+            This release includes a Raspberry Pi OS Lite image with Shrimp Cam installed as headless startup services. Configure Wi-Fi before first boot by editing `shrimpcam-device.env` on the boot partition, or provide `PI_WIFI_SSID`, `PI_WIFI_PSK`, and `PI_WIFI_COUNTRY` repository secrets for workflow-built images.
+          files: |
+            artifacts/pi-image/shrimpcam-pi-${{ env.RELEASE_VERSION }}.img.xz
+            artifacts/pi-image/shrimpcam-pi-${{ env.RELEASE_VERSION }}.sha256
+            artifacts/pi-image/README.md
