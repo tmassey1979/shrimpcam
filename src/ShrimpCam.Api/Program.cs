@@ -1,6 +1,8 @@
 using System.Security.Claims;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
 using ShrimpCam.Api.Authentication;
 using ShrimpCam.Api.Build;
@@ -36,6 +38,26 @@ builder.Services.AddAuthentication(BearerSessionAuthenticationHandler.SchemeName
 builder.Services.AddAuthorization(AuthorizationPolicies.Configure);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.Configure<ForwardedHeadersOptions>(
+    options =>
+    {
+        options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    });
+builder.Services.AddRateLimiter(
+    options =>
+    {
+        options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        options.AddPolicy(
+            "authentication",
+            httpContext => RateLimitPartition.GetFixedWindowLimiter(
+                httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 5,
+                    QueueLimit = 0,
+                    Window = TimeSpan.FromMinutes(1),
+                }));
+    });
 
 var app = builder.Build();
 var buildMetadata = BuildMetadata.FromAssembly(typeof(Program).Assembly);
@@ -55,6 +77,24 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseForwardedHeaders();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
+
+app.Use(
+    async (context, next) =>
+    {
+        context.Response.Headers.TryAdd("X-Content-Type-Options", "nosniff");
+        context.Response.Headers.TryAdd("X-Frame-Options", "DENY");
+        context.Response.Headers.TryAdd("Referrer-Policy", "no-referrer");
+        context.Response.Headers.TryAdd("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+        await next(context).ConfigureAwait(false);
+    });
+
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseMiddleware<StructuredRequestLoggingMiddleware>();
 app.UseAuthorization();
@@ -342,7 +382,8 @@ app.MapPost(
                 expiresAtUtc = result.Session.ExpiresAtUtc,
             });
     })
-    .WithName("Login");
+    .WithName("Login")
+    .RequireRateLimiting("authentication");
 
 app.MapPost(
         "/auth/logout",

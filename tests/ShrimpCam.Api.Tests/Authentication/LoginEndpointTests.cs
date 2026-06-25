@@ -97,6 +97,32 @@ public sealed class LoginEndpointTests
         }
     }
 
+    [Fact]
+    [Trait("Category", "Api")]
+    public async Task Login_throttles_repeated_invalid_attempts()
+    {
+        var rootPath = CreateTempRoot();
+
+        try
+        {
+            await SeedUserAsync(rootPath, "shrimp-admin", "shrimp-password", isEnabled: true).ConfigureAwait(true);
+            await using var factory = new LoginWebApplicationFactory(rootPath);
+            using var client = factory.CreateClient();
+
+            HttpResponseMessage response = null!;
+            for (var attempt = 0; attempt < 6; attempt++)
+            {
+                response = await client.PostAsJsonAsync("/auth/login", new LoginRequest("shrimp-admin", "wrong-password")).ConfigureAwait(true);
+            }
+
+            response.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
     private static async Task SeedUserAsync(string rootPath, string userName, string password, bool isEnabled)
     {
         var services = new ServiceCollection();

@@ -6,11 +6,11 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 03:49:11 -05:00 |
+| Last refreshed | 2026-06-25 03:53:52 -05:00 |
 | Total stories | 49 |
-| Accepted stories | 38 |
-| Remaining stories | 11 |
-| Overall completion | 77.6% |
+| Accepted stories | 39 |
+| Remaining stories | 10 |
+| Overall completion | 79.6% |
 
 ## Epic Progress
 
@@ -18,24 +18,23 @@
 | --- | --- | --- | --- |
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
 | Epic 2: Camera, Capture, and Streaming | 11 | 11 | 100% |
-| Epic 3: API, Security, and Operations | 15 | 16 | 93.8% |
+| Epic 3: API, Security, and Operations | 16 | 16 | 100% |
 | Epic 4: PWA Product Experience | 0 | 10 | 0% |
 
 ## Latest Completed Stories
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-ASO-316 | External-hosting hardening baseline | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-ASO-315 | Deployment support for Windows service and systemd | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-ASO-314 | Restore and import workflow | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-ASO-313 | Backup and export workflow | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-ASO-312 | Diagnostics and support bundle API | Epic 3: API, Security, and Operations | 2026-06-25 |  |
-| SC-ASO-311 | Structured application logs | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 
 ## Next Unaccepted Stories
 
 | Story | Title | Epic |
 | --- | --- | --- |
-| SC-ASO-316 | External-hosting hardening baseline | Epic 3: API, Security, and Operations |
 | SC-PWA-01 | App Shell And Mobile Routing | Epic 4: PWA Product Experience |
 | SC-PWA-02 | Sign-In And Session Experience | Epic 4: PWA Product Experience |
 | SC-PWA-03 | Dashboard Overview | Epic 4: PWA Product Experience |
@@ -45,3 +44,4 @@
 | SC-PWA-07 | Offline Shell And Cached Core Experience | Epic 4: PWA Product Experience |
 | SC-PWA-08 | Installable PWA Behavior | Epic 4: PWA Product Experience |
 | SC-PWA-09 | Loading, Error, And Reconnect States | Epic 4: PWA Product Experience |
+| SC-PWA-10 | Accessibility And Touch Usability | Epic 4: PWA Product Experience |
