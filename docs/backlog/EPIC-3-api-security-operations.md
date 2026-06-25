@@ -563,6 +563,33 @@ Scenario: Admin can perform camera operations
   Then the API authorizes the request before invoking camera services
 ```
 
+### SC-ASO-319 - Redact authentication secrets from audit logs
+
+**User story**  
+As a Shrimp Cam administrator, I want passwords and tokens excluded from audit records so that diagnostics and audit history never expose credentials.
+
+**Dependencies**  
+SC-ASO-302, SC-ASO-305, SC-ASO-309
+
+**Test expectations**  
+API/audit tests verify failed sign-in, bootstrap, and successful sign-in audit records do not contain submitted passwords, raw bearer tokens, or credential fields.
+
+**Acceptance criteria**
+
+```gherkin
+Scenario: Failed sign-in is audited without password disclosure
+  Given a user submits invalid credentials
+  When the sign-in attempt is audited
+  Then the audit detail does not contain the submitted password
+  And the audit detail does not include a password field
+
+Scenario: Successful sign-in is audited without token disclosure
+  Given a user signs in successfully
+  When the audit event is stored
+  Then the audit detail includes non-secret session metadata
+  And the audit detail does not contain the raw bearer token
+```
+
 ## Delivery Notes
 
 - Recommended implementation order: `SC-ASO-301` through `SC-ASO-316` in sequence, with `SC-ASO-306` to `SC-ASO-311` parallelizable after authentication foundations land.

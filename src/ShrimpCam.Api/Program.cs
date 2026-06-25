@@ -276,7 +276,6 @@ app.MapPost(
                         new Dictionary<string, string>
                         {
                             ["reason"] = result.FailureReason ?? "unknown",
-                            ["password"] = request.Password,
                         }),
                     cancellationToken)
                 .ConfigureAwait(false);
@@ -357,7 +356,6 @@ app.MapPost(
                         new Dictionary<string, string>
                         {
                             ["reason"] = result.FailureReason ?? "unknown",
-                            ["password"] = request.Password,
                         }),
                     cancellationToken)
                 .ConfigureAwait(false);
@@ -376,7 +374,6 @@ app.MapPost(
                     new Dictionary<string, string>
                     {
                         ["sessionId"] = result.Session.SessionId.ToString(),
-                        ["token"] = result.Session.Token,
                     }),
                 cancellationToken)
             .ConfigureAwait(false);

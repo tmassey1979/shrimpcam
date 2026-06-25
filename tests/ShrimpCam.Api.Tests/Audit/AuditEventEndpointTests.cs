@@ -52,7 +52,8 @@ public sealed class AuditEventEndpointTests
                 record.EventType == AuditEventTypes.SignIn &&
                 record.ActorUserName == "shrimp-admin" &&
                 record.Outcome == AuditOutcomes.Failed &&
-                record.Detail.Contains("\"password\":\"[redacted]\"", StringComparison.Ordinal));
+                record.Detail.Contains("\"reason\":\"invalidCredentials\"", StringComparison.Ordinal));
+            auditRecords.Select(record => record.Detail).Should().NotContain(detail => detail.Contains("\"password\"", StringComparison.Ordinal));
             auditRecords.Select(record => record.Detail).Should().NotContain(detail => detail.Contains("StrongShrimp123", StringComparison.Ordinal));
             auditRecords.Select(record => record.Detail).Should().NotContain(detail => detail.Contains("WrongPassword123", StringComparison.Ordinal));
         }
@@ -92,6 +93,13 @@ public sealed class AuditEventEndpointTests
                 record.EventType == AuditEventTypes.SignOut &&
                 record.ActorUserName == "shrimp-admin" &&
                 record.Outcome == AuditOutcomes.Succeeded);
+            auditRecords.Should().Contain(record =>
+                record.EventType == AuditEventTypes.SignIn &&
+                record.ActorUserName == "shrimp-admin" &&
+                record.Outcome == AuditOutcomes.Succeeded &&
+                record.Detail.Contains("\"sessionId\"", StringComparison.Ordinal));
+            auditRecords.Select(record => record.Detail).Should().NotContain(detail => detail.Contains("\"token\"", StringComparison.Ordinal));
+            auditRecords.Select(record => record.Detail).Should().NotContain(detail => detail.Contains(token, StringComparison.Ordinal));
         }
         finally
         {
