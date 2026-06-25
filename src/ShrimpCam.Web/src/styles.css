@@ -144,6 +144,32 @@ a {
   background: rgba(106, 57, 12, 0.72);
 }
 
+.offline-panel {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid rgba(255, 184, 118, 0.3);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at top left, rgba(255, 184, 118, 0.18), transparent 32%),
+    rgba(106, 57, 12, 0.72);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.2);
+}
+
+.offline-panel h2,
+.offline-panel p {
+  margin: 0;
+}
+
+.offline-panel p {
+  color: rgba(255, 244, 232, 0.82);
+}
+
+.offline-cache-grid {
+  display: grid;
+  gap: 0.85rem;
+}
+
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -734,6 +760,10 @@ a {
 
   .dashboard-grid {
     grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.75fr);
+  }
+
+  .offline-cache-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .gallery-layout {

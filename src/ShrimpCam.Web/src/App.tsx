@@ -125,6 +125,21 @@ type ValidationProblemResponse = {
   errors?: Record<string, string[]>;
 };
 
+type CachedShellMetadata = {
+  cachedAtUtc: string;
+  dashboard?: {
+    healthStatus: string;
+    latestCaptureFileName: string | null;
+    latestCaptureAtUtc: string | null;
+    totalCaptures: number | null;
+  };
+  gallery?: {
+    captureCount: number;
+    newestCaptureFileName: string | null;
+    newestCaptureAtUtc: string | null;
+  };
+};
+
 type AuthContext = {
   session: Session | null;
   isAuthenticated: boolean;
@@ -155,6 +170,7 @@ type ScreenFrameProps = {
 };
 
 const sessionStorageKey = "shrimpcam.session";
+const shellMetadataStorageKey = "shrimpcam.shellMetadata";
 
 const navItems: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: "DB" },
@@ -166,6 +182,7 @@ const navItems: NavItem[] = [
 function App() {
   const auth = useAuthSession();
   const isOnline = useOnlineStatus();
+  const [cachedShellMetadata, setCachedShellMetadata] = useState<CachedShellMetadata | null>(() => readCachedShellMetadata());
   const statusLabel = isOnline ? "Connected" : "Offline";
   const shellMessage = isOnline
     ? auth.isAuthenticated
@@ -192,9 +209,7 @@ function App() {
 
       <main className="content">
         {!isOnline ? (
-          <div className="banner" role="status">
-            You are offline. The app shell remains available while data reconnects.
-          </div>
+          <OfflineShellPanel metadata={cachedShellMetadata} />
         ) : null}
 
         <section className="hero-card">
@@ -210,7 +225,7 @@ function App() {
             path="/dashboard"
             element={
               <ProtectedRoute auth={auth}>
-                <DashboardScreen auth={auth} />
+                <DashboardScreen auth={auth} onMetadataCached={setCachedShellMetadata} />
               </ProtectedRoute>
             }
           />
@@ -226,7 +241,7 @@ function App() {
             path="/gallery"
             element={
               <ProtectedRoute auth={auth}>
-                <GalleryScreen auth={auth} />
+                <GalleryScreen auth={auth} onMetadataCached={setCachedShellMetadata} />
               </ProtectedRoute>
             }
           />
@@ -464,7 +479,53 @@ function ProtectedRoute({ auth, children }: ProtectedRouteProps) {
   return <>{children}</>;
 }
 
-function DashboardScreen({ auth }: { auth: AuthContext }) {
+function OfflineShellPanel({ metadata }: { metadata: CachedShellMetadata | null }) {
+  const hasCachedMetadata = Boolean(metadata?.dashboard || metadata?.gallery);
+
+  return (
+    <div className="offline-panel" role="status">
+      <div>
+        <p className="eyebrow">Offline Shell</p>
+        <h2>{hasCachedMetadata ? "Cached view available" : "Initial online visit required"}</h2>
+        <p>
+          {hasCachedMetadata
+            ? `The app shell is cached. Metadata shown below may be stale from ${formatDateTime(metadata!.cachedAtUtc)}.`
+            : "The app shell can load offline after a successful online visit, but this device has no cached dashboard or gallery metadata yet."}
+        </p>
+      </div>
+      {hasCachedMetadata ? (
+        <div className="offline-cache-grid">
+          <StatCard
+            eyebrow="Dashboard Cache"
+            value={metadata?.dashboard?.healthStatus ?? "No dashboard"}
+            detail={
+              metadata?.dashboard?.latestCaptureFileName
+                ? `Potentially stale latest capture: ${metadata.dashboard.latestCaptureFileName}`
+                : "No cached latest capture yet."
+            }
+          />
+          <StatCard
+            eyebrow="Gallery Cache"
+            value={`${metadata?.gallery?.captureCount ?? 0} cached`}
+            detail={
+              metadata?.gallery?.newestCaptureFileName
+                ? `Potentially stale newest capture: ${metadata.gallery.newestCaptureFileName}`
+                : "No cached gallery metadata yet."
+            }
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function DashboardScreen({
+  auth,
+  onMetadataCached
+}: {
+  auth: AuthContext;
+  onMetadataCached: (metadata: CachedShellMetadata | null) => void;
+}) {
   const [dashboard, setDashboard] = useState<DashboardState>({
     health: null,
     latestCapture: null,
@@ -503,6 +564,18 @@ function DashboardScreen({ auth }: { auth: AuthContext }) {
     }
 
     setDashboard({ health, latestCapture, totalCaptures, healthError, capturesError, isLoading: false });
+    if (health || latestCapture || totalCaptures !== null) {
+      onMetadataCached(
+        updateCachedShellMetadata({
+          dashboard: {
+            healthStatus: health?.status ?? "Unknown",
+            latestCaptureFileName: latestCapture?.fileName ?? null,
+            latestCaptureAtUtc: latestCapture?.capturedAtUtc ?? null,
+            totalCaptures
+          }
+        })
+      );
+    }
   }
 
   useEffect(() => {
@@ -583,7 +656,13 @@ function DashboardScreen({ auth }: { auth: AuthContext }) {
   );
 }
 
-function GalleryScreen({ auth }: { auth: AuthContext }) {
+function GalleryScreen({
+  auth,
+  onMetadataCached
+}: {
+  auth: AuthContext;
+  onMetadataCached: (metadata: CachedShellMetadata | null) => void;
+}) {
   const location = useLocation();
   const selectedCaptureId = new URLSearchParams(location.search).get("capture");
   const [dateFilter, setDateFilter] = useState("");
@@ -611,6 +690,7 @@ function GalleryScreen({ auth }: { auth: AuthContext }) {
       const selectedCapture = selectedCaptureId
         ? payload.items.find((capture) => capture.id === selectedCaptureId) ?? null
         : payload.items[0] ?? null;
+      const newestCapture = payload.items[0] ?? null;
 
       setGallery({
         captures: payload.items,
@@ -621,6 +701,15 @@ function GalleryScreen({ auth }: { auth: AuthContext }) {
         error: null,
         imageFailed: false
       });
+      onMetadataCached(
+        updateCachedShellMetadata({
+          gallery: {
+            captureCount: payload.paging.totalItems,
+            newestCaptureFileName: newestCapture?.fileName ?? null,
+            newestCaptureAtUtc: newestCapture?.capturedAtUtc ?? null
+          }
+        })
+      );
     } catch {
       setGallery((current) => ({
         ...current,
@@ -1321,6 +1410,32 @@ function expireSession(setSession: (session: Session | null) => void, navigate: 
 
 function clearStoredSession() {
   window.localStorage.removeItem(sessionStorageKey);
+}
+
+function readCachedShellMetadata(): CachedShellMetadata | null {
+  const stored = window.localStorage.getItem(shellMetadataStorageKey);
+  if (!stored) {
+    return null;
+  }
+
+  try {
+    const metadata = JSON.parse(stored) as CachedShellMetadata;
+    return metadata.cachedAtUtc ? metadata : null;
+  } catch {
+    window.localStorage.removeItem(shellMetadataStorageKey);
+    return null;
+  }
+}
+
+function updateCachedShellMetadata(update: Partial<Omit<CachedShellMetadata, "cachedAtUtc">>) {
+  const next: CachedShellMetadata = {
+    ...(readCachedShellMetadata() ?? { cachedAtUtc: new Date().toISOString() }),
+    ...update,
+    cachedAtUtc: new Date().toISOString()
+  };
+
+  window.localStorage.setItem(shellMetadataStorageKey, JSON.stringify(next));
+  return next;
 }
 
 function getNextCaptureEstimate() {
