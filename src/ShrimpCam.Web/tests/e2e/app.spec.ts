@@ -41,6 +41,43 @@ test("renders the reference-led aquarium shell without the old heavy header", as
   await expect(page.getByLabel("Session and install status")).toContainText("Signed in as admin.");
   await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
 
+  const shellStyles = await page.evaluate(() => {
+    const body = window.getComputedStyle(document.body);
+    const statusCard = window.getComputedStyle(document.querySelector(".shell-status-card") as HTMLElement);
+    const nav = window.getComputedStyle(document.querySelector(".bottom-nav") as HTMLElement);
+    const activeNav = window.getComputedStyle(document.querySelector(".nav-link.active") as HTMLElement);
+
+    return {
+      bodyBackground: body.backgroundImage,
+      statusRadius: Number.parseFloat(statusCard.borderRadius),
+      navPosition: nav.position,
+      activeNavBackground: activeNav.backgroundImage
+    };
+  });
+  expect(shellStyles.bodyBackground).toContain("gradient");
+  expect(shellStyles.statusRadius).toBeGreaterThanOrEqual(20);
+  expect(shellStyles.navPosition).toBe("fixed");
+  expect(shellStyles.activeNavBackground).toContain("gradient");
+
+  const navBox = await page.getByRole("navigation", { name: "Primary" }).boundingBox();
+  expect(navBox?.y ?? 0).toBeGreaterThan(700);
+  for (const link of await page.getByRole("navigation", { name: "Primary" }).getByRole("link").all()) {
+    const box = await link.boundingBox();
+    expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+    expect(box?.width ?? 0).toBeGreaterThanOrEqual(44);
+  }
+
+  await page.keyboard.press("Tab");
+  const focusStyle = await page.evaluate(() => {
+    const active = document.activeElement as HTMLElement;
+    const style = window.getComputedStyle(active);
+    return {
+      outlineWidth: Number.parseFloat(style.outlineWidth),
+      boxShadow: style.boxShadow
+    };
+  });
+  expect(focusStyle.outlineWidth > 0 || focusStyle.boxShadow !== "none").toBeTruthy();
+
   await page.setViewportSize({ width: 1024, height: 900 });
   await expect(page.getByRole("banner")).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
