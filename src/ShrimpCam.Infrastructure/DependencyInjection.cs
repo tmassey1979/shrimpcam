@@ -5,6 +5,7 @@ using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Captures;
 using ShrimpCam.Core.Health;
 using ShrimpCam.Core.Persistence;
+using ShrimpCam.Core.Settings;
 using ShrimpCam.Infrastructure.Cameras;
 using ShrimpCam.Infrastructure.Cameras.Linux;
 using ShrimpCam.Infrastructure.Cameras.Windows;
@@ -28,6 +29,11 @@ public static class DependencyInjection
         services.AddSingleton<IAuthenticationService, LocalAuthenticationService>();
         services.AddSingleton<IApplicationHealthService, ApplicationHealthService>();
         services.AddSingleton<IDatabaseHealthProbe, SqliteDatabaseHealthProbe>();
+        services.AddSingleton<IEditableSettingsService>(
+            provider => new EditableSettingsService(
+                provider.GetRequiredService<ISettingsRepository>(),
+                provider.GetRequiredService<IClock>(),
+                provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<ShrimpCam.Core.Configuration.ShrimpCamOptions>>().Value));
         services.AddSingleton<ISessionAuthenticationService, SessionAuthenticationService>();
         services.AddSingleton<ISessionRevocationService, SessionRevocationService>();
         services.AddSingleton<IStorageHealthProbe, StorageHealthProbe>();

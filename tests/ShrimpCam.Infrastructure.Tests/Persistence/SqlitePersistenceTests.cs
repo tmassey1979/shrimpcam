@@ -157,6 +157,9 @@ public sealed class SqlitePersistenceTests
             (await settingsRepository.GetByKeyAsync("capture.intervalMinutes", CancellationToken.None).ConfigureAwait(true))
                 .Should()
                 .Be(new PersistedSetting("capture.intervalMinutes", "5", "Capture interval", updatedAtUtc));
+            (await settingsRepository.ListAsync(CancellationToken.None).ConfigureAwait(true))
+                .Should()
+                .ContainSingle(setting => setting == new PersistedSetting("capture.intervalMinutes", "5", "Capture interval", updatedAtUtc));
             (await userRepository.GetByIdAsync(userId, CancellationToken.None).ConfigureAwait(true))
                 .Should()
                 .Be(new UserRecord(userId, "shrimp-admin", "hashed-password", true, updatedAtUtc));

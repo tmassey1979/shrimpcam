@@ -52,6 +52,30 @@ internal sealed class SqliteSettingsRepository(IOptions<ShrimpCamOptions> option
         return Task.FromResult(reader.Read() ? ReadSetting(reader) : null);
     }
 
+    public Task<IReadOnlyList<PersistedSetting>> ListAsync(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        using var connection = SqliteConnectionFactory.OpenConnection(options);
+        using var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            SELECT key, value, description, updated_at_utc
+            FROM settings
+            ORDER BY key;
+            """;
+
+        using var reader = command.ExecuteReader();
+        var settings = new List<PersistedSetting>();
+
+        while (reader.Read())
+        {
+            settings.Add(ReadSetting(reader));
+        }
+
+        return Task.FromResult<IReadOnlyList<PersistedSetting>>(settings);
+    }
+
     private static PersistedSetting ReadSetting(SqliteDataReader reader) =>
         new(
             reader.GetString(0),

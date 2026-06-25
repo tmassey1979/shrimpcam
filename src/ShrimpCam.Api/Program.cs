@@ -10,6 +10,7 @@ using ShrimpCam.Core.Captures;
 using ShrimpCam.Core.Configuration;
 using ShrimpCam.Core.Health;
 using ShrimpCam.Core.Persistence;
+using ShrimpCam.Core.Settings;
 using ShrimpCam.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -178,19 +179,32 @@ app.MapPost(
 
 app.MapGet(
         "/settings",
-        [Authorize(Policy = AuthorizationPolicies.Administrator)] (IOptions<ShrimpCamOptions> optionsAccessor) => Results.Ok(
-            new
-            {
-                storage = new
-                {
-                    retentionDays = optionsAccessor.Value.Storage.RetentionDays,
-                },
-                security = new
-                {
-                    hostMode = optionsAccessor.Value.Security.HostMode,
-                },
-            }))
+        [Authorize(Policy = AuthorizationPolicies.Administrator)] async (IEditableSettingsService settingsService, CancellationToken cancellationToken) =>
+        {
+            var settings = await settingsService.GetCurrentAsync(cancellationToken).ConfigureAwait(false);
+            return Results.Ok(SettingsEndpointMapping.ToSettingsResponse(settings));
+        })
     .WithName("GetSettings");
+
+app.MapPut(
+        "/settings",
+        [Authorize(Policy = AuthorizationPolicies.Administrator)] async (UpdateSettingsHttpRequest request, IEditableSettingsService settingsService, CancellationToken cancellationToken) =>
+        {
+            var settings = request.ToEditableSettings();
+            var validation = settingsService.Validate(settings);
+            if (!validation.IsValid)
+            {
+                return Results.ValidationProblem(
+                    validation.Errors.ToDictionary(
+                        error => error.Key,
+                        error => error.Value,
+                        StringComparer.OrdinalIgnoreCase));
+            }
+
+            var updated = await settingsService.UpdateAsync(settings, cancellationToken).ConfigureAwait(false);
+            return Results.Ok(SettingsEndpointMapping.ToSettingsResponse(updated));
+        })
+    .WithName("UpdateSettings");
 
 app.MapPost(
     "/captures/manual",
@@ -316,5 +330,104 @@ internal sealed record BootstrapAdministratorHttpRequest(
 internal sealed record LoginRequest(
     string UserName,
     string Password);
+
+internal sealed record UpdateSettingsHttpRequest(
+    CameraSettingsHttpRequest Camera,
+    CaptureSettingsHttpRequest Capture,
+    StorageSettingsHttpRequest Storage,
+    SecuritySettingsHttpRequest Security)
+{
+    public EditableSettings ToEditableSettings() =>
+        new(
+            new CameraOptions
+            {
+                Platform = Camera.Platform,
+                Source = Camera.Source,
+                CaptureWidth = Camera.CaptureWidth,
+                CaptureHeight = Camera.CaptureHeight,
+                StreamWidth = Camera.StreamWidth,
+                StreamHeight = Camera.StreamHeight,
+                StreamFramesPerSecond = Camera.StreamFramesPerSecond,
+                ReconnectRetryAttempts = Camera.ReconnectRetryAttempts,
+                ReconnectBackoffSeconds = Camera.ReconnectBackoffSeconds,
+            },
+            new CaptureOptions
+            {
+                Enabled = Capture.Enabled,
+                IntervalMinutes = Capture.IntervalMinutes,
+                ActiveStartHourUtc = Capture.ActiveStartHourUtc,
+                ActiveEndHourUtc = Capture.ActiveEndHourUtc,
+                MotionHighlightsEnabled = Capture.MotionHighlightsEnabled,
+                MotionThreshold = Capture.MotionThreshold,
+                MotionCooldownSeconds = Capture.MotionCooldownSeconds,
+            },
+            new StorageEditableSettings(Storage.RetentionDays),
+            new SecurityOptions
+            {
+                HostMode = Security.HostMode,
+            });
+}
+
+internal sealed record CameraSettingsHttpRequest(
+    string Platform,
+    string Source,
+    int CaptureWidth,
+    int CaptureHeight,
+    int StreamWidth,
+    int StreamHeight,
+    int StreamFramesPerSecond,
+    int ReconnectRetryAttempts,
+    int ReconnectBackoffSeconds);
+
+internal sealed record CaptureSettingsHttpRequest(
+    bool Enabled,
+    int IntervalMinutes,
+    int ActiveStartHourUtc,
+    int ActiveEndHourUtc,
+    bool MotionHighlightsEnabled,
+    double MotionThreshold,
+    int MotionCooldownSeconds);
+
+internal sealed record StorageSettingsHttpRequest(int RetentionDays);
+
+internal sealed record SecuritySettingsHttpRequest(string HostMode);
+
+internal static class SettingsEndpointMapping
+{
+    public static object ToSettingsResponse(EditableSettings settings) =>
+        new
+        {
+            camera = new
+            {
+                settings.Camera.Platform,
+                settings.Camera.Source,
+                settings.Camera.CaptureWidth,
+                settings.Camera.CaptureHeight,
+                settings.Camera.StreamWidth,
+                settings.Camera.StreamHeight,
+                settings.Camera.StreamFramesPerSecond,
+                settings.Camera.ReconnectRetryAttempts,
+                settings.Camera.ReconnectBackoffSeconds,
+            },
+            capture = new
+            {
+                settings.Capture.Enabled,
+                settings.Capture.IntervalMinutes,
+                settings.Capture.ActiveStartHourUtc,
+                settings.Capture.ActiveEndHourUtc,
+                settings.Capture.MotionHighlightsEnabled,
+                settings.Capture.MotionThreshold,
+                settings.Capture.MotionCooldownSeconds,
+            },
+            storage = new
+            {
+                settings.Storage.RetentionDays,
+            },
+            security = new
+            {
+                settings.Security.HostMode,
+            },
+        };
+}
 
 public partial class Program;

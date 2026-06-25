@@ -6,11 +6,11 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 02:02:08 -05:00 |
+| Last refreshed | 2026-06-25 02:24:21 -05:00 |
 | Total stories | 49 |
-| Accepted stories | 29 |
-| Remaining stories | 20 |
-| Overall completion | 59.2% |
+| Accepted stories | 30 |
+| Remaining stories | 19 |
+| Overall completion | 61.2% |
 
 ## Epic Progress
 
@@ -18,24 +18,23 @@
 | --- | --- | --- | --- |
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
 | Epic 2: Camera, Capture, and Streaming | 11 | 11 | 100% |
-| Epic 3: API, Security, and Operations | 6 | 16 | 37.5% |
+| Epic 3: API, Security, and Operations | 7 | 16 | 43.8% |
 | Epic 4: PWA Product Experience | 0 | 10 | 0% |
 
 ## Latest Completed Stories
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-ASO-307 | Settings management API | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-ASO-306 | Health and readiness endpoint | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-ASO-305 | Session or token lifecycle management | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-ASO-304 | Authorization roles and policy enforcement | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-ASO-303 | Bootstrap administrator flow | Epic 3: API, Security, and Operations | 2026-06-25 |  |
-| SC-ASO-302 | Local account authentication | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 
 ## Next Unaccepted Stories
 
 | Story | Title | Epic |
 | --- | --- | --- |
-| SC-ASO-307 | Settings management API | Epic 3: API, Security, and Operations |
 | SC-ASO-308 | Capture browsing APIs | Epic 3: API, Security, and Operations |
 | SC-ASO-309 | Audit and security event logging | Epic 3: API, Security, and Operations |
 | SC-ASO-310 | Degraded startup and runtime resilience | Epic 3: API, Security, and Operations |
@@ -45,3 +44,4 @@
 | SC-ASO-314 | Restore and import workflow | Epic 3: API, Security, and Operations |
 | SC-ASO-315 | Deployment support for Windows service and systemd | Epic 3: API, Security, and Operations |
 | SC-ASO-316 | External-hosting hardening baseline | Epic 3: API, Security, and Operations |
+| SC-PWA-01 | App Shell And Mobile Routing | Epic 4: PWA Product Experience |
