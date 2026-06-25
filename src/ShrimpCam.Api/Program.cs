@@ -206,6 +206,39 @@ app.MapPut(
         })
     .WithName("UpdateSettings");
 
+app.MapGet(
+        "/captures",
+        [Authorize(Policy = AuthorizationPolicies.Viewer)] async (
+            DateTimeOffset? fromUtc,
+            DateTimeOffset? toUtc,
+            int? page,
+            int? pageSize,
+            ICaptureRecordRepository captureRepository,
+            CancellationToken cancellationToken) =>
+        {
+            var validation = CaptureBrowsingEndpointMapping.ValidateQuery(fromUtc, toUtc, page, pageSize);
+            if (validation.Count > 0)
+            {
+                return Results.ValidationProblem(validation);
+            }
+
+            var query = new CaptureRecordQuery(fromUtc, toUtc, page ?? 1, pageSize ?? 25);
+            var capturePage = await captureRepository.ListAsync(query, cancellationToken).ConfigureAwait(false);
+            return Results.Ok(CaptureBrowsingEndpointMapping.ToListResponse(capturePage));
+        })
+    .WithName("ListCaptures");
+
+app.MapGet(
+        "/captures/{id:guid}",
+        [Authorize(Policy = AuthorizationPolicies.Viewer)] async (Guid id, ICaptureRecordRepository captureRepository, CancellationToken cancellationToken) =>
+        {
+            var capture = await captureRepository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
+            return capture is null
+                ? Results.NotFound()
+                : Results.Ok(CaptureBrowsingEndpointMapping.ToCaptureResponse(capture));
+        })
+    .WithName("GetCapture");
+
 app.MapPost(
     "/captures/manual",
     async (IManualCaptureService captureService, IOptions<ShrimpCamOptions> options, CancellationToken cancellationToken) =>
@@ -391,6 +424,62 @@ internal sealed record CaptureSettingsHttpRequest(
 internal sealed record StorageSettingsHttpRequest(int RetentionDays);
 
 internal sealed record SecuritySettingsHttpRequest(string HostMode);
+
+internal static class CaptureBrowsingEndpointMapping
+{
+    private const int MaxPageSize = 100;
+
+    public static Dictionary<string, string[]> ValidateQuery(DateTimeOffset? fromUtc, DateTimeOffset? toUtc, int? page, int? pageSize)
+    {
+        var errors = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+
+        if (fromUtc.HasValue && toUtc.HasValue && fromUtc > toUtc)
+        {
+            errors["fromUtc"] = ["fromUtc must be earlier than or equal to toUtc."];
+            errors["toUtc"] = ["toUtc must be later than or equal to fromUtc."];
+        }
+
+        if (page is < 1)
+        {
+            errors["page"] = ["Page must be greater than or equal to 1."];
+        }
+
+        if (pageSize is < 1 or > MaxPageSize)
+        {
+            errors["pageSize"] = [$"Page size must be between 1 and {MaxPageSize}."];
+        }
+
+        return errors;
+    }
+
+    public static object ToListResponse(CaptureRecordPage capturePage) =>
+        new
+        {
+            items = capturePage.Items.Select(ToCaptureResponse).ToArray(),
+            paging = new
+            {
+                capturePage.PageNumber,
+                capturePage.PageSize,
+                capturePage.TotalItems,
+                capturePage.TotalPages,
+                capturePage.HasPreviousPage,
+                capturePage.HasNextPage,
+            },
+        };
+
+    public static object ToCaptureResponse(CaptureRecord capture) =>
+        new
+        {
+            capture.Id,
+            capture.RelativeImagePath,
+            capture.RelativeMetadataPath,
+            capture.FileName,
+            capture.SourceType,
+            capture.CapturedAtUtc,
+            imageUrl = $"/captures/{capture.Id}/image",
+            metadataUrl = $"/captures/{capture.Id}/metadata",
+        };
+}
 
 internal static class SettingsEndpointMapping
 {

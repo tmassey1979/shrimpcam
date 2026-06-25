@@ -172,6 +172,9 @@ public sealed class SqlitePersistenceTests
             (await captureRepository.GetByIdAsync(captureId, CancellationToken.None).ConfigureAwait(true))
                 .Should()
                 .Be(new CaptureRecord(captureId, "2026/06/25/capture.jpg", "2026/06/25/capture.json", "capture.jpg", "Scheduled", updatedAtUtc));
+            (await captureRepository.ListAsync(new CaptureRecordQuery(null, null, 1, 10), CancellationToken.None).ConfigureAwait(true))
+                .Items.Should()
+                .ContainSingle(capture => capture == new CaptureRecord(captureId, "2026/06/25/capture.jpg", "2026/06/25/capture.json", "capture.jpg", "Scheduled", updatedAtUtc));
             (await sessionRepository.GetByIdAsync(sessionId, CancellationToken.None).ConfigureAwait(true))
                 .Should()
                 .Be(new SessionRecord(sessionId, userId, "token-hash", updatedAtUtc, updatedAtUtc.AddHours(8), null));
@@ -188,6 +191,60 @@ public sealed class SqlitePersistenceTests
             (await auditRepository.GetByIdAsync(auditId, CancellationToken.None).ConfigureAwait(true))
                 .Should()
                 .Be(new AuditRecord(auditId, "SettingsUpdated", "shrimp-admin", "Succeeded", "Capture interval changed", updatedAtUtc));
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task Capture_repository_lists_filtered_captures_newest_first_with_stable_paging()
+    {
+        var rootPath = CreateTempRoot();
+        var options = CreateShrimpCamOptions(rootPath);
+
+        try
+        {
+            var services = new ServiceCollection();
+            services.AddSingleton<IOptions<ShrimpCamOptions>>(Options.Create(options));
+            ShrimpCam.Infrastructure.DependencyInjection.AddInfrastructure(services);
+
+            using var provider = services.BuildServiceProvider();
+
+            await provider.GetRequiredService<IApplicationDataInitializer>()
+                .InitializeAsync(options.Storage, CancellationToken.None)
+                .ConfigureAwait(true);
+
+            var captureRepository = provider.GetRequiredService<ICaptureRecordRepository>();
+            var captures = new[]
+            {
+                new CaptureRecord(Guid.Parse("00000000-0000-0000-0000-000000000001"), "2026/06/23/old.jpg", "2026/06/23/old.json", "old.jpg", "Scheduled", new DateTimeOffset(2026, 06, 23, 08, 00, 00, TimeSpan.Zero)),
+                new CaptureRecord(Guid.Parse("00000000-0000-0000-0000-000000000002"), "2026/06/24/morning.jpg", "2026/06/24/morning.json", "morning.jpg", "Scheduled", new DateTimeOffset(2026, 06, 24, 08, 00, 00, TimeSpan.Zero)),
+                new CaptureRecord(Guid.Parse("00000000-0000-0000-0000-000000000003"), "2026/06/24/noon.jpg", "2026/06/24/noon.json", "noon.jpg", "Scheduled", new DateTimeOffset(2026, 06, 24, 12, 00, 00, TimeSpan.Zero)),
+                new CaptureRecord(Guid.Parse("00000000-0000-0000-0000-000000000004"), "2026/06/25/new.jpg", "2026/06/25/new.json", "new.jpg", "Scheduled", new DateTimeOffset(2026, 06, 25, 08, 00, 00, TimeSpan.Zero)),
+            };
+
+            foreach (var capture in captures)
+            {
+                await captureRepository.CreateAsync(capture, CancellationToken.None).ConfigureAwait(true);
+            }
+
+            var page = await captureRepository.ListAsync(
+                    new CaptureRecordQuery(
+                        new DateTimeOffset(2026, 06, 24, 00, 00, 00, TimeSpan.Zero),
+                        new DateTimeOffset(2026, 06, 24, 23, 59, 59, TimeSpan.Zero),
+                        2,
+                        1),
+                    CancellationToken.None)
+                .ConfigureAwait(true);
+
+            page.Items.Should().ContainSingle(capture => capture.Id == Guid.Parse("00000000-0000-0000-0000-000000000002"));
+            page.TotalItems.Should().Be(2);
+            page.TotalPages.Should().Be(2);
+            page.HasPreviousPage.Should().BeTrue();
+            page.HasNextPage.Should().BeFalse();
         }
         finally
         {

@@ -50,6 +50,48 @@ internal sealed class SqliteCaptureRecordRepository(IOptions<ShrimpCamOptions> o
         return Task.FromResult(reader.Read() ? ReadCaptureRecord(reader) : null);
     }
 
+    public Task<CaptureRecordPage> ListAsync(CaptureRecordQuery query, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ArgumentOutOfRangeException.ThrowIfLessThan(query.PageNumber, 1);
+        ArgumentOutOfRangeException.ThrowIfLessThan(query.PageSize, 1);
+
+        using var connection = SqliteConnectionFactory.OpenConnection(options);
+        using var countCommand = connection.CreateCommand();
+        countCommand.CommandText =
+            """
+            SELECT COUNT(*)
+            FROM captures
+            WHERE ($fromUtc IS NULL OR captured_at_utc >= $fromUtc)
+              AND ($toUtc IS NULL OR captured_at_utc <= $toUtc);
+            """;
+        AddFilterParameters(countCommand, query);
+        var totalItems = Convert.ToInt32(countCommand.ExecuteScalar(), System.Globalization.CultureInfo.InvariantCulture);
+
+        using var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            SELECT id, relative_image_path, relative_metadata_path, file_name, source_type, captured_at_utc
+            FROM captures
+            WHERE ($fromUtc IS NULL OR captured_at_utc >= $fromUtc)
+              AND ($toUtc IS NULL OR captured_at_utc <= $toUtc)
+            ORDER BY captured_at_utc DESC, id DESC
+            LIMIT $pageSize OFFSET $offset;
+            """;
+        AddFilterParameters(command, query);
+        command.Parameters.AddWithValue("$pageSize", query.PageSize);
+        command.Parameters.AddWithValue("$offset", (query.PageNumber - 1) * query.PageSize);
+
+        using var reader = command.ExecuteReader();
+        var items = new List<CaptureRecord>();
+        while (reader.Read())
+        {
+            items.Add(ReadCaptureRecord(reader));
+        }
+
+        return Task.FromResult(new CaptureRecordPage(items, query.PageNumber, query.PageSize, totalItems));
+    }
+
     private static CaptureRecord ReadCaptureRecord(SqliteDataReader reader) =>
         new(
             Guid.Parse(reader.GetString(0)),
@@ -58,4 +100,14 @@ internal sealed class SqliteCaptureRecordRepository(IOptions<ShrimpCamOptions> o
             reader.GetString(3),
             reader.GetString(4),
             DateTimeOffset.Parse(reader.GetString(5), System.Globalization.CultureInfo.InvariantCulture));
+
+    private static void AddFilterParameters(SqliteCommand command, CaptureRecordQuery query)
+    {
+        command.Parameters.AddWithValue(
+            "$fromUtc",
+            query.FromUtc?.UtcDateTime.ToString("O", System.Globalization.CultureInfo.InvariantCulture) ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue(
+            "$toUtc",
+            query.ToUtc?.UtcDateTime.ToString("O", System.Globalization.CultureInfo.InvariantCulture) ?? (object)DBNull.Value);
+    }
 }
