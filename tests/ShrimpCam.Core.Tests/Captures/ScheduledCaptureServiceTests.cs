@@ -40,6 +40,7 @@ public sealed class ScheduledCaptureServiceTests
         clock.UtcNow.Returns(new DateTimeOffset(2026, 06, 24, 12, 03, 00, TimeSpan.Zero));
         stateStore.LoadAsync(options.Storage, Arg.Any<CancellationToken>()).Returns(ScheduledCaptureState.Empty);
         fileSystem.GetTemporaryFilePath(".jpg").Returns(stagedPath);
+        fileSystem.FileExists(stagedPath).Returns(true);
         commandFactory.BuildStillCaptureCommand(options.Camera, stagedPath).Returns(command);
         processRunner.RunAsync(command, Arg.Any<CancellationToken>())
             .Returns(new ProcessResult(0, string.Empty, string.Empty));
@@ -215,6 +216,63 @@ public sealed class ScheduledCaptureServiceTests
         await stateStore.Received(1).SaveAsync(
                 options.Storage,
                 new ScheduledCaptureState(dueInterval, ScheduledCaptureOutcome.Failed, ManualCaptureFailureReasons.CameraUnavailable),
+                Arg.Any<CancellationToken>())
+            .ConfigureAwait(true);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task Missing_staged_capture_file_marks_interval_failed_without_throwing()
+    {
+        var asyncDelay = Substitute.For<IAsyncDelay>();
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var captureRecordRepository = Substitute.For<ICaptureRecordRepository>();
+        var captureStorage = Substitute.For<ICaptureStorage>();
+        var clock = Substitute.For<IClock>();
+        var fileSystem = Substitute.For<IFileSystem>();
+        var processRunner = Substitute.For<IProcessRunner>();
+        var stateStore = Substitute.For<IScheduledCaptureStateStore>();
+        var options = CreateOptions();
+        var stagedPath = "temp/missing.jpg";
+        var dueInterval = new DateTimeOffset(2026, 06, 24, 12, 00, 00, TimeSpan.Zero);
+        var command = new ProcessRequest("ffmpeg", "-args");
+
+        clock.UtcNow.Returns(new DateTimeOffset(2026, 06, 24, 12, 03, 00, TimeSpan.Zero));
+        stateStore.LoadAsync(options.Storage, Arg.Any<CancellationToken>()).Returns(ScheduledCaptureState.Empty);
+        fileSystem.GetTemporaryFilePath(".jpg").Returns(stagedPath);
+        fileSystem.FileExists(stagedPath).Returns(true);
+        commandFactory.BuildStillCaptureCommand(options.Camera, stagedPath).Returns(command);
+        processRunner.RunAsync(command, Arg.Any<CancellationToken>())
+            .Returns(new ProcessResult(0, string.Empty, string.Empty));
+        captureStorage.StoreAsync(options.Storage, Arg.Any<CaptureStorageRequest>(), Arg.Any<CancellationToken>())
+            .Returns<Task<StoredCapture>>(_ => throw new FileNotFoundException("Staged capture file was not found.", stagedPath));
+
+        var service = new ScheduledCaptureService(
+            asyncDelay,
+            commandFactory,
+            cameraStatusService,
+            captureRecordRepository,
+            captureStorage,
+            clock,
+            fileSystem,
+            processRunner,
+            stateStore);
+
+        var result = await service.RunDueCaptureAsync(options, CancellationToken.None).ConfigureAwait(true);
+
+        result.Outcome.Should().Be(ScheduledCaptureOutcome.Failed);
+        result.FailureReason.Should().Contain("Staged capture file was not found", Exactly.Once());
+        await captureRecordRepository.DidNotReceiveWithAnyArgs().CreateAsync(default!, default).ConfigureAwait(true);
+        fileSystem.Received(1).DeleteFile(stagedPath);
+        cameraStatusService.Received(1).ReportDegraded(Arg.Is<string>(reason => reason.Contains("Staged capture file was not found", StringComparison.Ordinal)));
+        await stateStore.Received(1).SaveAsync(
+                options.Storage,
+                Arg.Is<ScheduledCaptureState>(state =>
+                    state.LastProcessedIntervalUtc == dueInterval
+                    && state.LastOutcome == ScheduledCaptureOutcome.Failed
+                    && state.LastFailureReason != null
+                    && state.LastFailureReason.Contains("Staged capture file was not found", StringComparison.Ordinal)),
                 Arg.Any<CancellationToken>())
             .ConfigureAwait(true);
     }

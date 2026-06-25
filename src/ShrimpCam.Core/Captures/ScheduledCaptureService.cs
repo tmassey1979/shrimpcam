@@ -110,13 +110,27 @@ public sealed class ScheduledCaptureService(
                     .ConfigureAwait(false);
             }
 
-            var capture = await captureStorage.StoreAsync(
-                    options.Storage,
-                    new CaptureStorageRequest(plan.IntervalStartUtc, CaptureSourceTypes.Scheduled, stagedFilePath),
-                    cancellationToken)
-                .ConfigureAwait(false);
+            StoredCapture capture;
+            try
+            {
+                capture = await captureStorage.StoreAsync(
+                        options.Storage,
+                        new CaptureStorageRequest(plan.IntervalStartUtc, CaptureSourceTypes.Scheduled, stagedFilePath),
+                        cancellationToken)
+                    .ConfigureAwait(false);
 
-            await captureRecordRepository.CreateAsync(capture.ToCaptureRecord(), cancellationToken).ConfigureAwait(false);
+                await captureRecordRepository.CreateAsync(capture.ToCaptureRecord(), cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                DeleteIfPresent(stagedFilePath);
+                return await PersistFailureAsync(
+                        options,
+                        plan,
+                        exception.Message,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+            }
 
             cameraStatusService.ReportOnline();
 

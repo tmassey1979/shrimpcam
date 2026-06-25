@@ -3,11 +3,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ShrimpCam.Core.Captures;
 using ShrimpCam.Core.Configuration;
+using ShrimpCam.Core.Settings;
 
 namespace ShrimpCam.Infrastructure.Captures;
 
 internal sealed class ScheduledCaptureWorker(
-    IOptions<ShrimpCamOptions> options,
+    IOptions<ShrimpCamOptions> defaults,
+    IEditableSettingsService settingsService,
     IScheduledCaptureService scheduledCaptureService,
     ILogger<ScheduledCaptureWorker> logger) : BackgroundService
 {
@@ -34,8 +36,6 @@ internal sealed class ScheduledCaptureWorker(
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            await RunSingleIterationAsync(stoppingToken).ConfigureAwait(false);
-
             try
             {
                 await Task.Delay(PollInterval, stoppingToken).ConfigureAwait(false);
@@ -44,12 +44,15 @@ internal sealed class ScheduledCaptureWorker(
             {
                 break;
             }
+
+            await RunSingleIterationAsync(stoppingToken).ConfigureAwait(false);
         }
     }
 
     internal async Task RunSingleIterationAsync(CancellationToken cancellationToken)
     {
-        var result = await scheduledCaptureService.RunDueCaptureAsync(options.Value, cancellationToken).ConfigureAwait(false);
+        var settings = await settingsService.GetCurrentAsync(cancellationToken).ConfigureAwait(false);
+        var result = await scheduledCaptureService.RunDueCaptureAsync(ToOptions(settings, defaults.Value), cancellationToken).ConfigureAwait(false);
 
         switch (result.Outcome)
         {
@@ -66,4 +69,19 @@ internal sealed class ScheduledCaptureWorker(
                 break;
         }
     }
+
+    private static ShrimpCamOptions ToOptions(EditableSettings settings, ShrimpCamOptions defaults) =>
+        new()
+        {
+            Camera = settings.Camera,
+            Capture = settings.Capture,
+            Storage = new StorageOptions
+            {
+                DatabasePath = defaults.Storage.DatabasePath,
+                ImageRootPath = defaults.Storage.ImageRootPath,
+                TimelapseRootPath = defaults.Storage.TimelapseRootPath,
+                RetentionDays = settings.Storage.RetentionDays,
+            },
+            Security = settings.Security,
+        };
 }

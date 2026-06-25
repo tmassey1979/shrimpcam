@@ -430,12 +430,17 @@ function useInstallPrompt(): InstallPromptState {
   useEffect(() => {
     const standaloneQuery = window.matchMedia("(display-mode: standalone)");
     const handleDisplayModeChange = () => {
-      setIsInstalled(isStandaloneDisplay());
+      const installed = isStandaloneDisplay();
+      setIsInstalled(installed);
+      if (!installed) {
+        setMessage(getManualInstallGuidance());
+      }
     };
 
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);
+      setIsInstalled(false);
       setMessage("Install Shrimp Cam for home-screen launch and standalone display.");
     };
 
@@ -448,11 +453,17 @@ function useInstallPrompt(): InstallPromptState {
     standaloneQuery.addEventListener("change", handleDisplayModeChange);
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
+    window.addEventListener("focus", handleDisplayModeChange);
+    window.addEventListener("pageshow", handleDisplayModeChange);
+    document.addEventListener("visibilitychange", handleDisplayModeChange);
 
     return () => {
       standaloneQuery.removeEventListener("change", handleDisplayModeChange);
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
+      window.removeEventListener("focus", handleDisplayModeChange);
+      window.removeEventListener("pageshow", handleDisplayModeChange);
+      document.removeEventListener("visibilitychange", handleDisplayModeChange);
     };
   }, []);
 
@@ -1666,7 +1677,6 @@ function isStandaloneDisplay() {
     window.matchMedia("(display-mode: standalone)").matches
     || window.matchMedia("(display-mode: fullscreen)").matches
     || navigatorWithStandalone.standalone === true
-    || document.referrer.startsWith("android-app://")
   );
 }
 

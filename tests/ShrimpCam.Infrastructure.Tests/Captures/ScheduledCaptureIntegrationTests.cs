@@ -5,6 +5,7 @@ using ShrimpCam.Core.Abstractions;
 using ShrimpCam.Core.Captures;
 using ShrimpCam.Core.Configuration;
 using ShrimpCam.Core.Persistence;
+using ShrimpCam.Core.Settings;
 using ShrimpCam.Infrastructure.Captures;
 
 #pragma warning disable CA2007
@@ -75,9 +76,13 @@ public sealed class ScheduledCaptureIntegrationTests
     public async Task Worker_logs_failed_capture_without_throwing()
     {
         var scheduledCaptureService = NSubstitute.Substitute.For<IScheduledCaptureService>();
+        var settingsService = NSubstitute.Substitute.For<IEditableSettingsService>();
+        settingsService.GetCurrentAsync(NSubstitute.Arg.Any<CancellationToken>())
+            .Returns(CreateSettings(CreateOptions("data/images", enabled: true)));
         var logger = new ListLogger<ScheduledCaptureWorker>();
         var worker = new ScheduledCaptureWorker(
             Microsoft.Extensions.Options.Options.Create(CreateOptions("data/images", enabled: true)),
+            settingsService,
             scheduledCaptureService,
             logger);
 
@@ -119,6 +124,13 @@ public sealed class ScheduledCaptureIntegrationTests
                 RetentionDays = 30,
             },
         };
+
+    private static EditableSettings CreateSettings(ShrimpCamOptions options) =>
+        new(
+            options.Camera,
+            options.Capture,
+            new StorageEditableSettings(options.Storage.RetentionDays),
+            options.Security);
 
     private sealed class FixedClock(DateTimeOffset utcNow) : IClock
     {
