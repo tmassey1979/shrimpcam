@@ -1,0 +1,55 @@
+{
+  "completedStories": [
+    {
+      "id": "SC-PF-008",
+      "completedOn": "2026-06-24",
+      "commit": "fc106a6"
+    },
+    {
+      "id": "SC-PF-007",
+      "completedOn": "2026-06-24",
+      "commit": "d96d388"
+    },
+    {
+      "id": "SC-PF-004",
+      "completedOn": "2026-06-24",
+      "commit": "a8cc814"
+    },
+    {
+      "id": "SC-PF-003",
+      "completedOn": "2026-06-24",
+      "commit": "51ad68a"
+    },
+    {
+      "id": "SC-PF-012",
+      "completedOn": "2026-06-24",
+      "commit": "d94f409"
+    },
+    {
+      "id": "SC-PF-011",
+      "completedOn": "2026-06-24",
+      "commit": "80bb62a"
+    },
+    {
+      "id": "SC-PF-006",
+      "completedOn": "2026-06-24",
+      "commit": "17b3757"
+    },
+    {
+      "id": "SC-PF-005",
+      "completedOn": "2026-06-24",
+      "commit": "c1c36d8"
+    },
+    {
+      "id": "SC-PF-001",
+      "completedOn": "2026-06-24",
+      "commit": "0229802"
+    }
+  ],
+  "notes": [
+    {
+      "id": "SC-PF-009",
+      "note": "A historical commit added coverage collection settings, but the story is not accepted until 90% threshold enforcement is implemented."
+    }
+  ]
+}
