@@ -517,6 +517,52 @@ app.MapPut(
     .WithName("UpdateSettings");
 
 app.MapGet(
+        "/cameras",
+        [Authorize(Policy = AuthorizationPolicies.Administrator)] async (
+            string? platform,
+            IOptions<ShrimpCamOptions> shrimpCamOptions,
+            ILinuxCameraDiscovery linuxCameraDiscovery,
+            IWindowsCameraDiscovery windowsCameraDiscovery,
+            CancellationToken cancellationToken) =>
+        {
+            var requestedPlatform = string.IsNullOrWhiteSpace(platform)
+                ? shrimpCamOptions.Value.Camera.Platform
+                : platform.Trim();
+
+            try
+            {
+                var cameras = requestedPlatform switch
+                {
+                    CameraPlatforms.Linux => await linuxCameraDiscovery.DiscoverAsync(cancellationToken).ConfigureAwait(false),
+                    CameraPlatforms.Windows => await windowsCameraDiscovery.DiscoverAsync(cancellationToken).ConfigureAwait(false),
+                    _ => null,
+                };
+
+                return cameras is null
+                    ? Results.ValidationProblem(
+                        new Dictionary<string, string[]>
+                        {
+                            ["platform"] = [$"Unsupported camera platform '{requestedPlatform}'."],
+                        })
+                    : Results.Ok(CameraDiscoveryEndpointMapping.ToCameraListResponse(requestedPlatform, cameras));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.Json(
+                    new
+                    {
+                        status = "failed",
+                        platform = requestedPlatform,
+                        reason = "cameraDiscoveryFailed",
+                        detail = ex.Message,
+                        cameras = Array.Empty<object>(),
+                    },
+                    statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
+        })
+    .WithName("ListCameras");
+
+app.MapGet(
         "/audit/events",
         [Authorize(Policy = AuthorizationPolicies.Administrator)] async (
             int? page,
@@ -974,6 +1020,24 @@ internal static class SettingsEndpointMapping
             {
                 settings.Security.HostMode,
             },
+        };
+}
+
+internal static class CameraDiscoveryEndpointMapping
+{
+    public static object ToCameraListResponse(string platform, IReadOnlyList<CameraDescriptor> cameras) =>
+        new
+        {
+            platform,
+            cameras = cameras
+                .Select(
+                    camera => new
+                    {
+                        camera.DisplayName,
+                        camera.DevicePath,
+                        camera.Platform,
+                    })
+                .ToArray(),
         };
 }
 

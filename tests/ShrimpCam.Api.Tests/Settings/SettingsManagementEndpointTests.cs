@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using ShrimpCam.Core.Abstractions;
 using ShrimpCam.Core.Authentication;
 using ShrimpCam.Core.Configuration;
 using ShrimpCam.Core.Persistence;
@@ -163,6 +164,82 @@ public sealed class SettingsManagementEndpointTests
         }
     }
 
+    [Fact]
+    [Trait("Category", "Api")]
+    public async Task Administrator_can_discover_camera_sources_for_selected_platform()
+    {
+        var rootPath = CreateTempRoot();
+
+        try
+        {
+            var token = await SeedUserAndLoginAsync(rootPath, "shrimp-admin", "AdminPass1234", "Administrator").ConfigureAwait(true);
+            await using var factory = new SettingsWebApplicationFactory(rootPath);
+            using var client = factory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await client.GetAsync("/cameras?platform=Windows").ConfigureAwait(true);
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var payload = await response.Content.ReadFromJsonAsync<CameraDiscoveryResponse>().ConfigureAwait(true);
+            payload.Should().NotBeNull();
+            payload!.Platform.Should().Be("Windows");
+            payload.Cameras.Should().ContainSingle();
+            payload.Cameras[0].DisplayName.Should().Be("Logitech C920");
+            payload.Cameras[0].DevicePath.Should().Be("@device_pnp_\\\\?\\usb#vid_046d&pid_082d#shrimp#{abc}");
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
+    public async Task Anonymous_users_cannot_discover_camera_sources()
+    {
+        var rootPath = CreateTempRoot();
+
+        try
+        {
+            await using var factory = new SettingsWebApplicationFactory(rootPath);
+            using var client = factory.CreateClient();
+
+            var response = await client.GetAsync("/cameras?platform=Windows").ConfigureAwait(true);
+
+            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
+    public async Task Unsupported_camera_platform_is_rejected()
+    {
+        var rootPath = CreateTempRoot();
+
+        try
+        {
+            var token = await SeedUserAndLoginAsync(rootPath, "shrimp-admin", "AdminPass1234", "Administrator").ConfigureAwait(true);
+            await using var factory = new SettingsWebApplicationFactory(rootPath);
+            using var client = factory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await client.GetAsync("/cameras?platform=BeOS").ConfigureAwait(true);
+
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            var payload = await response.Content.ReadFromJsonAsync<ValidationProblemDetailsResponse>().ConfigureAwait(true);
+            payload.Should().NotBeNull();
+            payload!.Errors.Keys.Should().Contain("platform");
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
     private static UpdateSettingsRequest CreateValidUpdateRequest() =>
         new(
             new CameraSettingsRequest("Windows", "Logitech C920", 1920, 1080, 1280, 720, 24, 3, 2),
@@ -290,6 +367,15 @@ public sealed class SettingsManagementEndpointTests
         StorageSettingsResponse Storage,
         SecuritySettingsResponse Security);
 
+    private sealed record CameraDiscoveryResponse(
+        string Platform,
+        CameraDiscoveryItem[] Cameras);
+
+    private sealed record CameraDiscoveryItem(
+        string DisplayName,
+        string DevicePath,
+        string Platform);
+
     private sealed record CameraSettingsResponse(
         string Platform,
         string Source,
@@ -362,7 +448,32 @@ public sealed class SettingsManagementEndpointTests
                         ["ShrimpCam:Storage:TimelapseRootPath"] = Path.Combine(rootPath, "timelapse"),
                     }));
             builder.ConfigureServices(
-                services => services.AddSingleton<IDataProtectionProvider>(new EphemeralDataProtectionProvider()));
+                services =>
+                {
+                    services.AddSingleton<IDataProtectionProvider>(new EphemeralDataProtectionProvider());
+                    services.AddSingleton<IProcessRunner>(new StubProcessRunner());
+                });
+        }
+    }
+
+    private sealed class StubProcessRunner : IProcessRunner
+    {
+        public Task<ProcessResult> RunAsync(ProcessRequest request, CancellationToken cancellationToken)
+        {
+            if (request.FileName.Equals("ffmpeg", StringComparison.OrdinalIgnoreCase))
+            {
+                return Task.FromResult(
+                    new ProcessResult(
+                        1,
+                        string.Empty,
+                        """
+                        [dshow @ 000001] DirectShow video devices
+                        [dshow @ 000001]  "Logitech C920"
+                        [dshow @ 000001]     Alternative name "@device_pnp_\\?\usb#vid_046d&pid_082d#shrimp#{abc}"
+                        """));
+            }
+
+            return Task.FromResult(new ProcessResult(0, string.Empty, string.Empty));
         }
     }
 }

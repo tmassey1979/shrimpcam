@@ -111,13 +111,27 @@ type SettingsResponse = {
   };
 };
 
+type CameraDiscoveryResponse = {
+  platform: string;
+  cameras: CameraOption[];
+};
+
+type CameraOption = {
+  displayName: string;
+  devicePath: string;
+  platform: string;
+};
+
 type SettingsState = {
   form: SettingsResponse | null;
   health: HealthResponse | null;
+  cameras: CameraOption[];
   isLoading: boolean;
+  isCameraDiscoveryLoading: boolean;
   isSaving: boolean;
   isDirty: boolean;
   message: string | null;
+  cameraDiscoveryMessage: string | null;
   errors: Record<string, string>;
 };
 
@@ -1116,15 +1130,18 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
   const [state, setState] = useState<SettingsState>({
     form: null,
     health: null,
+    cameras: [],
     isLoading: true,
+    isCameraDiscoveryLoading: false,
     isSaving: false,
     isDirty: false,
     message: null,
+    cameraDiscoveryMessage: null,
     errors: {}
   });
 
   async function loadSettings() {
-    setState((current) => ({ ...current, isLoading: true, message: null, errors: {} }));
+    setState((current) => ({ ...current, isLoading: true, message: null, cameraDiscoveryMessage: null, errors: {} }));
 
     const [settingsResult, healthResult] = await Promise.allSettled([
       auth.authenticatedFetch("/settings"),
@@ -1150,10 +1167,13 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
     setState({
       form,
       health,
+      cameras: [],
       isLoading: false,
+      isCameraDiscoveryLoading: false,
       isSaving: false,
       isDirty: false,
       message,
+      cameraDiscoveryMessage: null,
       errors: {}
     });
   }
@@ -1161,6 +1181,46 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
   useEffect(() => {
     void loadSettings();
   }, []);
+
+  useEffect(() => {
+    if (!state.form) {
+      return;
+    }
+
+    void loadCameraOptions(state.form.camera.platform, state.form.camera.source);
+  }, [state.form?.camera.platform]);
+
+  async function loadCameraOptions(platform: string, currentSource: string) {
+    setState((current) => ({
+      ...current,
+      isCameraDiscoveryLoading: true,
+      cameraDiscoveryMessage: `Looking for ${platform} cameras...`
+    }));
+
+    try {
+      const response = await auth.authenticatedFetch(`/cameras?platform=${encodeURIComponent(platform)}`);
+      if (!response.ok) {
+        throw new Error("Camera discovery is unavailable right now.");
+      }
+
+      const payload = (await response.json()) as CameraDiscoveryResponse;
+      setState((current) => ({
+        ...current,
+        cameras: ensureSelectedCameraOption(payload.cameras, platform, currentSource),
+        isCameraDiscoveryLoading: false,
+        cameraDiscoveryMessage: payload.cameras.length > 0
+          ? `Found ${payload.cameras.length} camera${payload.cameras.length === 1 ? "" : "s"} for ${platform}.`
+          : `No ${platform} cameras were detected. You can keep or enter a custom source.`
+      }));
+    } catch {
+      setState((current) => ({
+        ...current,
+        cameras: ensureSelectedCameraOption([], platform, currentSource),
+        isCameraDiscoveryLoading: false,
+        cameraDiscoveryMessage: "Camera discovery failed. You can keep the saved source or enter a custom source."
+      }));
+    }
+  }
 
   function updateForm(mutator: (current: SettingsResponse) => SettingsResponse) {
     setState((current) =>
@@ -1355,8 +1415,30 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
               <legend>Camera And Storage</legend>
               <label>
                 <span>Camera source</span>
+                <select
+                  value={getCameraSelectValue(state.cameras, form.camera.source)}
+                  onChange={(event) => {
+                    if (event.target.value === "__custom") {
+                      return;
+                    }
+
+                    updateForm((current) => ({
+                      ...current,
+                      camera: { ...current.camera, source: event.target.value }
+                    }));
+                  }}
+                >
+                  {state.cameras.map((cameraOption) => (
+                    <option key={`${cameraOption.platform}:${cameraOption.devicePath}`} value={cameraOption.devicePath}>
+                      {formatCameraOption(cameraOption)}
+                    </option>
+                  ))}
+                  <option value="__custom">Custom camera source...</option>
+                </select>
                 <input
+                  aria-label="Selected camera source"
                   value={form.camera.source}
+                  placeholder={form.camera.platform === "Linux" ? "/dev/video0" : "Camera display name or DirectShow device path"}
                   onChange={(event) =>
                     updateForm((current) => ({
                       ...current,
@@ -1364,6 +1446,7 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
                     }))
                   }
                 />
+                <small>{state.isCameraDiscoveryLoading ? "Refreshing camera list..." : state.cameraDiscoveryMessage}</small>
                 <FieldError message={state.errors["camera.source"]} />
               </label>
               <div className="settings-grid">
@@ -1374,7 +1457,7 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
                     onChange={(event) =>
                       updateForm((current) => ({
                         ...current,
-                        camera: { ...current.camera, platform: event.target.value }
+                        camera: { ...current.camera, platform: event.target.value, source: "" }
                       }))
                     }
                   >
@@ -1507,6 +1590,31 @@ function FieldError({ message }: { message?: string }) {
       {message}
     </span>
   ) : null;
+}
+
+function ensureSelectedCameraOption(cameras: CameraOption[], platform: string, currentSource: string) {
+  if (!currentSource.trim() || cameras.some((camera) => camera.devicePath === currentSource)) {
+    return cameras;
+  }
+
+  return [
+    ...cameras,
+    {
+      displayName: "Saved camera source",
+      devicePath: currentSource,
+      platform
+    }
+  ];
+}
+
+function getCameraSelectValue(cameras: CameraOption[], currentSource: string) {
+  return cameras.some((camera) => camera.devicePath === currentSource) ? currentSource : "__custom";
+}
+
+function formatCameraOption(camera: CameraOption) {
+  return camera.displayName === camera.devicePath
+    ? camera.displayName
+    : `${camera.displayName} (${camera.devicePath})`;
 }
 
 function validateSettings(settings: SettingsResponse) {
