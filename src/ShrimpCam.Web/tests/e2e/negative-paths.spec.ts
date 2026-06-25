@@ -1,0 +1,68 @@
+import { expect, test } from "@playwright/test";
+import { mockShrimpCamApi, signIn } from "./fixtures";
+
+test("shows actionable sign-in validation and failure feedback", async ({ page }) => {
+  await mockShrimpCamApi(page);
+  await page.goto("/sign-in");
+
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page.getByRole("alert")).toHaveText("Enter your username and password to continue.");
+
+  await page.getByLabel("Username").fill("admin");
+  await page.getByLabel("Password").fill("wrong-password");
+  await page.getByRole("button", { name: "Sign in" }).click();
+
+  await expect(page.getByRole("alert")).toHaveText("We could not sign you in. Check your username and password, then try again.");
+  await expect(page.getByLabel("Password")).toHaveValue("");
+});
+
+test("communicates live stream and manual snapshot failures", async ({ page }) => {
+  await mockShrimpCamApi(page, {
+    manualCaptureStatus: 503,
+    manualCaptureBody: { status: "failed", reason: "Camera busy." }
+  });
+  await signIn(page);
+  await page.getByRole("link", { name: "Live" }).click({ force: true });
+
+  await page.getByAltText("Live shrimp tank camera feed").dispatchEvent("error");
+  await expect(page.getByText("Stream unavailable")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Capture snapshot" })).toBeDisabled();
+
+  await page.getByRole("button", { name: "Retry stream" }).click();
+  await page.getByAltText("Live shrimp tank camera feed").dispatchEvent("load");
+  await expect(page.getByText("Live stream is online.")).toBeVisible();
+
+  await page.getByRole("button", { name: "Capture snapshot" }).click();
+  await expect(page.getByRole("alert")).toHaveText("Manual snapshot failed. Camera busy.");
+  await expect(page.getByRole("button", { name: "Capture snapshot" })).toBeEnabled();
+});
+
+test("keeps gallery usable for empty filters and protected image failures", async ({ page }) => {
+  await mockShrimpCamApi(page, { emptyFilteredCaptures: true, captureImageStatus: 500 });
+  await signIn(page);
+  await page.getByRole("link", { name: "Gallery" }).click({ force: true });
+
+  await expect(page.getByText("Image unavailable")).toBeVisible();
+  await page.getByLabel("Filter captures by day").fill("2026-06-24");
+  await expect(page.getByText("0 captures found for Jun 24, 2026.")).toBeVisible();
+  await expect(page.getByText("No captures found")).toBeVisible();
+  await page.getByRole("button", { name: "Clear date filter" }).click();
+  await expect(page.getByText("2 captures found.")).toBeVisible();
+});
+
+test("blocks invalid settings and preserves edits after server rejection", async ({ page }) => {
+  await mockShrimpCamApi(page, { settingsSaveStatus: 403 });
+  await signIn(page);
+  await page.getByRole("link", { name: "Settings" }).click({ force: true });
+
+  await page.getByLabel("Selected camera source").fill("");
+  await page.getByRole("button", { name: "Save settings" }).click();
+  await expect(page.getByText("Fix the highlighted settings before saving.")).toBeVisible();
+  await expect(page.getByText("Camera source is required.")).toBeVisible();
+
+  await page.getByLabel("Selected camera source").fill("Integrated Webcam");
+  await page.getByLabel("Interval minutes").fill("10");
+  await page.getByRole("button", { name: "Save settings" }).click();
+  await expect(page.getByText("Only administrators can update Shrimp Cam settings.")).toBeVisible();
+  await expect(page.getByLabel("Selected camera source")).toHaveValue("Integrated Webcam");
+});

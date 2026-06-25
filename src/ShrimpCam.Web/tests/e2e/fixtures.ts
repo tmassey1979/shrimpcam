@@ -72,7 +72,35 @@ export const settingsResponse = {
   }
 };
 
-export async function mockShrimpCamApi(page: Page) {
+type MockShrimpCamApiOptions = {
+  captures?: typeof captures;
+  emptyFilteredCaptures?: boolean;
+  captureListStatus?: number;
+  captureImageStatus?: number;
+  healthStatus?: number;
+  manualCaptureStatus?: number;
+  manualCaptureBody?: unknown;
+  settingsStatus?: number;
+  settingsSaveStatus?: number;
+  settingsSaveBody?: unknown;
+  cameraDiscoveryStatus?: number;
+};
+
+function captureListBody(items: typeof captures, totalItems = items.length) {
+  return {
+    items,
+    paging: {
+      pageNumber: 1,
+      pageSize: 25,
+      totalItems,
+      totalPages: totalItems > 0 ? 1 : 0,
+      hasPreviousPage: false,
+      hasNextPage: false
+    }
+  };
+}
+
+export async function mockShrimpCamApi(page: Page, options: MockShrimpCamApiOptions = {}) {
   await page.route("/auth/login", async (route) => {
     const body = route.request().postDataJSON() as { userName?: string; password?: string };
     if (body.userName === "admin" && body.password === "AdminPass1234") {
@@ -103,31 +131,45 @@ export async function mockShrimpCamApi(page: Page) {
   });
 
   await page.route("/health", async (route) => {
+    if (options.healthStatus && options.healthStatus >= 400) {
+      await route.fulfill({ status: options.healthStatus, contentType: "application/json", body: JSON.stringify({ status: "failed" }) });
+      return;
+    }
+
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(healthResponse) });
   });
 
   await page.route(/\/captures(?:\?.*)?$/, async (route) => {
+    if (options.captureListStatus && options.captureListStatus >= 400) {
+      await route.fulfill({ status: options.captureListStatus, contentType: "application/json", body: JSON.stringify({ status: "failed" }) });
+      return;
+    }
+
     const url = new URL(route.request().url());
     const fromUtc = url.searchParams.get("fromUtc");
-    const filteredCaptures = fromUtc ? captures.filter((capture) => capture.capturedAtUtc.startsWith("2026-06-25")) : captures;
+    const sourceCaptures = options.captures ?? captures;
+    const filteredCaptures = fromUtc
+      ? options.emptyFilteredCaptures
+        ? []
+        : sourceCaptures.filter((capture) => capture.capturedAtUtc.startsWith("2026-06-25"))
+      : sourceCaptures;
     await route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify({
-        items: filteredCaptures,
-        paging: {
-          pageNumber: 1,
-          pageSize: 25,
-          totalItems: filteredCaptures.length,
-          totalPages: filteredCaptures.length > 0 ? 1 : 0,
-          hasPreviousPage: false,
-          hasNextPage: false
-        }
-      })
+      body: JSON.stringify(captureListBody(filteredCaptures))
     });
   });
 
   await page.route("/captures/manual", async (route) => {
+    if (options.manualCaptureStatus && options.manualCaptureStatus >= 400) {
+      await route.fulfill({
+        status: options.manualCaptureStatus,
+        contentType: "application/json",
+        body: JSON.stringify(options.manualCaptureBody ?? { status: "failed", reason: "Camera busy." })
+      });
+      return;
+    }
+
     await route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -146,6 +188,11 @@ export async function mockShrimpCamApi(page: Page) {
   await page.route(/\/captures\/[^/]+\/image$/, async (route) => {
     if (!route.request().headers().authorization) {
       await route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ status: "unauthorized" }) });
+      return;
+    }
+
+    if (options.captureImageStatus && options.captureImageStatus >= 400) {
+      await route.fulfill({ status: options.captureImageStatus, contentType: "application/json", body: JSON.stringify({ status: "failed" }) });
       return;
     }
 
@@ -171,8 +218,22 @@ export async function mockShrimpCamApi(page: Page) {
     }
 
     if (route.request().method() === "PUT") {
+      if (options.settingsSaveStatus && options.settingsSaveStatus >= 400) {
+        await route.fulfill({
+          status: options.settingsSaveStatus,
+          contentType: "application/json",
+          body: JSON.stringify(options.settingsSaveBody ?? { status: "failed" })
+        });
+        return;
+      }
+
       const saved = route.request().postDataJSON();
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(saved) });
+      return;
+    }
+
+    if (options.settingsStatus && options.settingsStatus >= 400) {
+      await route.fulfill({ status: options.settingsStatus, contentType: "application/json", body: JSON.stringify({ status: "failed" }) });
       return;
     }
 
@@ -180,6 +241,11 @@ export async function mockShrimpCamApi(page: Page) {
   });
 
   await page.route(/\/cameras\?platform=.*/, async (route) => {
+    if (options.cameraDiscoveryStatus && options.cameraDiscoveryStatus >= 400) {
+      await route.fulfill({ status: options.cameraDiscoveryStatus, contentType: "application/json", body: JSON.stringify({ status: "failed" }) });
+      return;
+    }
+
     await route.fulfill({
       status: 200,
       contentType: "application/json",
