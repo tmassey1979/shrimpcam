@@ -10,7 +10,7 @@ dotnet format ShrimpCam.sln --verify-no-changes --severity warn --no-restore
 dotnet test ShrimpCam.sln --no-build
 
 if ($EnforceCoverage) {
-    powershell -ExecutionPolicy Bypass -File scripts/enforce-backend-coverage.ps1 -Threshold 90
+    & (Join-Path $PSScriptRoot "enforce-backend-coverage.ps1") -Threshold 90
 }
 
 Push-Location src/ShrimpCam.Web
