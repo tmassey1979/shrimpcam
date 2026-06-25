@@ -6,11 +6,11 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 00:28:13 -05:00 |
+| Last refreshed | 2026-06-25 00:34:22 -05:00 |
 | Total stories | 49 |
-| Accepted stories | 24 |
-| Remaining stories | 25 |
-| Overall completion | 49% |
+| Accepted stories | 25 |
+| Remaining stories | 24 |
+| Overall completion | 51% |
 
 ## Epic Progress
 
@@ -18,24 +18,23 @@
 | --- | --- | --- | --- |
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
 | Epic 2: Camera, Capture, and Streaming | 11 | 11 | 100% |
-| Epic 3: API, Security, and Operations | 1 | 16 | 6.2% |
+| Epic 3: API, Security, and Operations | 2 | 16 | 12.5% |
 | Epic 4: PWA Product Experience | 0 | 10 | 0% |
 
 ## Latest Completed Stories
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-ASO-302 | Local account authentication | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-ASO-301 | SQLite schema and repository foundation | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-CC-11 | Capture Motion-Triggered Highlights | Epic 2: Camera, Capture, and Streaming | 2026-06-25 |  |
 | SC-CC-10 | Generate Daily Timelapse Videos | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 | SC-CC-09 | Clean Up Expired Capture Files | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
-| SC-CC-07 | Recover from Camera Disconnects and Stream Failures | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 
 ## Next Unaccepted Stories
 
 | Story | Title | Epic |
 | --- | --- | --- |
-| SC-ASO-302 | Local account authentication | Epic 3: API, Security, and Operations |
 | SC-ASO-303 | Bootstrap administrator flow | Epic 3: API, Security, and Operations |
 | SC-ASO-304 | Authorization roles and policy enforcement | Epic 3: API, Security, and Operations |
 | SC-ASO-305 | Session or token lifecycle management | Epic 3: API, Security, and Operations |
@@ -45,3 +44,4 @@
 | SC-ASO-309 | Audit and security event logging | Epic 3: API, Security, and Operations |
 | SC-ASO-310 | Degraded startup and runtime resilience | Epic 3: API, Security, and Operations |
 | SC-ASO-311 | Structured application logs | Epic 3: API, Security, and Operations |
+| SC-ASO-312 | Diagnostics and support bundle API | Epic 3: API, Security, and Operations |

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using ShrimpCam.Api.Build;
 using ShrimpCam.Api.Configuration;
+using ShrimpCam.Core.Authentication;
 using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Captures;
 using ShrimpCam.Core.Configuration;
@@ -43,6 +44,36 @@ app.MapGet(
             sourceRevision = buildMetadata.SourceRevision,
             buildConfiguration = buildMetadata.BuildConfiguration,
         }));
+
+app.MapPost(
+    "/auth/login",
+    async (LoginRequest request, IAuthenticationService authenticationService, CancellationToken cancellationToken) =>
+    {
+        var result = await authenticationService.AuthenticateAsync(
+                new AuthenticationRequest(request.UserName, request.Password),
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        if (!result.Succeeded)
+        {
+            return Results.Problem(
+                title: "Authentication failed.",
+                detail: "Invalid username or password.",
+                statusCode: StatusCodes.Status401Unauthorized);
+        }
+
+        return Results.Ok(
+            new
+            {
+                status = "authenticated",
+                sessionId = result.Session!.SessionId,
+                userId = result.Session.UserId,
+                userName = result.Session.UserName,
+                token = result.Session.Token,
+                expiresAtUtc = result.Session.ExpiresAtUtc,
+            });
+    })
+    .WithName("Login");
 
 app.MapPost(
     "/captures/manual",
@@ -160,5 +191,9 @@ internal sealed record MotionHighlightRequest(
     DateTimeOffset OccurredAtUtc,
     double Score,
     string? EventId);
+
+internal sealed record LoginRequest(
+    string UserName,
+    string Password);
 
 public partial class Program;
