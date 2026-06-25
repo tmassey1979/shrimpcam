@@ -35,6 +35,7 @@ public sealed class ShrimpCamOptionsValidationTests
         options.Camera.StreamWidth.Should().Be(1280);
         options.Camera.StreamHeight.Should().Be(720);
         options.Camera.StreamFramesPerSecond.Should().Be(15);
+        options.Capture.Enabled.Should().BeFalse();
         options.Capture.IntervalMinutes.Should().Be(5);
         options.Capture.ActiveStartHourUtc.Should().Be(6);
         options.Capture.ActiveEndHourUtc.Should().Be(22);
@@ -59,7 +60,7 @@ public sealed class ShrimpCamOptionsValidationTests
                 StreamHeight = 720,
                 StreamFramesPerSecond = 15,
             },
-            Capture = new CaptureOptions { IntervalMinutes = 5, ActiveStartHourUtc = 8, ActiveEndHourUtc = 20 },
+            Capture = new CaptureOptions { Enabled = true, IntervalMinutes = 5, ActiveStartHourUtc = 8, ActiveEndHourUtc = 20 },
             Storage = new StorageOptions { ImageRootPath = "data/images", RetentionDays = 30 },
             Security = new SecurityOptions { HostMode = "InternetExposed" },
         };
@@ -83,7 +84,7 @@ public sealed class ShrimpCamOptionsValidationTests
                 StreamHeight = 0,
                 StreamFramesPerSecond = 0,
             },
-            Capture = new CaptureOptions { IntervalMinutes = 0, ActiveStartHourUtc = -1, ActiveEndHourUtc = 25 },
+            Capture = new CaptureOptions { Enabled = true, IntervalMinutes = 0, ActiveStartHourUtc = -1, ActiveEndHourUtc = 25 },
             Storage = new StorageOptions { ImageRootPath = string.Empty, RetentionDays = 0 },
             Security = new SecurityOptions { HostMode = "Unknown" },
         };

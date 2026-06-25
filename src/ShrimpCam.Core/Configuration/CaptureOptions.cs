@@ -4,6 +4,8 @@ namespace ShrimpCam.Core.Configuration;
 
 public sealed class CaptureOptions
 {
+    public bool Enabled { get; init; }
+
     [Range(1, 1440)]
     public int IntervalMinutes { get; init; } = 5;
 
