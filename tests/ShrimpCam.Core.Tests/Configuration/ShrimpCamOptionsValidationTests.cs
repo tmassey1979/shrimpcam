@@ -20,6 +20,7 @@ public sealed class ShrimpCamOptionsValidationTests
         "ActiveStartHourUtc",
         "ActiveEndHourUtc",
         "ImageRootPath",
+        "TimelapseRootPath",
         "RetentionDays",
         "HostMode",
     ];
@@ -44,6 +45,7 @@ public sealed class ShrimpCamOptionsValidationTests
         options.Capture.ActiveStartHourUtc.Should().Be(6);
         options.Capture.ActiveEndHourUtc.Should().Be(22);
         options.Storage.ImageRootPath.Should().BeEmpty();
+        options.Storage.TimelapseRootPath.Should().BeEmpty();
         options.Storage.RetentionDays.Should().Be(30);
         options.Security.HostMode.Should().Be("InternetExposed");
     }
@@ -67,7 +69,7 @@ public sealed class ShrimpCamOptionsValidationTests
                 ReconnectBackoffSeconds = 1,
             },
             Capture = new CaptureOptions { Enabled = true, IntervalMinutes = 5, ActiveStartHourUtc = 8, ActiveEndHourUtc = 20 },
-            Storage = new StorageOptions { ImageRootPath = "data/images", RetentionDays = 30 },
+            Storage = new StorageOptions { ImageRootPath = "data/images", TimelapseRootPath = "data/timelapse", RetentionDays = 30 },
             Security = new SecurityOptions { HostMode = "InternetExposed" },
         };
 
@@ -93,7 +95,7 @@ public sealed class ShrimpCamOptionsValidationTests
                 ReconnectBackoffSeconds = 0,
             },
             Capture = new CaptureOptions { Enabled = true, IntervalMinutes = 0, ActiveStartHourUtc = -1, ActiveEndHourUtc = 25 },
-            Storage = new StorageOptions { ImageRootPath = string.Empty, RetentionDays = 0 },
+            Storage = new StorageOptions { ImageRootPath = string.Empty, TimelapseRootPath = string.Empty, RetentionDays = 0 },
             Security = new SecurityOptions { HostMode = "Unknown" },
         };
 

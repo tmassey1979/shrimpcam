@@ -10,10 +10,14 @@ internal sealed class SystemFileSystem : IFileSystem
 
     public void CreateDirectory(string path) => Directory.CreateDirectory(path);
 
+    public IEnumerable<string> EnumerateDirectories(string path) => Directory.EnumerateDirectories(path);
+
     public bool FileExists(string path) => File.Exists(path);
 
     public IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption) =>
         Directory.EnumerateFiles(path, searchPattern, searchOption);
+
+    public void WriteAllLines(string path, IEnumerable<string> contents) => File.WriteAllLines(path, contents);
 
     public DateTimeOffset GetLastWriteTimeUtc(string path) => File.GetLastWriteTimeUtc(path);
 

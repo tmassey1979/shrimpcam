@@ -8,6 +8,10 @@ public sealed class StorageOptions
     [MinLength(1)]
     public string ImageRootPath { get; init; } = string.Empty;
 
+    [Required]
+    [MinLength(1)]
+    public string TimelapseRootPath { get; init; } = string.Empty;
+
     [Range(1, 3650)]
     public int RetentionDays { get; init; } = 30;
 }

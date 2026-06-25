@@ -8,9 +8,13 @@ public interface IFileSystem
 
     void CreateDirectory(string path);
 
+    IEnumerable<string> EnumerateDirectories(string path);
+
     bool FileExists(string path);
 
     IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption);
+
+    void WriteAllLines(string path, IEnumerable<string> contents);
 
     DateTimeOffset GetLastWriteTimeUtc(string path);
 
