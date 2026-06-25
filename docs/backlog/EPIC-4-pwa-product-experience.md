@@ -492,6 +492,32 @@ Scenario: Dashboard API failures are visible
   And stale success messaging is not shown
 ```
 
+### SC-PWA-17 Automated Accessibility Regression Coverage
+
+**User story:** As a Shrimp Cam operator, I want automated accessibility scans across every production PWA route so that visual polish does not regress landmarks, labels, focusability, or color-contrast safety before release.
+
+**Dependencies:** SC-PWA-10, SC-PWA-11, SC-PWA-16
+
+**Test expectations:**
+- Samsung S26 Playwright tests run axe accessibility scans on sign-in, dashboard, live, gallery, settings, offline, and not-found states.
+- Tests assert there are no serious or critical accessibility violations for authenticated and unauthenticated routes.
+- Tests continue to validate install-panel visibility behavior so installed users are not shown install guidance.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: Core PWA routes pass accessibility scans
+  Given the PWA is rendered on a Samsung-class mobile viewport
+  When automated accessibility scans run on sign-in, dashboard, live, gallery, settings, and not-found screens
+  Then no serious or critical accessibility violations are reported
+
+Scenario: Offline shell remains accessible
+  Given a signed-in user has cached shell metadata
+  When the browser goes offline
+  Then the offline shell passes automated accessibility checks
+  And reconnect guidance remains available to assistive technology
+```
+
 ## Delivery Notes
 
 - Story sequencing should start with shell and routing, then move through authentication, core screens, resilience behavior, and final accessibility hardening.

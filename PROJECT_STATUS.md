@@ -6,9 +6,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 16:53:07 -05:00 |
-| Total stories | 62 |
-| Accepted stories | 62 |
+| Last refreshed | 2026-06-25 16:58:45 -05:00 |
+| Total stories | 63 |
+| Accepted stories | 63 |
 | Remaining stories | 0 |
 | Overall completion | 100% |
 
@@ -19,17 +19,17 @@
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
 | Epic 2: Camera, Capture, and Streaming | 13 | 13 | 100% |
 | Epic 3: API, Security, and Operations | 21 | 21 | 100% |
-| Epic 4: PWA Product Experience | 16 | 16 | 100% |
+| Epic 4: PWA Product Experience | 17 | 17 | 100% |
 
 ## Latest Completed Stories
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-PWA-17 | Automated Accessibility Regression Coverage | Epic 4: PWA Product Experience | 2026-06-25 |  |
 | SC-OPS-321 | Gate Release Image Publishing And First-Boot Networking | Epic 3: API, Security, and Operations | 2026-06-25 | dfaac59 |
 | SC-PWA-16 | Complete PWA Lifecycle Playwright Coverage | Epic 4: PWA Product Experience | 2026-06-25 | f463413 |
 | SC-ASO-320 | Harden Default Administrator Initialization For Internet Exposure | Epic 3: API, Security, and Operations | 2026-06-25 | d8b3088 |
 | SC-CAM-17 | Report Manual Capture Health Transitions | Epic 2: Camera, Capture, and Streaming | 2026-06-25 | 1a33ba9 |
-| SC-ASO-319 | Redact authentication secrets from audit logs | Epic 3: API, Security, and Operations | 2026-06-25 | 6e1c096 |
 
 ## Next Unaccepted Stories
 
