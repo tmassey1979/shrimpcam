@@ -7,9 +7,14 @@ Wants=network-online.target
 Type=simple
 WorkingDirectory=/opt/shrimpcam/api
 EnvironmentFile=-/etc/default/shrimpcam-api
+Environment=ShrimpCam__Storage__DatabasePath=/var/lib/shrimpcam/data/shrimpcam.db
+Environment=ShrimpCam__Storage__ImageRootPath=/var/lib/shrimpcam/images
+Environment=ShrimpCam__Storage__TimelapseRootPath=/var/lib/shrimpcam/timelapse
 ExecStart=/opt/shrimpcam/api/ShrimpCam.Api
 Restart=always
 RestartSec=5
+StateDirectory=shrimpcam
+LogsDirectory=shrimpcam
 User=root
 
 [Install]

@@ -20,6 +20,13 @@ using ShrimpCam.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseSystemd();
+builder.Host.UseWindowsService(
+    options =>
+    {
+        options.ServiceName = "ShrimpCam";
+    });
+
 builder.Services.AddShrimpCamConfiguration(builder.Configuration);
 builder.Services.AddInfrastructure();
 builder.Services.AddAuthentication(BearerSessionAuthenticationHandler.SchemeName)
