@@ -32,6 +32,12 @@ internal sealed class ScheduledCaptureWorker(
             new EventId(2003, nameof(FailedScheduledFrame)),
             "Scheduled timelapse capture failed for interval {IntervalStartUtc}: {FailureReason}");
 
+    private static readonly Action<ILogger, Exception?> UnexpectedScheduledCaptureIterationFailure =
+        LoggerMessage.Define(
+            LogLevel.Error,
+            new EventId(2004, nameof(UnexpectedScheduledCaptureIterationFailure)),
+            "Scheduled timelapse worker iteration failed unexpectedly. The worker will retry on the next poll.");
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
@@ -51,22 +57,33 @@ internal sealed class ScheduledCaptureWorker(
 
     internal async Task RunSingleIterationAsync(CancellationToken cancellationToken)
     {
-        var settings = await settingsService.GetCurrentAsync(cancellationToken).ConfigureAwait(false);
-        var result = await scheduledCaptureService.RunDueCaptureAsync(ToOptions(settings, defaults.Value), cancellationToken).ConfigureAwait(false);
-
-        switch (result.Outcome)
+        try
         {
-            case ScheduledCaptureOutcome.Captured:
-                CapturedScheduledFrame(logger, result.IntervalStartUtc, null);
-                break;
+            var settings = await settingsService.GetCurrentAsync(cancellationToken).ConfigureAwait(false);
+            var result = await scheduledCaptureService.RunDueCaptureAsync(ToOptions(settings, defaults.Value), cancellationToken).ConfigureAwait(false);
 
-            case ScheduledCaptureOutcome.SkippedBySchedule:
-                SkippedScheduledFrame(logger, result.IntervalStartUtc, null);
-                break;
+            switch (result.Outcome)
+            {
+                case ScheduledCaptureOutcome.Captured:
+                    CapturedScheduledFrame(logger, result.IntervalStartUtc, null);
+                    break;
 
-            case ScheduledCaptureOutcome.Failed:
-                FailedScheduledFrame(logger, result.IntervalStartUtc, result.FailureReason, null);
-                break;
+                case ScheduledCaptureOutcome.SkippedBySchedule:
+                    SkippedScheduledFrame(logger, result.IntervalStartUtc, null);
+                    break;
+
+                case ScheduledCaptureOutcome.Failed:
+                    FailedScheduledFrame(logger, result.IntervalStartUtc, result.FailureReason, null);
+                    break;
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            UnexpectedScheduledCaptureIterationFailure(logger, exception);
         }
     }
 

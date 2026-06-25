@@ -450,3 +450,29 @@ Scenario: Cancelled capture process is terminated
   And the camera resource lease is released
   And the failure is reported as actionable capture status
 ```
+
+### SC-CAM-19 - Make Scheduled Capture Worker Exception-Resilient
+
+**User Story**  
+As a Shrimp Cam operator, I want the scheduled capture worker to survive unexpected iteration failures so that one storage, settings, or camera exception cannot stop timelapse capture permanently.
+
+**Dependencies**
+- SC-CC-05
+- SC-CAM-18
+- SC-ASO-310
+
+**Test Expectations**
+- Worker tests cover thrown settings and scheduled capture service exceptions.
+- Tests prove a subsequent scheduled iteration can still run after an unexpected failure.
+- Host cancellation still stops the worker promptly instead of being swallowed as a retryable failure.
+
+**Acceptance Criteria**
+
+```gherkin
+Scenario: Scheduler continues after an unexpected exception
+  Given the scheduled capture worker encounters an exception during one iteration
+  When the next delay interval elapses
+  Then the worker logs the failure
+  And it attempts the next scheduled iteration
+  And health diagnostics report the degraded condition without terminating the background service
+```

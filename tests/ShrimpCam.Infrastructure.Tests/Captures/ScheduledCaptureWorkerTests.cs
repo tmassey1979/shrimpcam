@@ -120,6 +120,62 @@ public sealed class ScheduledCaptureWorkerTests
             .ConfigureAwait(true);
     }
 
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task Run_single_iteration_logs_settings_exception_without_throwing()
+    {
+        var settingsService = Substitute.For<IEditableSettingsService>();
+        settingsService.GetCurrentAsync(Arg.Any<CancellationToken>())
+            .Returns<Task<EditableSettings>>(_ => throw new InvalidOperationException("settings unavailable"));
+        var scheduledCaptureService = Substitute.For<IScheduledCaptureService>();
+        var logger = new ListLogger<ScheduledCaptureWorker>();
+        var worker = new ScheduledCaptureWorker(
+            Options.Create(CreateOptions()),
+            settingsService,
+            scheduledCaptureService,
+            logger);
+
+        await worker.RunSingleIterationAsync(CancellationToken.None).ConfigureAwait(true);
+
+        await scheduledCaptureService.DidNotReceiveWithAnyArgs()
+            .RunDueCaptureAsync(default!, default)
+            .ConfigureAwait(true);
+        logger.Entries.Should().Contain(entry =>
+            entry.LogLevel == Microsoft.Extensions.Logging.LogLevel.Error
+            && entry.Message.Contains("Scheduled timelapse worker iteration failed unexpectedly", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task Run_single_iteration_logs_capture_exception_without_stopping_future_iterations()
+    {
+        var settingsService = Substitute.For<IEditableSettingsService>();
+        settingsService.GetCurrentAsync(Arg.Any<CancellationToken>())
+            .Returns(CreateSettings(CreateOptions()));
+        var scheduledCaptureService = Substitute.For<IScheduledCaptureService>();
+        scheduledCaptureService.RunDueCaptureAsync(Arg.Any<ShrimpCamOptions>(), Arg.Any<CancellationToken>())
+            .Returns(
+                _ => Task.FromException<ScheduledCaptureRunResult>(new InvalidOperationException("storage unavailable")),
+                _ => Task.FromResult(ScheduledCaptureRunResult.Create(
+                    ScheduledCaptureOutcome.Captured,
+                    new DateTimeOffset(2026, 06, 24, 12, 00, 00, TimeSpan.Zero),
+                    new DateTimeOffset(2026, 06, 24, 12, 05, 00, TimeSpan.Zero))));
+        var logger = new ListLogger<ScheduledCaptureWorker>();
+        var worker = new ScheduledCaptureWorker(
+            Options.Create(CreateOptions()),
+            settingsService,
+            scheduledCaptureService,
+            logger);
+
+        await worker.RunSingleIterationAsync(CancellationToken.None).ConfigureAwait(true);
+        await worker.RunSingleIterationAsync(CancellationToken.None).ConfigureAwait(true);
+
+        logger.Entries.Should().Contain(entry =>
+            entry.LogLevel == Microsoft.Extensions.Logging.LogLevel.Error
+            && entry.Message.Contains("Scheduled timelapse worker iteration failed unexpectedly", StringComparison.Ordinal));
+        logger.Entries.Should().Contain(entry => entry.Message.Contains("Captured scheduled timelapse frame", StringComparison.Ordinal));
+    }
+
     private static ShrimpCamOptions CreateOptions(
         bool enabled = true,
         int intervalMinutes = 5,
