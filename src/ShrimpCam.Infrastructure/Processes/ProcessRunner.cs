@@ -24,14 +24,49 @@ internal sealed class ProcessRunner : IProcessRunner
 
         process.Start();
 
+        using var cancellationRegistration = cancellationToken.Register(() => KillProcessTree(process));
         var standardOutputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
         var standardErrorTask = process.StandardError.ReadToEndAsync(cancellationToken);
 
-        await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            KillProcessTree(process);
+            await WaitForKilledProcessAsync(process).ConfigureAwait(false);
+            throw;
+        }
 
         var standardOutput = await standardOutputTask.ConfigureAwait(false);
         var standardError = await standardErrorTask.ConfigureAwait(false);
 
         return new ProcessResult(process.ExitCode, standardOutput, standardError);
+    }
+
+    private static void KillProcessTree(Process process)
+    {
+        try
+        {
+            if (!process.HasExited)
+            {
+                process.Kill(entireProcessTree: true);
+            }
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
+    private static async Task WaitForKilledProcessAsync(Process process)
+    {
+        try
+        {
+            await process.WaitForExitAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+        catch (InvalidOperationException)
+        {
+        }
     }
 }

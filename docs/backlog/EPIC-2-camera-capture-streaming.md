@@ -423,3 +423,30 @@ Scenario: Manual capture reports camera busy
   Then the manual capture returns a camera busy result
   And the camera health is reported degraded without starting another process
 ```
+
+### SC-CAM-18 - Kill Still-Capture Child Processes On Cancellation And Timeout
+
+**User Story**  
+As a Shrimp Cam operator, I want cancelled or timed-out still captures to terminate their child process so that `ffmpeg` cannot keep the Logitech camera busy after the app has given up.
+
+**Dependencies**
+- SC-CC-03
+- SC-CC-04
+- SC-CC-05
+- SC-CAM-16
+
+**Test Expectations**
+- Integration tests prove the process runner terminates a still-running child process when its cancellation token is cancelled.
+- Capture services continue to release camera resource leases when process execution is cancelled.
+- Existing manual and scheduled capture tests continue to prove cleanup and health behavior.
+
+**Acceptance Criteria**
+
+```gherkin
+Scenario: Cancelled capture process is terminated
+  Given a still capture command is running
+  When the capture operation is cancelled or times out
+  Then the child process is killed if it has not exited
+  And the camera resource lease is released
+  And the failure is reported as actionable capture status
+```

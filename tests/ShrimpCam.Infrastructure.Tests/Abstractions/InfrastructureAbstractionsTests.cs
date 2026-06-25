@@ -58,6 +58,40 @@ public sealed class InfrastructureAbstractionsTests
 
     [Fact]
     [Trait("Category", "Integration")]
+    public async Task Process_runner_kills_running_process_when_cancelled()
+    {
+        var services = new ServiceCollection();
+        Infrastructure.DependencyInjection.AddInfrastructure(services);
+
+        using var provider = services.BuildServiceProvider();
+        using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(300));
+
+        var markerPath = Path.Combine(Path.GetTempPath(), $"shrimpcam-cancelled-process-{Guid.NewGuid():N}.txt");
+        var runner = provider.GetRequiredService<IProcessRunner>();
+        var command = new ProcessRequest(
+            "powershell",
+            $"-NoProfile -ExecutionPolicy Bypass -Command \"Start-Sleep -Seconds 5; Set-Content -LiteralPath '{markerPath}' -Value survived\"");
+
+        try
+        {
+            var act = () => runner.RunAsync(command, cancellationTokenSource.Token);
+
+            await act.Should().ThrowAsync<OperationCanceledException>().ConfigureAwait(true);
+            await Task.Delay(TimeSpan.FromSeconds(6)).ConfigureAwait(true);
+
+            File.Exists(markerPath).Should().BeFalse("a cancelled capture process must not keep running after the caller gives up");
+        }
+        finally
+        {
+            if (File.Exists(markerPath))
+            {
+                File.Delete(markerPath);
+            }
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
     public void File_system_combines_paths()
     {
         var services = new ServiceCollection();
