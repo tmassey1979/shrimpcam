@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using ShrimpCam.Core.Abstractions;
 using ShrimpCam.Infrastructure.Processes;
@@ -45,7 +46,7 @@ public sealed class ProcessStreamRunnerTests
 
     private static ProcessRequest CreatePowerShellCommand(string script) =>
         new(
-            "powershell",
+            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "powershell" : "pwsh",
             $"-NoProfile -NonInteractive -Command \"{script}\"");
 }
 

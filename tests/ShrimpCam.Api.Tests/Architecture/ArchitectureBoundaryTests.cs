@@ -135,10 +135,24 @@ public sealed class ArchitectureBoundaryTests
     private static string[] ProjectReferences(XDocument project) =>
         project.Descendants()
             .Where(element => element.Name.LocalName == "ProjectReference")
-            .Select(element => Path.GetFileName(element.Attribute("Include")?.Value))
+            .Select(element => ProjectReferenceFileName(element.Attribute("Include")?.Value))
             .Where(value => !string.IsNullOrWhiteSpace(value))
             .Cast<string>()
             .ToArray();
+
+    private static string? ProjectReferenceFileName(string? include)
+    {
+        if (string.IsNullOrWhiteSpace(include))
+        {
+            return null;
+        }
+
+        var normalized = include
+            .Replace('\\', Path.DirectorySeparatorChar)
+            .Replace('/', Path.DirectorySeparatorChar);
+
+        return Path.GetFileName(normalized);
+    }
 
     private static string[] FrameworkReferences(XDocument project) =>
         project.Descendants()
