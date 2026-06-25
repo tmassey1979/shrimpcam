@@ -149,6 +149,7 @@ type InstallPromptState = {
   canPrompt: boolean;
   isInstalled: boolean;
   message: string;
+  browserName: string;
   promptInstall: () => Promise<void>;
 };
 
@@ -244,7 +245,7 @@ function App() {
           <p className="eyebrow">Secure Shell</p>
           <h2>{auth.isAuthenticated ? "Session active" : "Sign-in required"}</h2>
           <p>{shellMessage}</p>
-          <InstallPromptPanel installPrompt={installPrompt} />
+          {!installPrompt.isInstalled ? <InstallPromptPanel installPrompt={installPrompt} /> : null}
         </section>
 
         <Routes>
@@ -409,10 +410,15 @@ function useInstallPrompt(): InstallPromptState {
   const [message, setMessage] = useState(
     isStandaloneDisplay()
       ? "Shrimp Cam is installed and running in standalone mode."
-      : "Install Shrimp Cam from your browser menu if the install button is not available."
+      : getManualInstallGuidance()
   );
 
   useEffect(() => {
+    const standaloneQuery = window.matchMedia("(display-mode: standalone)");
+    const handleDisplayModeChange = () => {
+      setIsInstalled(isStandaloneDisplay());
+    };
+
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);
@@ -425,10 +431,12 @@ function useInstallPrompt(): InstallPromptState {
       setMessage("Shrimp Cam was installed. Reopen it from your app launcher or home screen.");
     };
 
+    standaloneQuery.addEventListener("change", handleDisplayModeChange);
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
+      standaloneQuery.removeEventListener("change", handleDisplayModeChange);
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
@@ -438,6 +446,7 @@ function useInstallPrompt(): InstallPromptState {
     canPrompt: deferredPrompt !== null,
     isInstalled,
     message,
+    browserName: getBrowserName(),
     promptInstall: async () => {
       if (!deferredPrompt) {
         setMessage(getManualInstallGuidance());
@@ -478,10 +487,14 @@ function useReconnectNotice(isOnline: boolean) {
 }
 
 function InstallPromptPanel({ installPrompt }: { installPrompt: InstallPromptState }) {
+  if (installPrompt.isInstalled) {
+    return null;
+  }
+
   return (
     <div className="install-panel">
       <div>
-        <p className="eyebrow">Installable PWA</p>
+        <p className="eyebrow">{installPrompt.browserName} install</p>
         <strong>{installPrompt.isInstalled ? "Installed" : "Add Shrimp Cam to this device"}</strong>
         <span>{installPrompt.message}</span>
       </div>
@@ -1541,14 +1554,66 @@ function toInteger(value: string) {
 
 function isStandaloneDisplay() {
   const navigatorWithStandalone = window.navigator as Navigator & { standalone?: boolean };
-  return window.matchMedia("(display-mode: standalone)").matches || navigatorWithStandalone.standalone === true;
+  return (
+    window.matchMedia("(display-mode: standalone)").matches
+    || window.matchMedia("(display-mode: fullscreen)").matches
+    || navigatorWithStandalone.standalone === true
+    || document.referrer.startsWith("android-app://")
+  );
 }
 
 function getManualInstallGuidance() {
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  const isAndroid = userAgent.includes("android");
   const isAppleTouchBrowser = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
-  return isAppleTouchBrowser
-    ? "Use Share, then Add to Home Screen to install Shrimp Cam on this device."
-    : "Use your browser menu and choose Install app or Add to Home screen when supported.";
+
+  if (isAndroid && userAgent.includes("samsungbrowser")) {
+    return "On Samsung Internet, tap the menu button, then Add page to, then Home screen. If prompted, choose Install.";
+  }
+
+  if (isAndroid && userAgent.includes("firefox")) {
+    return "On Firefox for Android, tap the menu button, then Install. If Install is not shown, choose Add to Home screen.";
+  }
+
+  if (isAndroid && userAgent.includes("edg/")) {
+    return "On Edge for Android, tap the menu button, then Add to phone or Install app.";
+  }
+
+  if (isAndroid && (userAgent.includes("chrome") || userAgent.includes("crios"))) {
+    return "On Chrome for Android, tap the three-dot menu, then Install app. If that is not shown, choose Add to Home screen.";
+  }
+
+  if (isAppleTouchBrowser) {
+    return "On iPhone or iPad, tap Share, then Add to Home Screen.";
+  }
+
+  return "Open your browser menu and choose Install app or Add to Home screen when supported.";
+}
+
+function getBrowserName() {
+  const userAgent = window.navigator.userAgent.toLowerCase();
+
+  if (userAgent.includes("samsungbrowser")) {
+    return "Samsung Internet";
+  }
+
+  if (userAgent.includes("firefox")) {
+    return "Firefox";
+  }
+
+  if (userAgent.includes("edg/")) {
+    return "Edge";
+  }
+
+  if (userAgent.includes("chrome") || userAgent.includes("crios")) {
+    return "Chrome";
+  }
+
+  if (/iphone|ipad|ipod/i.test(window.navigator.userAgent) || userAgent.includes("safari")) {
+    return "Safari";
+  }
+
+  return "Browser";
 }
 
 function readStoredSession(): Session | null {
