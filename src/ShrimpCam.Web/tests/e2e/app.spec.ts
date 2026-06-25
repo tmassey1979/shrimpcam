@@ -17,11 +17,17 @@ test("protects routes and signs in to the dashboard", async ({ page }) => {
 
   await expect(page.getByText("Signed in as admin.")).toBeVisible();
   await expect(page.getByText("Logi C270 HD WebCam is online.")).toBeVisible();
-  await expect(page.getByText("20260625T195000000Z_scheduled.jpg from Scheduled")).toBeVisible();
+  await expect(page.getByText("Camera Status")).toBeVisible();
+  await expect(page.getByText("Next Timelapse")).toBeVisible();
+  await expect(page.getByLabel("Storage usage")).toContainText("Storage Usage");
+  await expect(page.getByText("20260625T195000000Z_scheduled.jpg")).toBeVisible();
   const latestSnapshot = page.getByRole("img", { name: /Latest shrimp tank snapshot/ });
   await expect(latestSnapshot).toBeVisible();
   await expect(latestSnapshot).toHaveAttribute("src", /^blob:/);
   expect(imageAuthorizations).toContain("Bearer e2e-token");
+  await expect(page.getByRole("link", { name: /Watch your tank/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Browse snapshots/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Capture Now/ })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
 });
 

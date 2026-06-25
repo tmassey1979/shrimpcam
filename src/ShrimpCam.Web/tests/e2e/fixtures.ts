@@ -286,6 +286,12 @@ export async function signIn(page: Page) {
 }
 
 export async function navigateInApp(page: Page, path: "/dashboard" | "/live" | "/gallery" | "/settings") {
-  await page.locator(`a[href="${path}"]`).evaluate((element) => (element as HTMLAnchorElement).click());
+  const labels: Record<typeof path, string> = {
+    "/dashboard": "Dashboard",
+    "/live": "Live",
+    "/gallery": "Gallery",
+    "/settings": "Settings"
+  };
+  await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: labels[path], exact: true }).evaluate((element) => (element as HTMLAnchorElement).click());
   await page.waitForURL(`**${path}`);
 }

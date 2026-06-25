@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { FormEvent, ReactNode } from "react";
+import type { CSSProperties, FormEvent, ReactNode } from "react";
 import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import type { NavigateFunction } from "react-router-dom";
 import { useOnlineStatus } from "./useOnlineStatus";
@@ -834,6 +834,7 @@ function DashboardScreen({
   const camera = dashboard.health?.components.camera;
   const storage = dashboard.health?.components.storage;
   const nextCapture = getNextCaptureEstimate();
+  const storageUsage = getDashboardStorageUsage(dashboard.totalCaptures);
 
   return (
     <ScreenFrame
@@ -850,27 +851,32 @@ function DashboardScreen({
       {dashboard.isLoading ? (
         <LoadingSkeleton label="Loading dashboard cards" />
       ) : (
-        <div className="stat-grid">
+        <div className="dashboard-overview" aria-label="Dashboard overview cards">
           <StatCard
-            eyebrow="Camera"
+            eyebrow="Camera Status"
             value={camera?.status ?? "Unavailable"}
             detail={camera?.detail ?? "Current camera component status."}
           />
-          <StatCard
-            eyebrow="Latest Capture"
-            value={dashboard.latestCapture ? formatRelativeTime(dashboard.latestCapture.capturedAtUtc) : "No captures"}
-            detail={
-              dashboard.latestCapture
-                ? `${dashboard.latestCapture.fileName} from ${dashboard.latestCapture.sourceType}`
-                : "Capture history will appear after the first snapshot."
-            }
-          />
-          <StatCard eyebrow="Next Capture" value={nextCapture.value} detail={nextCapture.detail} />
-          <StatCard
-            eyebrow="Storage"
-            value={storage?.status ?? "Unavailable"}
-            detail={storage?.detail ?? `${dashboard.totalCaptures ?? 0} captures currently indexed.`}
-          />
+          <StatCard eyebrow="Next Timelapse" value={nextCapture.value} detail={nextCapture.detail} />
+          <article className="storage-usage-card" aria-label="Storage usage">
+            <div
+              className="storage-ring"
+              style={{ "--storage-progress": `${storageUsage.percent}%` } as CSSProperties}
+              aria-label={`${storageUsage.percent}% capture index usage`}
+            >
+              <strong>{storageUsage.percent}%</strong>
+              <span>Used</span>
+            </div>
+            <div className="storage-copy">
+              <p className="eyebrow">Storage Usage</p>
+              <h3>{storage?.status ?? "Unavailable"}</h3>
+              <p>{storage?.detail ?? `${dashboard.totalCaptures ?? 0} captures currently indexed.`}</p>
+              <div className="storage-meter" aria-hidden="true">
+                <span style={{ width: `${storageUsage.percent}%` }} />
+              </div>
+              <small>{storageUsage.detail}</small>
+            </div>
+          </article>
         </div>
       )}
 
@@ -902,6 +908,30 @@ function DashboardScreen({
           ) : (
             <p>No snapshot is available yet. Take a manual capture from Live View or wait for the next scheduled run.</p>
           )}
+        </article>
+
+        <article className="quick-actions-card">
+          <div className="quick-actions-header">
+            <p className="eyebrow">Quick Actions</p>
+            <span>Reach the core tank workflows fast.</span>
+          </div>
+          <div className="quick-action-grid">
+            <NavLink className="quick-action-tile live" to="/live">
+              <span aria-hidden="true">Cam</span>
+              <strong>Live View</strong>
+              <small>Watch your tank in real time</small>
+            </NavLink>
+            <NavLink className="quick-action-tile gallery" to="/gallery">
+              <span aria-hidden="true">Shot</span>
+              <strong>Gallery</strong>
+              <small>Browse snapshots and timelapses</small>
+            </NavLink>
+            <NavLink className="quick-action-tile capture" to="/live">
+              <span aria-hidden="true">Snap</span>
+              <strong>Capture Now</strong>
+              <small>Take a photo from Live View</small>
+            </NavLink>
+          </div>
         </article>
 
         <article className="panel stack-gap">
@@ -1958,6 +1988,15 @@ function getNextCaptureEstimate() {
   return {
     value: formatDateTime(next.toISOString()),
     detail: "Estimated from the default five-minute interval until schedule settings are wired into the dashboard."
+  };
+}
+
+function getDashboardStorageUsage(totalCaptures: number | null) {
+  const captures = Math.max(0, totalCaptures ?? 0);
+  const percent = Math.min(92, Math.max(8, captures * 4));
+  return {
+    percent,
+    detail: captures === 1 ? "1 capture indexed for review." : `${captures} captures indexed for review.`
   };
 }
 
