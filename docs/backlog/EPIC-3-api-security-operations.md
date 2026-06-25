@@ -617,6 +617,31 @@ Scenario: Internet-exposed production accepts deployment-provided credentials
   Then startup succeeds
 ```
 
+### SC-OPS-321 - Gate Release Image Publishing And First-Boot Networking
+
+**User story**  
+As a Shrimp Cam operator, I want CI/release and Raspberry Pi first-boot provisioning hardened so that release images are not published from unverified commits and headless Wi-Fi setup can run before network-online waits.
+
+**Dependencies**  
+SC-PF-011, SC-ASO-315, SC-ASO-316
+
+**Test expectations**  
+Static deployment tests verify release image publishing is gated by successful CI, the base image URL is constrained to the official Raspberry Pi OS Lite arm64 source, and first-boot provisioning runs before `network-online.target`.
+
+**Acceptance criteria**
+
+```gherkin
+Scenario: Release image waits for CI success
+  Given a push to main starts quality checks
+  When CI fails
+  Then the release image workflow does not publish a release
+
+Scenario: Headless first boot can configure Wi-Fi before network-online
+  Given a flashed image contains shrimpcam-device.env
+  When the first boot provisioning service starts
+  Then Wi-Fi configuration is applied before waiting on network-online
+```
+
 ## Delivery Notes
 
 - Recommended implementation order: `SC-ASO-301` through `SC-ASO-316` in sequence, with `SC-ASO-306` to `SC-ASO-311` parallelizable after authentication foundations land.

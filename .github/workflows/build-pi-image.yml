@@ -1,9 +1,13 @@
 name: build-pi-image
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - ci
     branches:
       - main
+    types:
+      - completed
   workflow_dispatch:
     inputs:
       hostname:
@@ -17,6 +21,7 @@ on:
 
 jobs:
   build-image:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -28,12 +33,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Resolve release version
         run: |
           base_version="$(tr -d '[:space:]' < VERSION)"
-          short_sha="${GITHUB_SHA::7}"
+          source_sha="$(git rev-parse HEAD)"
+          short_sha="${source_sha::7}"
           release_version="${base_version}.${GITHUB_RUN_NUMBER}.${short_sha}"
+          echo "SOURCE_SHA=${source_sha}" >> "${GITHUB_ENV}"
           echo "RELEASE_VERSION=${release_version}" >> "${GITHUB_ENV}"
           echo "TAG_NAME=v${release_version}" >> "${GITHUB_ENV}"
 
@@ -53,6 +62,20 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends unzip xz-utils kpartx dosfstools e2fsprogs rsync
+
+      - name: Validate Raspberry Pi OS image source
+        env:
+          IMAGE_URL: ${{ inputs.image_url || env.DEFAULT_IMAGE_URL }}
+        run: |
+          case "${IMAGE_URL}" in
+            https://downloads.raspberrypi.com/raspios_lite_arm64_latest|https://downloads.raspberrypi.com/raspios_lite_arm64_latest.*)
+              ;;
+            *)
+              echo "Unsupported Raspberry Pi OS image URL: ${IMAGE_URL}" >&2
+              echo "Use the official Raspberry Pi OS Lite arm64 image URL." >&2
+              exit 1
+              ;;
+          esac
 
       - name: Publish Shrimp Cam for Raspberry Pi
         shell: pwsh
@@ -91,14 +114,14 @@ jobs:
           path: artifacts/pi-image/*
 
       - name: Create alpha release
-        if: github.event_name == 'push'
+        if: github.event_name == 'workflow_run'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG_NAME }}
           name: Shrimp Cam ${{ env.RELEASE_VERSION }}
           prerelease: true
           body: |
-            Alpha release generated from `${{ github.sha }}` on `main`.
+            Alpha release generated from `${{ env.SOURCE_SHA }}` on `main` after the `ci` workflow completed successfully.
 
             This release includes a Raspberry Pi OS Lite image with Shrimp Cam installed as headless startup services. Configure Wi-Fi before first boot by editing `shrimpcam-device.env` on the boot partition, or provide `PI_WIFI_SSID`, `PI_WIFI_PSK`, and `PI_WIFI_COUNTRY` repository secrets for workflow-built images.
           files: |
