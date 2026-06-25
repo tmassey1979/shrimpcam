@@ -175,6 +175,13 @@ public sealed class SqlitePersistenceTests
             (await sessionRepository.GetByTokenHashAsync("token-hash", CancellationToken.None).ConfigureAwait(true))
                 .Should()
                 .Be(new SessionRecord(sessionId, userId, "token-hash", updatedAtUtc, updatedAtUtc.AddHours(8), null));
+            await sessionRepository.UpdateAsync(
+                    new SessionRecord(sessionId, userId, "token-hash", updatedAtUtc, updatedAtUtc.AddHours(8), updatedAtUtc.AddHours(1)),
+                    CancellationToken.None)
+                .ConfigureAwait(true);
+            (await sessionRepository.GetByIdAsync(sessionId, CancellationToken.None).ConfigureAwait(true))
+                .Should()
+                .Be(new SessionRecord(sessionId, userId, "token-hash", updatedAtUtc, updatedAtUtc.AddHours(8), updatedAtUtc.AddHours(1)));
             (await auditRepository.GetByIdAsync(auditId, CancellationToken.None).ConfigureAwait(true))
                 .Should()
                 .Be(new AuditRecord(auditId, "SettingsUpdated", "shrimp-admin", "Succeeded", "Capture interval changed", updatedAtUtc));

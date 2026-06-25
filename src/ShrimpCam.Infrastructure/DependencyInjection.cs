@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
         services.AddSingleton<IAuthenticationService, LocalAuthenticationService>();
         services.AddSingleton<ISessionAuthenticationService, SessionAuthenticationService>();
+        services.AddSingleton<ISessionRevocationService, SessionRevocationService>();
         services.AddSingleton<IPasswordPolicy, DefaultPasswordPolicy>();
         services.AddSingleton<IBootstrapAdministratorService, BootstrapAdministratorService>();
         services.AddSingleton<IApplicationDataInitializer, SqliteApplicationDataInitializer>();

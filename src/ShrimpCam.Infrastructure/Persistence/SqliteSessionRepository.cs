@@ -31,6 +31,33 @@ internal sealed class SqliteSessionRepository(IOptions<ShrimpCamOptions> options
         return Task.CompletedTask;
     }
 
+    public Task UpdateAsync(SessionRecord session, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        using var connection = SqliteConnectionFactory.OpenConnection(options);
+        using var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            UPDATE sessions
+            SET user_id = $userId,
+                token_hash = $tokenHash,
+                created_at_utc = $createdAtUtc,
+                expires_at_utc = $expiresAtUtc,
+                revoked_at_utc = $revokedAtUtc
+            WHERE id = $id;
+            """;
+        command.Parameters.AddWithValue("$id", session.Id.ToString());
+        command.Parameters.AddWithValue("$userId", session.UserId.ToString());
+        command.Parameters.AddWithValue("$tokenHash", session.TokenHash);
+        command.Parameters.AddWithValue("$createdAtUtc", session.CreatedAtUtc.UtcDateTime.ToString("O", System.Globalization.CultureInfo.InvariantCulture));
+        command.Parameters.AddWithValue("$expiresAtUtc", session.ExpiresAtUtc.UtcDateTime.ToString("O", System.Globalization.CultureInfo.InvariantCulture));
+        command.Parameters.AddWithValue("$revokedAtUtc", session.RevokedAtUtc?.UtcDateTime.ToString("O", System.Globalization.CultureInfo.InvariantCulture) ?? (object)DBNull.Value);
+        _ = command.ExecuteNonQuery();
+
+        return Task.CompletedTask;
+    }
+
     public Task<SessionRecord?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();

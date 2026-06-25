@@ -137,6 +137,38 @@ app.MapPost(
     })
     .WithName("Login");
 
+app.MapPost(
+        "/auth/logout",
+        [Authorize] async (HttpContext httpContext, ISessionRevocationService sessionRevocationService, CancellationToken cancellationToken) =>
+        {
+            var sessionIdValue = httpContext.User.FindFirst("session_id")?.Value;
+            if (!Guid.TryParse(sessionIdValue, out var sessionId))
+            {
+                return Results.Problem(
+                    title: "Authentication required.",
+                    detail: "A valid session token is required to access this endpoint.",
+                    statusCode: StatusCodes.Status401Unauthorized);
+            }
+
+            var result = await sessionRevocationService.RevokeAsync(sessionId, cancellationToken).ConfigureAwait(false);
+            if (!result.Succeeded)
+            {
+                return Results.Problem(
+                    title: "Session not found.",
+                    detail: "The active session could not be located for logout.",
+                    statusCode: StatusCodes.Status404NotFound);
+            }
+
+            return Results.Ok(
+                new
+                {
+                    status = "signedOut",
+                    sessionId = result.RevokedSession!.Id,
+                    revokedAtUtc = result.RevokedSession.RevokedAtUtc,
+                });
+        })
+    .WithName("Logout");
+
 app.MapGet(
         "/settings",
         [Authorize(Policy = AuthorizationPolicies.Administrator)] (IOptions<ShrimpCamOptions> optionsAccessor) => Results.Ok(
