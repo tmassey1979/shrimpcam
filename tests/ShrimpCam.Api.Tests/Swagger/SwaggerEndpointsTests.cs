@@ -10,6 +10,7 @@ namespace ShrimpCam.Api.Tests.Swagger;
 public sealed class SwaggerEndpointsTests
 {
     [Fact]
+    [Trait("Category", "Api")]
     public async Task Development_environment_serves_openapi_document()
     {
         await using var factory = new SwaggerWebApplicationFactory("Development");
@@ -27,6 +28,7 @@ public sealed class SwaggerEndpointsTests
     }
 
     [Fact]
+    [Trait("Category", "Api")]
     public async Task Development_environment_serves_swagger_ui()
     {
         await using var factory = new SwaggerWebApplicationFactory("Development");
@@ -39,6 +41,7 @@ public sealed class SwaggerEndpointsTests
     }
 
     [Fact]
+    [Trait("Category", "Api")]
     public async Task Production_environment_does_not_serve_swagger_ui()
     {
         await using var factory = new SwaggerWebApplicationFactory("Production");

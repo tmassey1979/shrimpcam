@@ -16,6 +16,7 @@ namespace ShrimpCam.Api.Tests.Configuration;
 public sealed class StartupConfigurationValidationTests
 {
     [Fact]
+    [Trait("Category", "Api")]
     public async Task Health_endpoint_exposes_values_from_valid_bound_configuration()
     {
         await using var factory = new ConfigurationWebApplicationFactory();
@@ -34,6 +35,7 @@ public sealed class StartupConfigurationValidationTests
     }
 
     [Fact]
+    [Trait("Category", "Api")]
     public async Task Invalid_configuration_fails_fast_on_startup()
     {
         var overrides = new Dictionary<string, string>

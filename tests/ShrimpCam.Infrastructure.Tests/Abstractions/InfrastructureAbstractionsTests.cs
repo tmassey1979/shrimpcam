@@ -10,6 +10,7 @@ namespace ShrimpCam.Infrastructure.Tests.Abstractions;
 public sealed class InfrastructureAbstractionsTests
 {
     [Fact]
+    [Trait("Category", "Integration")]
     public void Infrastructure_registers_shared_abstractions()
     {
         var services = new ServiceCollection();
@@ -24,6 +25,7 @@ public sealed class InfrastructureAbstractionsTests
     }
 
     [Fact]
+    [Trait("Category", "Integration")]
     public async Task Process_runner_executes_a_simple_command()
     {
         var services = new ServiceCollection();
@@ -42,6 +44,7 @@ public sealed class InfrastructureAbstractionsTests
     }
 
     [Fact]
+    [Trait("Category", "Integration")]
     public void File_system_combines_paths()
     {
         var services = new ServiceCollection();

@@ -8,6 +8,7 @@ namespace ShrimpCam.Core.Tests.Configuration;
 public sealed class ShrimpCamOptionsValidationTests
 {
     [Fact]
+    [Trait("Category", "Unit")]
     public void Valid_options_pass_data_annotations_validation()
     {
         var options = new ShrimpCamOptions
@@ -22,6 +23,7 @@ public sealed class ShrimpCamOptionsValidationTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public void Invalid_options_fail_data_annotations_validation()
     {
         var options = new ShrimpCamOptions

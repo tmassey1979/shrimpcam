@@ -5,6 +5,7 @@ namespace ShrimpCam.Core.Tests.Abstractions;
 public sealed class SharedAbstractionsSmokeTests
 {
     [Fact]
+    [Trait("Category", "Unit")]
     public void Shared_abstractions_are_public_and_available_for_application_services()
     {
         typeof(IClock).IsPublic.Should().BeTrue();
