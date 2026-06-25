@@ -210,9 +210,15 @@ function App() {
         Skip to main content
       </a>
       <header className="topbar">
-        <div>
-          <p className="eyebrow">Shrimp Cam</p>
-          <h1>Tank monitoring, simplified.</h1>
+        <div className="brand-lockup">
+          <span className="brand-mark" aria-hidden="true">
+            SC
+          </span>
+          <div>
+            <p className="eyebrow">Shrimp Cam</p>
+            <h1>Reef watch</h1>
+            <span className="brand-subtitle">Timelapse, live view, and tank status</span>
+          </div>
         </div>
         <div className="topbar-actions">
           <span className={`status-pill ${isOnline ? "online" : "offline"}`}>{statusLabel}</span>
