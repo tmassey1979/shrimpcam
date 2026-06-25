@@ -29,6 +29,24 @@ internal sealed class SqliteUserRoleRepository(IOptions<ShrimpCamOptions> option
         return Task.CompletedTask;
     }
 
+    public Task<bool> AnyInRoleAsync(string roleName, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        using var connection = SqliteConnectionFactory.OpenConnection(options);
+        using var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            SELECT COUNT(*)
+            FROM user_roles
+            WHERE role_name = $roleName;
+            """;
+        command.Parameters.AddWithValue("$roleName", roleName);
+
+        return Task.FromResult(
+            Convert.ToInt32(command.ExecuteScalar(), System.Globalization.CultureInfo.InvariantCulture) > 0);
+    }
+
     public Task<IReadOnlyList<UserRoleRecord>> ListByUserIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();

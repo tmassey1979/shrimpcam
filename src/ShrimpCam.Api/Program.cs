@@ -46,6 +46,57 @@ app.MapGet(
         }));
 
 app.MapPost(
+    "/auth/bootstrap-admin",
+    async (BootstrapAdministratorHttpRequest request, IBootstrapAdministratorService bootstrapAdministratorService, CancellationToken cancellationToken) =>
+    {
+        var result = await bootstrapAdministratorService.BootstrapAsync(
+                new BootstrapAdministratorRequest(request.UserName, request.Password),
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        if (!result.Succeeded)
+        {
+            return result.FailureReason switch
+            {
+                BootstrapAdministratorFailureReasons.AlreadyConfigured => Results.Problem(
+                    title: "Bootstrap is no longer available.",
+                    detail: "An administrator account has already been configured.",
+                    statusCode: StatusCodes.Status409Conflict),
+                BootstrapAdministratorFailureReasons.InvalidUserName => Results.ValidationProblem(
+                    new Dictionary<string, string[]>
+                    {
+                        ["userName"] = ["User name is required."],
+                    }),
+                BootstrapAdministratorFailureReasons.WeakPassword => Results.ValidationProblem(
+                    new Dictionary<string, string[]>
+                    {
+                        ["password"] = ["Password must be at least 12 characters and include uppercase, lowercase, and numeric characters."],
+                    }),
+                BootstrapAdministratorFailureReasons.UserNameUnavailable => Results.ValidationProblem(
+                    new Dictionary<string, string[]>
+                    {
+                        ["userName"] = ["That user name is already in use."],
+                    }),
+                _ => Results.Problem(
+                    title: "Bootstrap failed.",
+                    detail: "The bootstrap administrator request could not be completed.",
+                    statusCode: StatusCodes.Status400BadRequest),
+            };
+        }
+
+        return Results.Created(
+            "/auth/bootstrap-admin",
+            new
+            {
+                status = "bootstrapped",
+                userId = result.User!.UserId,
+                userName = result.User.UserName,
+                roleName = result.User.RoleName,
+            });
+    })
+    .WithName("BootstrapAdmin");
+
+app.MapPost(
     "/auth/login",
     async (LoginRequest request, IAuthenticationService authenticationService, CancellationToken cancellationToken) =>
     {
@@ -191,6 +242,10 @@ internal sealed record MotionHighlightRequest(
     DateTimeOffset OccurredAtUtc,
     double Score,
     string? EventId);
+
+internal sealed record BootstrapAdministratorHttpRequest(
+    string UserName,
+    string Password);
 
 internal sealed record LoginRequest(
     string UserName,
