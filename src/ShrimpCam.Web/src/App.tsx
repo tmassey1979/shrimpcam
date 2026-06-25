@@ -969,6 +969,9 @@ function GalleryScreen({
   const location = useLocation();
   const selectedCaptureId = new URLSearchParams(location.search).get("capture");
   const [dateFilter, setDateFilter] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [sourceFilter, setSourceFilter] = useState("All");
+  const [timeFilter, setTimeFilter] = useState("All");
   const [gallery, setGallery] = useState<GalleryState>({
     captures: [],
     selectedCapture: null,
@@ -1078,9 +1081,27 @@ function GalleryScreen({
 
   function clearFilter() {
     setDateFilter("");
+    setSearchText("");
+    setSourceFilter("All");
+    setTimeFilter("All");
   }
 
+  const visibleCaptures = gallery.captures.filter((capture) => {
+    const normalizedSearch = searchText.trim().toLowerCase();
+    const matchesSearch = normalizedSearch.length === 0
+      || capture.fileName.toLowerCase().includes(normalizedSearch)
+      || capture.sourceType.toLowerCase().includes(normalizedSearch);
+    const matchesSource = sourceFilter === "All" || capture.sourceType === sourceFilter;
+    const matchesTime = timeFilter === "All" || getCaptureTimeBucket(capture.capturedAtUtc) === timeFilter;
+
+    return matchesSearch && matchesSource && matchesTime;
+  });
+  const selectedVisibleCapture = gallery.selectedCapture && visibleCaptures.some((capture) => capture.id === gallery.selectedCapture?.id)
+    ? gallery.selectedCapture
+    : visibleCaptures[0] ?? null;
   const emptyState = !gallery.isLoading && !gallery.error && gallery.captures.length === 0;
+  const emptyFilteredState = !gallery.isLoading && !gallery.error && gallery.captures.length > 0 && visibleCaptures.length === 0;
+  const hasGalleryFilters = Boolean(dateFilter || searchText.trim() || sourceFilter !== "All" || timeFilter !== "All");
   const timelineDays = Array.from(
     new Map(
       gallery.captures.map((capture) => [
@@ -1090,6 +1111,22 @@ function GalleryScreen({
     ).entries()
   );
   const captureSources = Array.from(new Set(gallery.captures.map((capture) => capture.sourceType)));
+  const timeBuckets = Array.from(new Set(gallery.captures.map((capture) => getCaptureTimeBucket(capture.capturedAtUtc))));
+
+  useEffect(() => {
+    if (gallery.isLoading || visibleCaptures.length === 0) {
+      return;
+    }
+
+    if (!gallery.selectedCapture || !visibleCaptures.some((capture) => capture.id === gallery.selectedCapture?.id)) {
+      setGallery((current) => ({
+        ...current,
+        selectedCapture: visibleCaptures[0],
+        selectedImageUrl: null,
+        imageFailed: false
+      }));
+    }
+  }, [gallery.isLoading, gallery.selectedCapture?.id, searchText, sourceFilter, timeFilter, gallery.captures.length]);
 
   return (
     <ScreenFrame
@@ -1124,18 +1161,64 @@ function GalleryScreen({
           </div>
 
           <div className="source-chip-row" aria-label="Capture source filters">
+            <button
+              type="button"
+              className={sourceFilter === "All" ? "source-chip active" : "source-chip"}
+              onClick={() => setSourceFilter("All")}
+            >
+              All sources
+            </button>
             {captureSources.length > 0 ? (
               captureSources.map((source) => (
-                <span key={source} className="source-chip">
+                <button
+                  key={source}
+                  type="button"
+                  className={sourceFilter === source ? "source-chip active" : "source-chip"}
+                  onClick={() => setSourceFilter(source)}
+                >
                   {source}
-                </span>
+                </button>
               ))
             ) : (
               <span className="source-chip muted">Waiting for captures</span>
             )}
           </div>
 
+          <div className="source-chip-row" aria-label="Capture time filters">
+            <button
+              type="button"
+              className={timeFilter === "All" ? "source-chip active" : "source-chip"}
+              onClick={() => setTimeFilter("All")}
+            >
+              All times
+            </button>
+            {timeBuckets.length > 0 ? (
+              timeBuckets.map((bucket) => (
+                <button
+                  key={bucket}
+                  type="button"
+                  className={timeFilter === bucket ? "source-chip active" : "source-chip"}
+                  onClick={() => setTimeFilter(bucket)}
+                >
+                  {bucket}
+                </button>
+              ))
+            ) : (
+              <span className="source-chip muted">Waiting for times</span>
+            )}
+          </div>
+
           <div className="gallery-toolbar">
+            <label>
+              <span>Search captures</span>
+              <input
+                type="search"
+                value={searchText}
+                onChange={(event) => setSearchText(event.target.value)}
+                aria-label="Search captures"
+                placeholder="Filename or source"
+              />
+            </label>
             <label>
               <span>Filter by day</span>
               <input
@@ -1145,7 +1228,7 @@ function GalleryScreen({
                 aria-label="Filter captures by day"
               />
             </label>
-            <button type="button" className="secondary-button" disabled={!dateFilter} onClick={clearFilter}>
+            <button type="button" className="secondary-button" disabled={!hasGalleryFilters} onClick={clearFilter}>
               Clear filter
             </button>
           </div>
@@ -1153,7 +1236,7 @@ function GalleryScreen({
           <div className="gallery-summary" role="status" aria-live="polite">
             {gallery.isLoading
               ? "Loading captures..."
-              : `${gallery.totalItems} capture${gallery.totalItems === 1 ? "" : "s"} found${
+              : `${visibleCaptures.length} of ${gallery.totalItems} capture${gallery.totalItems === 1 ? "" : "s"} shown${
                   dateFilter ? ` for ${formatFilterDate(dateFilter)}` : ""
                 }.`}
           </div>
@@ -1170,20 +1253,30 @@ function GalleryScreen({
             <div className="empty-state">
               <strong>No captures found</strong>
               <span>Try a different day, clear the filter, or take a manual snapshot from Live View.</span>
-              <button type="button" className="secondary-button" disabled={!dateFilter} onClick={clearFilter}>
+              <button type="button" className="secondary-button" disabled={!hasGalleryFilters} onClick={clearFilter}>
                 Clear date filter
               </button>
             </div>
           ) : null}
 
+          {emptyFilteredState ? (
+            <div className="empty-state">
+              <strong>No matching captures</strong>
+              <span>Adjust search, source, or time filters to widen the timeline.</span>
+              <button type="button" className="secondary-button" onClick={clearFilter}>
+                Clear gallery filters
+              </button>
+            </div>
+          ) : null}
+
           <div className="capture-list" aria-label="Capture thumbnail timeline">
-            {!gallery.isLoading ? gallery.captures.map((capture) => (
+            {!gallery.isLoading ? visibleCaptures.map((capture) => (
               <button
                 type="button"
                 key={capture.id}
-                className={gallery.selectedCapture?.id === capture.id ? "capture-list-item active" : "capture-list-item"}
+                className={selectedVisibleCapture?.id === capture.id ? "capture-list-item active" : "capture-list-item"}
                 onClick={() => selectCapture(capture)}
-                aria-pressed={gallery.selectedCapture?.id === capture.id}
+                aria-pressed={selectedVisibleCapture?.id === capture.id}
               >
                 <span>{formatDateTime(capture.capturedAtUtc)}</span>
                 <strong>{capture.fileName}</strong>
@@ -1198,14 +1291,14 @@ function GalleryScreen({
         </section>
 
         <section className="viewer-card" aria-label="Focused capture viewer">
-          {gallery.selectedCapture ? (
+          {selectedVisibleCapture ? (
             <>
               <div className="viewer-hero-header">
                 <div>
                   <p className="eyebrow">Featured Capture</p>
-                  <h3>{formatDateTime(gallery.selectedCapture.capturedAtUtc)}</h3>
+                  <h3>{formatDateTime(selectedVisibleCapture.capturedAtUtc)}</h3>
                 </div>
-                <span className="source-chip">{gallery.selectedCapture.sourceType}</span>
+                <span className="source-chip">{selectedVisibleCapture.sourceType}</span>
               </div>
               <div className="viewer-frame">
                 {gallery.isImageLoading ? (
@@ -1222,7 +1315,7 @@ function GalleryScreen({
                 ) : null}
                 {gallery.selectedImageUrl ? (
                   <img
-                    alt={`Shrimp tank capture from ${formatDateTime(gallery.selectedCapture.capturedAtUtc)}`}
+                    alt={`Shrimp tank capture from ${formatDateTime(selectedVisibleCapture.capturedAtUtc)}`}
                     onError={() => setGallery((current) => ({ ...current, imageFailed: true }))}
                     src={gallery.selectedImageUrl}
                   />
@@ -1230,15 +1323,15 @@ function GalleryScreen({
               </div>
               <div className="viewer-details">
                 <p className="eyebrow">Focused Viewer</p>
-                <h3>{gallery.selectedCapture.fileName}</h3>
-                <p>Captured {formatDateTime(gallery.selectedCapture.capturedAtUtc)}.</p>
+                <h3>{selectedVisibleCapture.fileName}</h3>
+                <p>Captured {formatDateTime(selectedVisibleCapture.capturedAtUtc)}.</p>
                 <div className="gallery-action-bar" aria-label="Gallery capture actions">
                   {gallery.selectedImageUrl ? (
                     <a className="primary-button inline-link" href={gallery.selectedImageUrl} target="_blank" rel="noreferrer">
                       Open image
                     </a>
                   ) : null}
-                  <a className="secondary-button inline-link" href={gallery.selectedCapture.metadataUrl} target="_blank" rel="noreferrer">
+                  <a className="secondary-button inline-link" href={selectedVisibleCapture.metadataUrl} target="_blank" rel="noreferrer">
                     Metadata
                   </a>
                 </div>
@@ -2174,6 +2267,28 @@ function formatFilterDate(value: string) {
     day: "numeric",
     year: "numeric"
   }).format(date);
+}
+
+function getCaptureTimeBucket(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "Unknown time";
+  }
+
+  const hour = date.getHours();
+  if (hour < 6) {
+    return "Night";
+  }
+
+  if (hour < 12) {
+    return "Morning";
+  }
+
+  if (hour < 18) {
+    return "Afternoon";
+  }
+
+  return "Evening";
 }
 
 function formatRelativeTime(value: string) {

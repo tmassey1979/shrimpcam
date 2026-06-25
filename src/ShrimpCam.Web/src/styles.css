@@ -923,6 +923,17 @@ select:focus-visible,
   background: rgba(8, 125, 142, 0.2);
 }
 
+button.source-chip {
+  cursor: pointer;
+}
+
+.source-chip.active {
+  border-color: rgba(255, 184, 118, 0.74);
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255, 248, 237, 0.18), transparent 55%),
+    rgba(255, 184, 118, 0.24);
+}
+
 .gallery-toolbar {
   display: grid;
   gap: 0.75rem;

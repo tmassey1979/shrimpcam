@@ -83,10 +83,11 @@ test("browses gallery captures and applies a day filter", async ({ page }) => {
   await navigateInApp(page, "/gallery");
 
   await expect(page.getByRole("heading", { name: "Gallery" })).toBeVisible();
-  await expect(page.getByText("2 captures found.")).toBeVisible();
+  await expect(page.getByText("2 of 2 captures shown.")).toBeVisible();
   await expect(page.getByLabel("Capture timeline days")).toContainText("Jun 25, 2026");
   await expect(page.getByLabel("Capture source filters")).toContainText("Scheduled");
   await expect(page.getByLabel("Capture source filters")).toContainText("Manual");
+  await expect(page.getByLabel("Capture time filters")).toContainText("Afternoon");
   await expect(page.getByLabel("Capture thumbnail timeline")).toBeVisible();
   await expect(page.getByText("Featured Capture")).toBeVisible();
   await expect(page.getByRole("button", { name: /20260625T195000000Z_scheduled.jpg/ })).toBeVisible();
@@ -99,10 +100,20 @@ test("browses gallery captures and applies a day filter", async ({ page }) => {
   await expect(page.getByLabel("Focused capture viewer")).toContainText("Manual");
   await expect(page.getByLabel("Gallery capture actions")).toBeVisible();
 
-  await page.getByLabel("Filter captures by day").fill("2026-06-25");
-  await expect(page.getByText(/2 captures found for/)).toBeVisible();
+  await page.getByLabel("Search captures").fill("manual");
+  await expect(page.getByText("1 of 2 captures shown.")).toBeVisible();
+  await expect(page.getByRole("button", { name: /20260625T195005491Z_manual.jpg/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /20260625T195000000Z_scheduled.jpg/ })).toBeHidden();
+  await page.getByRole("button", { name: "All sources" }).click();
+  await page.getByRole("button", { name: "Afternoon" }).click();
+  await expect(page.getByText("1 of 2 captures shown.")).toBeVisible();
   await page.getByRole("button", { name: "Clear filter" }).click();
-  await expect(page.getByText("2 captures found.")).toBeVisible();
+  await expect(page.getByText("2 of 2 captures shown.")).toBeVisible();
+
+  await page.getByLabel("Filter captures by day").fill("2026-06-25");
+  await expect(page.getByText(/2 of 2 captures shown for/)).toBeVisible();
+  await page.getByRole("button", { name: "Clear filter" }).click();
+  await expect(page.getByText("2 of 2 captures shown.")).toBeVisible();
 });
 
 test("updates settings with discovered camera options", async ({ page }) => {

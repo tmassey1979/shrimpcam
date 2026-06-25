@@ -45,11 +45,15 @@ test("keeps gallery usable for empty filters and protected image failures", asyn
 
   await expect(page.getByText("Image unavailable")).toBeVisible();
   await page.getByLabel("Filter captures by day").fill("2026-06-24");
-  await expect(page.getByText("0 captures found for Jun 24, 2026.")).toBeVisible();
+  await expect(page.getByText("0 of 0 captures shown for Jun 24, 2026.")).toBeVisible();
   await expect(page.getByLabel("Capture timeline days")).toContainText("No timeline days loaded");
   await expect(page.getByText("No captures found")).toBeVisible();
   await page.getByRole("button", { name: "Clear date filter" }).click();
-  await expect(page.getByText("2 captures found.")).toBeVisible();
+  await expect(page.getByText("2 of 2 captures shown.")).toBeVisible();
+  await page.getByLabel("Search captures").fill("does-not-exist");
+  await expect(page.getByText("No matching captures")).toBeVisible();
+  await page.getByRole("button", { name: "Clear gallery filters" }).click();
+  await expect(page.getByText("2 of 2 captures shown.")).toBeVisible();
 });
 
 test("blocks invalid settings and preserves edits after server rejection", async ({ page }) => {
