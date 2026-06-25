@@ -6,17 +6,17 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-24 22:29:28 -05:00 |
+| Last refreshed | 2026-06-24 22:32:40 -05:00 |
 | Total stories | 49 |
-| Accepted stories | 9 |
-| Remaining stories | 40 |
-| Overall completion | 18.4% |
+| Accepted stories | 10 |
+| Remaining stories | 39 |
+| Overall completion | 20.4% |
 
 ## Epic Progress
 
 | Epic | Accepted | Total | Complete |
 | --- | --- | --- | --- |
-| Epic 1: Platform Foundation and Quality Gates | 9 | 12 | 75% |
+| Epic 1: Platform Foundation and Quality Gates | 10 | 12 | 83.3% |
 | Epic 2: Camera, Capture, and Streaming | 0 | 11 | 0% |
 | Epic 3: API, Security, and Operations | 0 | 16 | 0% |
 | Epic 4: PWA Product Experience | 0 | 10 | 0% |
@@ -25,17 +25,16 @@
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-PF-002 | Enforce clean architecture boundaries | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 |  |
 | SC-PF-008 | Enable TDD-oriented test workflow | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 | fc106a6 |
 | SC-PF-007 | Treat warnings as errors | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 | d96d388 |
 | SC-PF-004 | Validate configuration at startup | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 | a8cc814 |
 | SC-PF-003 | Establish shared abstractions | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 | 51ad68a |
-| SC-PF-012 | Publish backend OpenAPI docs with Swashbuckle | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 | d94f409 |
 
 ## Next Unaccepted Stories
 
 | Story | Title | Epic |
 | --- | --- | --- |
-| SC-PF-002 | Enforce clean architecture boundaries | Epic 1: Platform Foundation and Quality Gates |
 | SC-PF-009 | Enforce coverage thresholds | Epic 1: Platform Foundation and Quality Gates |
 | SC-PF-010 | Publish build and version metadata | Epic 1: Platform Foundation and Quality Gates |
 | SC-CC-01 | Discover Cameras on Linux Hosts | Epic 2: Camera, Capture, and Streaming |
@@ -45,6 +44,7 @@
 | SC-CC-05 | Run Scheduled Timelapse Capture | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-06 | Stream Live MJPEG Video | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-07 | Recover from Camera Disconnects and Stream Failures | Epic 2: Camera, Capture, and Streaming |
+| SC-CC-08 | Store Captures with Deterministic Naming and Layout | Epic 2: Camera, Capture, and Streaming |
 
 ## Notes
 

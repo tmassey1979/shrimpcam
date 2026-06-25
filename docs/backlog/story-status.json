@@ -1,6 +1,11 @@
 {
   "completedStories": [
     {
+      "id": "SC-PF-002",
+      "completedOn": "2026-06-24",
+      "commit": ""
+    },
+    {
       "id": "SC-PF-008",
       "completedOn": "2026-06-24",
       "commit": "fc106a6"
