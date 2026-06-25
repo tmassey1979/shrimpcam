@@ -82,6 +82,12 @@ a {
   background: var(--surface);
 }
 
+.topbar-actions {
+  display: grid;
+  justify-items: end;
+  gap: 0.6rem;
+}
+
 .topbar h1,
 .hero-card h2,
 .screen h2 {
@@ -227,8 +233,80 @@ a {
   cursor: pointer;
 }
 
+.primary-button:disabled,
+.secondary-button:disabled,
+.ghost-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.64;
+}
+
+.secondary-button,
+.ghost-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.6rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(124, 224, 234, 0.26);
+  background: rgba(124, 224, 234, 0.1);
+  color: #f7feff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ghost-button {
+  min-height: 2.35rem;
+  padding: 0.55rem 0.75rem;
+  background: rgba(255, 255, 255, 0.06);
+}
+
 .inline-link {
   width: fit-content;
+}
+
+.sign-in-screen {
+  max-width: 34rem;
+  margin: 0 auto;
+}
+
+.auth-form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 0.45rem;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.auth-form input {
+  width: 100%;
+  min-height: 3.1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(124, 224, 234, 0.22);
+  border-radius: 1rem;
+  background: rgba(3, 14, 18, 0.78);
+  color: #f7feff;
+  font: inherit;
+  outline: none;
+}
+
+.auth-form input:focus {
+  border-color: rgba(124, 224, 234, 0.72);
+  box-shadow: 0 0 0 3px rgba(124, 224, 234, 0.12);
+}
+
+.form-error {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(255, 169, 139, 0.28);
+  border-radius: 1rem;
+  background: rgba(106, 38, 38, 0.38);
+  color: #ffd8cc;
 }
 
 .list-card {
