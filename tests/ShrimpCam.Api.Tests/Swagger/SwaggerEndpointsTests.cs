@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
 
 #pragma warning disable CA2007
 
@@ -56,6 +57,12 @@ public sealed class SwaggerEndpointsTests
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment(environmentName);
+            builder.ConfigureAppConfiguration(
+                (_, configBuilder) => configBuilder.AddInMemoryCollection(
+                    new Dictionary<string, string?>
+                    {
+                        ["ShrimpCam:Security:InitialAdministrator:Password"] = "StrongShrimp123",
+                    }));
         }
     }
 }

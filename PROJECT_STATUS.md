@@ -6,9 +6,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 16:35:38 -05:00 |
-| Total stories | 59 |
-| Accepted stories | 59 |
+| Last refreshed | 2026-06-25 16:37:32 -05:00 |
+| Total stories | 60 |
+| Accepted stories | 60 |
 | Remaining stories | 0 |
 | Overall completion | 100% |
 
@@ -18,18 +18,18 @@
 | --- | --- | --- | --- |
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
 | Epic 2: Camera, Capture, and Streaming | 13 | 13 | 100% |
-| Epic 3: API, Security, and Operations | 19 | 19 | 100% |
+| Epic 3: API, Security, and Operations | 20 | 20 | 100% |
 | Epic 4: PWA Product Experience | 15 | 15 | 100% |
 
 ## Latest Completed Stories
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-ASO-320 | Harden Default Administrator Initialization For Internet Exposure | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-CAM-17 | Report Manual Capture Health Transitions | Epic 2: Camera, Capture, and Streaming | 2026-06-25 | 1a33ba9 |
 | SC-ASO-319 | Redact authentication secrets from audit logs | Epic 3: API, Security, and Operations | 2026-06-25 | 6e1c096 |
 | SC-ASO-318 | Protect camera operation endpoints | Epic 3: API, Security, and Operations | 2026-06-25 | fc50404 |
 | SC-CAM-16 | Coordinate Live Stream And Timelapse Camera Access | Epic 2: Camera, Capture, and Streaming | 2026-06-25 | a857f68 |
-| SC-PWA-15 | Settings Reference Cleanup | Epic 4: PWA Product Experience | 2026-06-25 | 6b94624 |
 
 ## Next Unaccepted Stories
 

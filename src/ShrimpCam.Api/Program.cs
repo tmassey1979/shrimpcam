@@ -29,7 +29,7 @@ builder.Host.UseWindowsService(
         options.ServiceName = "ShrimpCam";
     });
 
-builder.Services.AddShrimpCamConfiguration(builder.Configuration);
+builder.Services.AddShrimpCamConfiguration(builder.Configuration, builder.Environment);
 builder.Services.AddInfrastructure();
 builder.Services.AddAuthentication(BearerSessionAuthenticationHandler.SchemeName)
     .AddScheme<AuthenticationSchemeOptions, BearerSessionAuthenticationHandler>(

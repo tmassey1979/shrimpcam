@@ -8,7 +8,8 @@ internal static class ServiceCollectionExtensions
 
     public static IServiceCollection AddShrimpCamConfiguration(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         services
             .AddOptions<ShrimpCamOptions>()
@@ -20,6 +21,9 @@ internal static class ServiceCollectionExtensions
             .Validate(
                 options => IsInitialAdministratorValid(options.Security.InitialAdministrator),
                 "Initial administrator credentials must include a user name and a password with at least 12 characters, uppercase, lowercase, and numeric characters.")
+            .Validate(
+                options => IsInitialAdministratorSafeForHostMode(options.Security, environment),
+                "Internet-exposed production deployments must override the committed initial administrator password before startup.")
             .Validate(
                 _ => IsAllowedHostsSafeForInternetExposure(configuration),
                 "Internet-exposed deployments must set AllowedHosts to explicit host names instead of '*'.")
@@ -54,6 +58,18 @@ internal static class ServiceCollectionExtensions
         }
 
         return hasUpper && hasLower && hasDigit;
+    }
+
+    private static bool IsInitialAdministratorSafeForHostMode(SecurityOptions options, IHostEnvironment environment)
+    {
+        if (environment.IsDevelopment()
+            || !string.Equals(options.HostMode, "InternetExposed", StringComparison.OrdinalIgnoreCase)
+            || !options.InitialAdministrator.Enabled)
+        {
+            return true;
+        }
+
+        return !string.Equals(options.InitialAdministrator.Password, "AdminPass1234", StringComparison.Ordinal);
     }
 
     private static bool IsAllowedHostsSafeForInternetExposure(IConfiguration configuration)

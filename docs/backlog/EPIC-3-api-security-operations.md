@@ -590,6 +590,33 @@ Scenario: Successful sign-in is audited without token disclosure
   And the audit detail does not contain the raw bearer token
 ```
 
+### SC-ASO-320 - Harden Default Administrator Initialization For Internet Exposure
+
+**User story**  
+As a Shrimp Cam operator, I want default administrator initialization to avoid committed production credentials so that an internet-exposed first boot is not protected by a known password.
+
+**Dependencies**  
+SC-ASO-303, SC-ASO-316, SC-ASO-317
+
+**Test expectations**  
+Configuration/startup validation tests cover rejected committed credentials in production internet-exposed mode and accepted deployment-provided credentials.
+
+**Acceptance criteria**
+
+```gherkin
+Scenario: Internet-exposed production rejects committed default credentials
+  Given the app is configured for internet-exposed production hosting
+  And the initial administrator password is still the committed default
+  When startup validation runs
+  Then startup fails with actionable guidance
+
+Scenario: Internet-exposed production accepts deployment-provided credentials
+  Given the app is configured for internet-exposed production hosting
+  And the initial administrator password was overridden by deployment configuration
+  When startup validation runs
+  Then startup succeeds
+```
+
 ## Delivery Notes
 
 - Recommended implementation order: `SC-ASO-301` through `SC-ASO-316` in sequence, with `SC-ASO-306` to `SC-ASO-311` parallelizable after authentication foundations land.

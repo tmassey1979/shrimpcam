@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using ShrimpCam.Api.Configuration;
 using ShrimpCam.Core.Configuration;
@@ -60,7 +62,7 @@ public sealed class ExternalHostingHardeningTests
                 })
             .Build();
         var services = new ServiceCollection();
-        services.AddShrimpCamConfiguration(configuration);
+        services.AddShrimpCamConfiguration(configuration, new TestHostEnvironment("Production"));
 
         using var provider = services.BuildServiceProvider();
 
@@ -112,8 +114,20 @@ public sealed class ExternalHostingHardeningTests
                         ["ShrimpCam:Storage:DatabasePath"] = Path.Combine(rootPath, "shrimpcam.db"),
                         ["ShrimpCam:Storage:ImageRootPath"] = Path.Combine(rootPath, "images"),
                         ["ShrimpCam:Storage:TimelapseRootPath"] = Path.Combine(rootPath, "timelapse"),
+                        ["ShrimpCam:Security:InitialAdministrator:Password"] = "StrongShrimp123",
                     }));
         }
+    }
+
+    private sealed class TestHostEnvironment(string environmentName) : IHostEnvironment
+    {
+        public string EnvironmentName { get; set; } = environmentName;
+
+        public string ApplicationName { get; set; } = "ShrimpCam.Api.Tests";
+
+        public string ContentRootPath { get; set; } = Directory.GetCurrentDirectory();
+
+        public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
     }
 }
 

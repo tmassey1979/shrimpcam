@@ -151,6 +151,54 @@ public sealed class StartupConfigurationValidationTests
 
     [Fact]
     [Trait("Category", "Api")]
+    public async Task Internet_exposed_production_rejects_committed_initial_administrator_password()
+    {
+        var rootPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            var overrides = CreateValidPathOverrides(rootPath);
+
+            await using var factory = new ConfigurationWebApplicationFactory(overrides, environmentName: "Production");
+
+            var act = () => Task.Run(() => factory.CreateClient());
+
+            await act.Should().ThrowAsync<OptionsValidationException>()
+                .WithMessage("*committed initial administrator password*")
+                .ConfigureAwait(true);
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
+    public async Task Internet_exposed_production_accepts_deployment_provided_initial_administrator_password()
+    {
+        var rootPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            var overrides = CreateValidPathOverrides(rootPath);
+            overrides["ShrimpCam:Security:InitialAdministrator:Password"] = "StrongShrimp123";
+
+            await using var factory = new ConfigurationWebApplicationFactory(overrides, environmentName: "Production");
+            using var client = factory.CreateClient();
+
+            var response = await client.GetAsync("/health").ConfigureAwait(true);
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
     public async Task Newer_database_schema_version_blocks_startup_with_clear_error()
     {
         var rootPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -243,11 +291,12 @@ public sealed class StartupConfigurationValidationTests
 
     private sealed class ConfigurationWebApplicationFactory(
         IReadOnlyDictionary<string, string>? overrides = null,
-        bool cameraAvailable = true) : WebApplicationFactory<Program>
+        bool cameraAvailable = true,
+        string environmentName = "Development") : WebApplicationFactory<Program>
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            builder.UseEnvironment("Development");
+            builder.UseEnvironment(environmentName);
 
             if (overrides is null || overrides.Count == 0)
             {
@@ -266,6 +315,16 @@ public sealed class StartupConfigurationValidationTests
                 });
         }
     }
+
+    private static Dictionary<string, string> CreateValidPathOverrides(string rootPath) =>
+        new()
+        {
+            ["ShrimpCam:Camera:Platform"] = "Linux",
+            ["ShrimpCam:Camera:Source"] = "/dev/video0",
+            ["ShrimpCam:Storage:DatabasePath"] = Path.Combine(rootPath, "shrimpcam.db"),
+            ["ShrimpCam:Storage:ImageRootPath"] = Path.Combine(rootPath, "images"),
+            ["ShrimpCam:Storage:TimelapseRootPath"] = Path.Combine(rootPath, "timelapse"),
+        };
 
     private sealed class StubProcessRunner(bool cameraAvailable) : IProcessRunner
     {
