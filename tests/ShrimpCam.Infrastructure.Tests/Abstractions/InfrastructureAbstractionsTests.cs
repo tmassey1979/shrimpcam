@@ -2,7 +2,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using ShrimpCam.Core.Abstractions;
-using ShrimpCam.Infrastructure;
 
 #pragma warning disable CA2007
 
@@ -15,7 +14,7 @@ public sealed class InfrastructureAbstractionsTests
     {
         var services = new ServiceCollection();
 
-        services.AddInfrastructure();
+        Infrastructure.DependencyInjection.AddInfrastructure(services);
 
         using var provider = services.BuildServiceProvider();
 
@@ -28,7 +27,7 @@ public sealed class InfrastructureAbstractionsTests
     public async Task Process_runner_executes_a_simple_command()
     {
         var services = new ServiceCollection();
-        services.AddInfrastructure();
+        Infrastructure.DependencyInjection.AddInfrastructure(services);
 
         using var provider = services.BuildServiceProvider();
 
@@ -46,7 +45,7 @@ public sealed class InfrastructureAbstractionsTests
     public void File_system_combines_paths()
     {
         var services = new ServiceCollection();
-        services.AddInfrastructure();
+        Infrastructure.DependencyInjection.AddInfrastructure(services);
 
         using var provider = services.BuildServiceProvider();
 
