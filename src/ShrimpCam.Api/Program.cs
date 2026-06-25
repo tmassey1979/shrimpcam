@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using ShrimpCam.Api.Authentication;
 using ShrimpCam.Api.Build;
 using ShrimpCam.Api.Configuration;
 using ShrimpCam.Core.Authentication;
@@ -12,6 +15,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddShrimpCamConfiguration(builder.Configuration);
 builder.Services.AddInfrastructure();
+builder.Services.AddAuthentication(BearerSessionAuthenticationHandler.SchemeName)
+    .AddScheme<AuthenticationSchemeOptions, BearerSessionAuthenticationHandler>(
+        BearerSessionAuthenticationHandler.SchemeName,
+        _ => { });
+builder.Services.AddAuthorization(AuthorizationPolicies.Configure);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -29,6 +37,9 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwaggerUI();
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapGet(
     "/health",
@@ -98,7 +109,7 @@ app.MapPost(
 
 app.MapPost(
     "/auth/login",
-    async (LoginRequest request, IAuthenticationService authenticationService, CancellationToken cancellationToken) =>
+    async (LoginRequest request, ShrimpCam.Core.Authentication.IAuthenticationService authenticationService, CancellationToken cancellationToken) =>
     {
         var result = await authenticationService.AuthenticateAsync(
                 new AuthenticationRequest(request.UserName, request.Password),
@@ -125,6 +136,22 @@ app.MapPost(
             });
     })
     .WithName("Login");
+
+app.MapGet(
+        "/settings",
+        [Authorize(Policy = AuthorizationPolicies.Administrator)] (IOptions<ShrimpCamOptions> optionsAccessor) => Results.Ok(
+            new
+            {
+                storage = new
+                {
+                    retentionDays = optionsAccessor.Value.Storage.RetentionDays,
+                },
+                security = new
+                {
+                    hostMode = optionsAccessor.Value.Security.HostMode,
+                },
+            }))
+    .WithName("GetSettings");
 
 app.MapPost(
     "/captures/manual",

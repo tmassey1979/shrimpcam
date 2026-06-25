@@ -50,6 +50,26 @@ internal sealed class SqliteSessionRepository(IOptions<ShrimpCamOptions> options
         return Task.FromResult(reader.Read() ? ReadSession(reader) : null);
     }
 
+    public Task<SessionRecord?> GetByTokenHashAsync(string tokenHash, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(tokenHash);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        using var connection = SqliteConnectionFactory.OpenConnection(options);
+        using var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            SELECT id, user_id, token_hash, created_at_utc, expires_at_utc, revoked_at_utc
+            FROM sessions
+            WHERE token_hash = $tokenHash
+            LIMIT 1;
+            """;
+        command.Parameters.AddWithValue("$tokenHash", tokenHash);
+
+        using var reader = command.ExecuteReader();
+        return Task.FromResult(reader.Read() ? ReadSession(reader) : null);
+    }
+
     private static SessionRecord ReadSession(SqliteDataReader reader) =>
         new(
             Guid.Parse(reader.GetString(0)),

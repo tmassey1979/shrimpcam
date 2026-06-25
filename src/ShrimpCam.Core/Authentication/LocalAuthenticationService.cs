@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using System.Text;
 using ShrimpCam.Core.Abstractions;
 using ShrimpCam.Core.Persistence;
 
@@ -45,7 +44,7 @@ public sealed class LocalAuthenticationService(
                 new SessionRecord(
                     sessionId,
                     user.Id,
-                    ComputeTokenHash(rawToken),
+                    SessionTokenHasher.ComputeHash(rawToken),
                     clock.UtcNow,
                     expiresAtUtc,
                     null),
@@ -54,11 +53,5 @@ public sealed class LocalAuthenticationService(
 
         return AuthenticationResult.Success(
             new AuthenticatedSession(sessionId, user.Id, user.UserName, rawToken, expiresAtUtc));
-    }
-
-    internal static string ComputeTokenHash(string token)
-    {
-        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(token));
-        return Convert.ToHexString(hash);
     }
 }

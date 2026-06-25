@@ -6,11 +6,11 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 00:39:08 -05:00 |
+| Last refreshed | 2026-06-25 00:46:14 -05:00 |
 | Total stories | 49 |
-| Accepted stories | 26 |
-| Remaining stories | 23 |
-| Overall completion | 53.1% |
+| Accepted stories | 27 |
+| Remaining stories | 22 |
+| Overall completion | 55.1% |
 
 ## Epic Progress
 
@@ -18,24 +18,23 @@
 | --- | --- | --- | --- |
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
 | Epic 2: Camera, Capture, and Streaming | 11 | 11 | 100% |
-| Epic 3: API, Security, and Operations | 3 | 16 | 18.8% |
+| Epic 3: API, Security, and Operations | 4 | 16 | 25% |
 | Epic 4: PWA Product Experience | 0 | 10 | 0% |
 
 ## Latest Completed Stories
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-ASO-304 | Authorization roles and policy enforcement | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-ASO-303 | Bootstrap administrator flow | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-ASO-302 | Local account authentication | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-ASO-301 | SQLite schema and repository foundation | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-CC-11 | Capture Motion-Triggered Highlights | Epic 2: Camera, Capture, and Streaming | 2026-06-25 |  |
-| SC-CC-10 | Generate Daily Timelapse Videos | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 
 ## Next Unaccepted Stories
 
 | Story | Title | Epic |
 | --- | --- | --- |
-| SC-ASO-304 | Authorization roles and policy enforcement | Epic 3: API, Security, and Operations |
 | SC-ASO-305 | Session or token lifecycle management | Epic 3: API, Security, and Operations |
 | SC-ASO-306 | Health and readiness endpoint | Epic 3: API, Security, and Operations |
 | SC-ASO-307 | Settings management API | Epic 3: API, Security, and Operations |
@@ -45,3 +44,4 @@
 | SC-ASO-311 | Structured application logs | Epic 3: API, Security, and Operations |
 | SC-ASO-312 | Diagnostics and support bundle API | Epic 3: API, Security, and Operations |
 | SC-ASO-313 | Backup and export workflow | Epic 3: API, Security, and Operations |
+| SC-ASO-314 | Restore and import workflow | Epic 3: API, Security, and Operations |
