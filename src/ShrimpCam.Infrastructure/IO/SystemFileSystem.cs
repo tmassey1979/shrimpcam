@@ -12,6 +12,11 @@ internal sealed class SystemFileSystem : IFileSystem
 
     public bool FileExists(string path) => File.Exists(path);
 
+    public IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption) =>
+        Directory.EnumerateFiles(path, searchPattern, searchOption);
+
+    public DateTimeOffset GetLastWriteTimeUtc(string path) => File.GetLastWriteTimeUtc(path);
+
     public void MoveFile(string sourcePath, string destinationPath) => File.Move(sourcePath, destinationPath);
 
     public void DeleteFile(string path) => File.Delete(path);

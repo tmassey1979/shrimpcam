@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddSingleton<ICameraStatusService, CameraStatusService>();
         services.AddSingleton<ICameraLiveStreamService, CameraLiveStreamService>();
         services.AddSingleton<ICaptureStorage, FileSystemCaptureStorage>();
+        services.AddSingleton<ICaptureRetentionService, CaptureRetentionService>();
         services.AddSingleton<IManualCaptureService, ManualCaptureService>();
         services.AddSingleton<IScheduledCaptureStateStore, ScheduledCaptureStateStore>();
         services.AddSingleton<IScheduledCaptureService, ScheduledCaptureService>();

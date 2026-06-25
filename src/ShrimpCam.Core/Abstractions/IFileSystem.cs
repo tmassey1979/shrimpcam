@@ -10,6 +10,10 @@ public interface IFileSystem
 
     bool FileExists(string path);
 
+    IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption);
+
+    DateTimeOffset GetLastWriteTimeUtc(string path);
+
     void MoveFile(string sourcePath, string destinationPath);
 
     void DeleteFile(string path);

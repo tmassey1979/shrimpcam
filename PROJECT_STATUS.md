@@ -6,18 +6,18 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-24 23:50:51 -05:00 |
+| Last refreshed | 2026-06-24 23:55:47 -05:00 |
 | Total stories | 49 |
-| Accepted stories | 20 |
-| Remaining stories | 29 |
-| Overall completion | 40.8% |
+| Accepted stories | 21 |
+| Remaining stories | 28 |
+| Overall completion | 42.9% |
 
 ## Epic Progress
 
 | Epic | Accepted | Total | Complete |
 | --- | --- | --- | --- |
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
-| Epic 2: Camera, Capture, and Streaming | 8 | 11 | 72.7% |
+| Epic 2: Camera, Capture, and Streaming | 9 | 11 | 81.8% |
 | Epic 3: API, Security, and Operations | 0 | 16 | 0% |
 | Epic 4: PWA Product Experience | 0 | 10 | 0% |
 
@@ -25,17 +25,16 @@
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-CC-09 | Clean Up Expired Capture Files | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 | SC-CC-07 | Recover from Camera Disconnects and Stream Failures | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 | SC-CC-06 | Stream Live MJPEG Video | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 | SC-CC-05 | Run Scheduled Timelapse Capture | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 | SC-CC-04 | Capture a Manual Snapshot | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
-| SC-CC-08 | Store Captures with Deterministic Naming and Layout | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 
 ## Next Unaccepted Stories
 
 | Story | Title | Epic |
 | --- | --- | --- |
-| SC-CC-09 | Clean Up Expired Capture Files | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-10 | Generate Daily Timelapse Videos | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-11 | Capture Motion-Triggered Highlights | Epic 2: Camera, Capture, and Streaming |
 | SC-ASO-301 | SQLite schema and repository foundation | Epic 3: API, Security, and Operations |
@@ -45,3 +44,4 @@
 | SC-ASO-305 | Session or token lifecycle management | Epic 3: API, Security, and Operations |
 | SC-ASO-306 | Health and readiness endpoint | Epic 3: API, Security, and Operations |
 | SC-ASO-307 | Settings management API | Epic 3: API, Security, and Operations |
+| SC-ASO-308 | Capture browsing APIs | Epic 3: API, Security, and Operations |
