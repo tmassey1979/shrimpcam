@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using ShrimpCam.Api.Authentication;
 using ShrimpCam.Api.Build;
 using ShrimpCam.Api.Configuration;
+using ShrimpCam.Api.Logging;
 using ShrimpCam.Core.Audit;
 using ShrimpCam.Core.Authentication;
 using ShrimpCam.Core.Cameras;
@@ -45,6 +46,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthentication();
+app.UseMiddleware<StructuredRequestLoggingMiddleware>();
 app.UseAuthorization();
 
 app.MapGet(
