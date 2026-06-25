@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using ShrimpCam.Core.Abstractions;
 using ShrimpCam.Core.Cameras;
+using ShrimpCam.Infrastructure.Cameras;
 using ShrimpCam.Infrastructure.Cameras.Linux;
 using ShrimpCam.Infrastructure.Cameras.Windows;
 using ShrimpCam.Infrastructure.IO;
@@ -16,6 +17,7 @@ public static class DependencyInjection
         services.AddSingleton<IClock, SystemClock>();
         services.AddSingleton<IFileSystem, SystemFileSystem>();
         services.AddSingleton<IProcessRunner, ProcessRunner>();
+        services.AddSingleton<ICameraCommandFactory, CameraCommandFactory>();
         services.AddSingleton<ILinuxCameraDiscovery, LinuxCameraDiscovery>();
         services.AddSingleton<IWindowsCameraDiscovery, WindowsCameraDiscovery>();
 
