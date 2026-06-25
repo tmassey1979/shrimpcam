@@ -19,6 +19,7 @@ Establish the production-ready foundation for Shrimp Cam by scaffolding the solu
 | SC-PF-009 | Enforce coverage thresholds | Fail builds when backend coverage drops below the agreed minimum | SC-PF-008 |
 | SC-PF-010 | Publish build and version metadata | Produce deterministic build identity and runtime version visibility | SC-PF-001 |
 | SC-PF-011 | Provide CI and local quality commands | Align developer and CI execution paths for build verification | SC-PF-004, SC-PF-006, SC-PF-007, SC-PF-008, SC-PF-009, SC-PF-010 |
+| SC-PF-012 | Publish backend OpenAPI docs with Swashbuckle | Expose discoverable, environment-appropriate API documentation for the backend | SC-PF-001 |
 
 ---
 
@@ -319,6 +320,39 @@ Scenario: Fail with actionable gate output
   When the workflow stops
   Then the failing gate is clearly identified
   And the developer can determine the next corrective action from the output
+```
+
+## SC-PF-012 - Publish backend OpenAPI docs with Swashbuckle
+
+**User Story**  
+As a backend integrator, I want the Shrimp Cam API documented with Swashbuckle so that developers and operators can discover, test, and validate backend endpoints consistently.
+
+**Dependencies**  
+SC-PF-001
+
+**Test Expectations**  
+Verify the backend registers Swashbuckle/OpenAPI generation; verify the OpenAPI document includes the backend endpoints and response metadata exposed at the current stage; verify Swagger UI is available in approved environments; verify production configuration can disable or protect interactive docs according to the agreed hosting rule.
+
+**Acceptance Criteria**
+
+```gherkin
+Scenario: Serve an OpenAPI document for the backend
+  Given the Shrimp Cam backend is running with API documentation enabled
+  When a developer requests the OpenAPI document endpoint
+  Then the backend returns a valid OpenAPI document
+  And the document includes the currently available backend endpoints
+
+Scenario: Expose Swagger UI in approved environments
+  Given the backend is running in a development or otherwise approved environment
+  When a developer opens the Swagger UI endpoint
+  Then the interactive API documentation loads successfully
+  And the UI is backed by the generated OpenAPI document
+
+Scenario: Restrict interactive docs when not allowed
+  Given the backend is running in an environment where interactive documentation is not allowed
+  When a client requests the Swagger UI endpoint
+  Then the backend does not expose the interactive documentation
+  And the behavior follows the configured environment rule
 ```
 
 ## Exit Criteria for the Epic

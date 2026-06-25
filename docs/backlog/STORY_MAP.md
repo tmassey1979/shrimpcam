@@ -21,6 +21,7 @@ These stories should land before most feature work begins:
 
 ### Wave 1: Security and platform bootstrapping
 
+- `SC-PF-012` Publish backend OpenAPI docs with Swashbuckle
 - `SC-ASO-301` SQLite schema and repository foundation
 - `SC-ASO-302` Local account authentication
 - `SC-ASO-303` Bootstrap administrator flow
@@ -71,7 +72,7 @@ These stories should land before most feature work begins:
 
 ## Priority guidance
 
-- `P0`: `SC-PF-001` through `SC-PF-009`, `SC-PF-011`, `SC-ASO-301` through `SC-ASO-316`, `SC-CC-01` through `SC-CC-09`, `SC-PWA-01` through `SC-PWA-10`
+- `P0`: `SC-PF-001` through `SC-PF-009`, `SC-PF-011`, `SC-PF-012`, `SC-ASO-301` through `SC-ASO-316`, `SC-CC-01` through `SC-CC-09`, `SC-PWA-01` through `SC-PWA-10`
 - `P1`: `SC-ASO-313`, `SC-ASO-314`, `SC-CC-10`
 - `P2`: `SC-CC-11`, `SC-PF-010`
 
