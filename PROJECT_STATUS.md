@@ -6,7 +6,7 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 17:01:37 -05:00 |
+| Last refreshed | 2026-06-25 17:03:58 -05:00 |
 | Total stories | 64 |
 | Accepted stories | 64 |
 | Remaining stories | 0 |
@@ -25,7 +25,7 @@
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
-| SC-CAM-18 | Kill Still-Capture Child Processes On Cancellation And Timeout | Epic 2: Camera, Capture, and Streaming | 2026-06-25 |  |
+| SC-CAM-18 | Kill Still-Capture Child Processes On Cancellation And Timeout | Epic 2: Camera, Capture, and Streaming | 2026-06-25 | 10d96c0 |
 | SC-PWA-17 | Automated Accessibility Regression Coverage | Epic 4: PWA Product Experience | 2026-06-25 | bd5c442 |
 | SC-OPS-321 | Gate Release Image Publishing And First-Boot Networking | Epic 3: API, Security, and Operations | 2026-06-25 | dfaac59 |
 | SC-PWA-16 | Complete PWA Lifecycle Playwright Coverage | Epic 4: PWA Product Experience | 2026-06-25 | f463413 |
