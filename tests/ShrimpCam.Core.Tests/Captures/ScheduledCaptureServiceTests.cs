@@ -3,6 +3,7 @@ using ShrimpCam.Core.Abstractions;
 using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Captures;
 using ShrimpCam.Core.Configuration;
+using ShrimpCam.Core.Persistence;
 
 #pragma warning disable CA2007
 
@@ -17,6 +18,7 @@ public sealed class ScheduledCaptureServiceTests
         var asyncDelay = Substitute.For<IAsyncDelay>();
         var commandFactory = Substitute.For<ICameraCommandFactory>();
         var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var captureRecordRepository = Substitute.For<ICaptureRecordRepository>();
         var captureStorage = Substitute.For<ICaptureStorage>();
         var clock = Substitute.For<IClock>();
         var fileSystem = Substitute.For<IFileSystem>();
@@ -30,6 +32,7 @@ public sealed class ScheduledCaptureServiceTests
             "data/images/2026/06/24/scheduled.jpg",
             "data/images/2026/06/24/scheduled.json",
             "2026/06/24/scheduled.jpg",
+            "2026/06/24/scheduled.json",
             "scheduled.jpg",
             dueInterval,
             CaptureSourceTypes.Scheduled);
@@ -53,6 +56,7 @@ public sealed class ScheduledCaptureServiceTests
             asyncDelay,
             commandFactory,
             cameraStatusService,
+            captureRecordRepository,
             captureStorage,
             clock,
             fileSystem,
@@ -63,6 +67,16 @@ public sealed class ScheduledCaptureServiceTests
 
         result.Outcome.Should().Be(ScheduledCaptureOutcome.Captured);
         result.Capture.Should().Be(storedCapture);
+        await captureRecordRepository.Received(1)
+            .CreateAsync(
+                Arg.Is<CaptureRecord>(record =>
+                    record.RelativeImagePath == storedCapture.RelativeImagePath
+                    && record.RelativeMetadataPath == storedCapture.RelativeMetadataPath
+                    && record.FileName == storedCapture.FileName
+                    && record.SourceType == CaptureSourceTypes.Scheduled
+                    && record.CapturedAtUtc == dueInterval),
+                Arg.Any<CancellationToken>())
+            .ConfigureAwait(true);
         cameraStatusService.Received(1).ReportOnline();
         await stateStore.Received(1).SaveAsync(
                 options.Storage,
@@ -97,6 +111,7 @@ public sealed class ScheduledCaptureServiceTests
             asyncDelay,
             Substitute.For<ICameraCommandFactory>(),
             cameraStatusService,
+            Substitute.For<ICaptureRecordRepository>(),
             Substitute.For<ICaptureStorage>(),
             CreateClock(new DateTimeOffset(2026, 06, 24, 12, 03, 00, TimeSpan.Zero)),
             Substitute.For<IFileSystem>(),
@@ -117,6 +132,7 @@ public sealed class ScheduledCaptureServiceTests
         var asyncDelay = Substitute.For<IAsyncDelay>();
         var commandFactory = Substitute.For<ICameraCommandFactory>();
         var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var captureRecordRepository = Substitute.For<ICaptureRecordRepository>();
         var captureStorage = Substitute.For<ICaptureStorage>();
         var clock = Substitute.For<IClock>();
         var fileSystem = Substitute.For<IFileSystem>();
@@ -132,6 +148,7 @@ public sealed class ScheduledCaptureServiceTests
             asyncDelay,
             commandFactory,
             cameraStatusService,
+            captureRecordRepository,
             captureStorage,
             clock,
             fileSystem,
@@ -142,6 +159,7 @@ public sealed class ScheduledCaptureServiceTests
 
         result.Outcome.Should().Be(ScheduledCaptureOutcome.SkippedBySchedule);
         await captureStorage.DidNotReceiveWithAnyArgs().StoreAsync(default!, default!, default).ConfigureAwait(true);
+        await captureRecordRepository.DidNotReceiveWithAnyArgs().CreateAsync(default!, default).ConfigureAwait(true);
         await stateStore.Received(1).SaveAsync(
                 options.Storage,
                 new ScheduledCaptureState(skippedInterval, ScheduledCaptureOutcome.SkippedBySchedule, null),
@@ -156,6 +174,7 @@ public sealed class ScheduledCaptureServiceTests
         var asyncDelay = Substitute.For<IAsyncDelay>();
         var commandFactory = Substitute.For<ICameraCommandFactory>();
         var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var captureRecordRepository = Substitute.For<ICaptureRecordRepository>();
         var captureStorage = Substitute.For<ICaptureStorage>();
         var clock = Substitute.For<IClock>();
         var fileSystem = Substitute.For<IFileSystem>();
@@ -178,6 +197,7 @@ public sealed class ScheduledCaptureServiceTests
             asyncDelay,
             commandFactory,
             cameraStatusService,
+            captureRecordRepository,
             captureStorage,
             clock,
             fileSystem,
@@ -188,6 +208,7 @@ public sealed class ScheduledCaptureServiceTests
 
         result.Outcome.Should().Be(ScheduledCaptureOutcome.Failed);
         result.FailureReason.Should().Be(ManualCaptureFailureReasons.CameraUnavailable);
+        await captureRecordRepository.DidNotReceiveWithAnyArgs().CreateAsync(default!, default).ConfigureAwait(true);
         fileSystem.Received(3).DeleteFile(stagedPath);
         await asyncDelay.Received(2).DelayAsync(Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>()).ConfigureAwait(true);
         cameraStatusService.Received(1).ReportDegraded(ManualCaptureFailureReasons.CameraUnavailable);
@@ -205,6 +226,7 @@ public sealed class ScheduledCaptureServiceTests
         var asyncDelay = Substitute.For<IAsyncDelay>();
         var commandFactory = Substitute.For<ICameraCommandFactory>();
         var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var captureRecordRepository = Substitute.For<ICaptureRecordRepository>();
         var captureStorage = Substitute.For<ICaptureStorage>();
         var clock = Substitute.For<IClock>();
         var fileSystem = Substitute.For<IFileSystem>();
@@ -218,6 +240,7 @@ public sealed class ScheduledCaptureServiceTests
             "data/images/2026/06/24/scheduled.jpg",
             "data/images/2026/06/24/scheduled.json",
             "2026/06/24/scheduled.jpg",
+            "2026/06/24/scheduled.json",
             "scheduled.jpg",
             dueInterval,
             CaptureSourceTypes.Scheduled);
@@ -238,6 +261,7 @@ public sealed class ScheduledCaptureServiceTests
             asyncDelay,
             commandFactory,
             cameraStatusService,
+            captureRecordRepository,
             captureStorage,
             clock,
             fileSystem,
@@ -247,6 +271,9 @@ public sealed class ScheduledCaptureServiceTests
         var result = await service.RunDueCaptureAsync(options, CancellationToken.None).ConfigureAwait(true);
 
         result.Outcome.Should().Be(ScheduledCaptureOutcome.Captured);
+        await captureRecordRepository.Received(1)
+            .CreateAsync(Arg.Any<CaptureRecord>(), Arg.Any<CancellationToken>())
+            .ConfigureAwait(true);
         await asyncDelay.Received(1)
             .DelayAsync(TimeSpan.FromSeconds(1), Arg.Any<CancellationToken>())
             .ConfigureAwait(true);

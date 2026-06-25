@@ -1,8 +1,10 @@
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using ShrimpCam.Core.Abstractions;
 using ShrimpCam.Core.Captures;
 using ShrimpCam.Core.Configuration;
+using ShrimpCam.Core.Persistence;
 using ShrimpCam.Infrastructure.Captures;
 
 #pragma warning disable CA2007
@@ -22,28 +24,45 @@ public sealed class ScheduledCaptureIntegrationTests
             var services = new ServiceCollection();
             var clock = new FixedClock(new DateTimeOffset(2026, 06, 24, 12, 03, 00, TimeSpan.Zero));
             var processRunner = new StubProcessRunner(shouldFail: false);
+            var options = CreateOptions(rootPath, enabled: true);
 
             Infrastructure.DependencyInjection.AddInfrastructure(services);
+            services.AddSingleton(Microsoft.Extensions.Options.Options.Create(options));
             services.AddSingleton<IClock>(clock);
             services.AddSingleton<IProcessRunner>(processRunner);
 
-            using var provider = services.BuildServiceProvider();
-            var scheduler = provider.GetRequiredService<IScheduledCaptureService>();
+            CaptureRecordPage capturePage;
+            await using (var provider = services.BuildServiceProvider())
+            {
+                await provider.GetRequiredService<IApplicationDataInitializer>()
+                    .InitializeAsync(options.Storage, CancellationToken.None)
+                    .ConfigureAwait(true);
 
-            var options = CreateOptions(rootPath, enabled: true);
+                var scheduler = provider.GetRequiredService<IScheduledCaptureService>();
 
-            var firstResult = await scheduler.RunDueCaptureAsync(options, CancellationToken.None).ConfigureAwait(true);
-            var secondResult = await scheduler.RunDueCaptureAsync(options, CancellationToken.None).ConfigureAwait(true);
+                var firstResult = await scheduler.RunDueCaptureAsync(options, CancellationToken.None).ConfigureAwait(true);
+                var secondResult = await scheduler.RunDueCaptureAsync(options, CancellationToken.None).ConfigureAwait(true);
 
-            firstResult.Outcome.Should().Be(ScheduledCaptureOutcome.Captured);
-            secondResult.Outcome.Should().Be(ScheduledCaptureOutcome.Waiting);
-            processRunner.InvocationCount.Should().Be(1);
+                firstResult.Outcome.Should().Be(ScheduledCaptureOutcome.Captured);
+                secondResult.Outcome.Should().Be(ScheduledCaptureOutcome.Waiting);
+                processRunner.InvocationCount.Should().Be(1);
 
-            var imageFiles = Directory.GetFiles(rootPath, "*.jpg", SearchOption.AllDirectories);
-            imageFiles.Should().ContainSingle();
+                var imageFiles = Directory.GetFiles(rootPath, "*.jpg", SearchOption.AllDirectories);
+                imageFiles.Should().ContainSingle();
+
+                capturePage = await provider.GetRequiredService<ICaptureRecordRepository>()
+                    .ListAsync(new CaptureRecordQuery(null, null, 1, 10), CancellationToken.None)
+                    .ConfigureAwait(true);
+                capturePage.Items.Should().ContainSingle(record =>
+                    record.RelativeImagePath == firstResult.Capture!.RelativeImagePath
+                    && record.RelativeMetadataPath == firstResult.Capture.RelativeMetadataPath
+                    && record.SourceType == CaptureSourceTypes.Scheduled);
+            }
         }
         finally
         {
+            SqliteConnection.ClearAllPools();
+
             if (Directory.Exists(rootPath))
             {
                 Directory.Delete(rootPath, recursive: true);
@@ -94,7 +113,9 @@ public sealed class ScheduledCaptureIntegrationTests
             },
             Storage = new StorageOptions
             {
+                DatabasePath = Path.Combine(rootPath, "shrimpcam.db"),
                 ImageRootPath = rootPath,
+                TimelapseRootPath = Path.Combine(rootPath, "timelapse"),
                 RetentionDays = 30,
             },
         };

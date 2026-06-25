@@ -1,11 +1,13 @@
 using ShrimpCam.Core.Abstractions;
 using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Configuration;
+using ShrimpCam.Core.Persistence;
 
 namespace ShrimpCam.Core.Captures;
 
 public sealed class ManualCaptureService(
     ICameraCommandFactory cameraCommandFactory,
+    ICaptureRecordRepository captureRecordRepository,
     ICaptureStorage captureStorage,
     IClock clock,
     IFileSystem fileSystem,
@@ -36,6 +38,8 @@ public sealed class ManualCaptureService(
                     cancellationToken)
                 .ConfigureAwait(false);
 
+            await captureRecordRepository.CreateAsync(storedCapture.ToCaptureRecord(), cancellationToken).ConfigureAwait(false);
+
             return ManualCaptureResult.Success(storedCapture);
         }
         catch
@@ -52,4 +56,16 @@ public sealed class ManualCaptureService(
             fileSystem.DeleteFile(stagedFilePath);
         }
     }
+}
+
+internal static class StoredCapturePersistenceMapping
+{
+    public static CaptureRecord ToCaptureRecord(this StoredCapture capture) =>
+        new(
+            Guid.NewGuid(),
+            capture.RelativeImagePath,
+            capture.RelativeMetadataPath,
+            capture.FileName,
+            capture.SourceType,
+            capture.CapturedAtUtc);
 }

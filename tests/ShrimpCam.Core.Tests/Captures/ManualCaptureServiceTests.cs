@@ -3,6 +3,7 @@ using ShrimpCam.Core.Abstractions;
 using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Captures;
 using ShrimpCam.Core.Configuration;
+using ShrimpCam.Core.Persistence;
 
 #pragma warning disable CA2007
 
@@ -15,6 +16,7 @@ public sealed class ManualCaptureServiceTests
     public async Task Successful_manual_capture_stores_image_as_manual_source()
     {
         var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var captureRecordRepository = Substitute.For<ICaptureRecordRepository>();
         var captureStorage = Substitute.For<ICaptureStorage>();
         var clock = Substitute.For<IClock>();
         var fileSystem = Substitute.For<IFileSystem>();
@@ -27,6 +29,7 @@ public sealed class ManualCaptureServiceTests
             "data/images/2026/06/24/manual.jpg",
             "data/images/2026/06/24/manual.json",
             "2026/06/24/manual.jpg",
+            "2026/06/24/manual.json",
             "manual.jpg",
             captureTime,
             CaptureSourceTypes.Manual);
@@ -45,12 +48,22 @@ public sealed class ManualCaptureServiceTests
                 Arg.Any<CancellationToken>())
             .Returns(storedCapture);
 
-        var service = new ManualCaptureService(commandFactory, captureStorage, clock, fileSystem, processRunner);
+        var service = new ManualCaptureService(commandFactory, captureRecordRepository, captureStorage, clock, fileSystem, processRunner);
 
         var result = await service.CaptureAsync(options, CancellationToken.None).ConfigureAwait(true);
 
         result.Succeeded.Should().BeTrue();
         result.Capture.Should().Be(storedCapture);
+        await captureRecordRepository.Received(1)
+            .CreateAsync(
+                Arg.Is<CaptureRecord>(record =>
+                    record.RelativeImagePath == storedCapture.RelativeImagePath
+                    && record.RelativeMetadataPath == storedCapture.RelativeMetadataPath
+                    && record.FileName == storedCapture.FileName
+                    && record.SourceType == CaptureSourceTypes.Manual
+                    && record.CapturedAtUtc == captureTime),
+                Arg.Any<CancellationToken>())
+            .ConfigureAwait(true);
     }
 
     [Fact]
@@ -58,6 +71,7 @@ public sealed class ManualCaptureServiceTests
     public async Task Failed_manual_capture_returns_camera_unavailable_without_persisting_metadata()
     {
         var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var captureRecordRepository = Substitute.For<ICaptureRecordRepository>();
         var captureStorage = Substitute.For<ICaptureStorage>();
         var clock = Substitute.For<IClock>();
         var fileSystem = Substitute.For<IFileSystem>();
@@ -72,7 +86,7 @@ public sealed class ManualCaptureServiceTests
         processRunner.RunAsync(command, Arg.Any<CancellationToken>())
             .Returns(new ProcessResult(1, string.Empty, "camera unavailable"));
 
-        var service = new ManualCaptureService(commandFactory, captureStorage, clock, fileSystem, processRunner);
+        var service = new ManualCaptureService(commandFactory, captureRecordRepository, captureStorage, clock, fileSystem, processRunner);
 
         var result = await service.CaptureAsync(options, CancellationToken.None).ConfigureAwait(true);
 
@@ -80,6 +94,9 @@ public sealed class ManualCaptureServiceTests
         result.FailureReason.Should().Be(ManualCaptureFailureReasons.CameraUnavailable);
         await captureStorage.DidNotReceiveWithAnyArgs()
             .StoreAsync(default!, default!, default)
+            .ConfigureAwait(true);
+        await captureRecordRepository.DidNotReceiveWithAnyArgs()
+            .CreateAsync(default!, default)
             .ConfigureAwait(true);
         fileSystem.Received(1).DeleteFile(stagedPath);
     }

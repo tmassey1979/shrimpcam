@@ -1,6 +1,7 @@
 using ShrimpCam.Core.Abstractions;
 using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Configuration;
+using ShrimpCam.Core.Persistence;
 
 namespace ShrimpCam.Core.Captures;
 
@@ -8,6 +9,7 @@ public sealed class ScheduledCaptureService(
     IAsyncDelay asyncDelay,
     ICameraCommandFactory cameraCommandFactory,
     ICameraStatusService cameraStatusService,
+    ICaptureRecordRepository captureRecordRepository,
     ICaptureStorage captureStorage,
     IClock clock,
     IFileSystem fileSystem,
@@ -113,6 +115,8 @@ public sealed class ScheduledCaptureService(
                     new CaptureStorageRequest(plan.IntervalStartUtc, CaptureSourceTypes.Scheduled, stagedFilePath),
                     cancellationToken)
                 .ConfigureAwait(false);
+
+            await captureRecordRepository.CreateAsync(capture.ToCaptureRecord(), cancellationToken).ConfigureAwait(false);
 
             cameraStatusService.ReportOnline();
 

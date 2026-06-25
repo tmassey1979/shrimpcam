@@ -65,6 +65,7 @@ internal sealed class FileSystemCaptureStorage(IFileSystem fileSystem) : ICaptur
                 imagePath,
                 metadataPath,
                 Path.GetRelativePath(rootPath, imagePath).Replace('\\', '/'),
+                Path.GetRelativePath(rootPath, metadataPath).Replace('\\', '/'),
                 Path.GetFileName(imagePath),
                 request.CapturedAtUtc,
                 request.SourceType));

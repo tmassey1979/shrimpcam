@@ -3,6 +3,7 @@ using ShrimpCam.Core.Abstractions;
 using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Captures;
 using ShrimpCam.Core.Configuration;
+using ShrimpCam.Core.Persistence;
 
 namespace ShrimpCam.Core.Tests.Captures;
 
@@ -14,6 +15,7 @@ public sealed class MotionHighlightServiceTests
     {
         var cameraCommandFactory = Substitute.For<ICameraCommandFactory>();
         var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var captureRecordRepository = Substitute.For<ICaptureRecordRepository>();
         var captureStorage = Substitute.For<ICaptureStorage>();
         var fileSystem = Substitute.For<IFileSystem>();
         var processRunner = Substitute.For<IProcessRunner>();
@@ -23,6 +25,7 @@ public sealed class MotionHighlightServiceTests
             "data/images/2026/06/25/20260625T001000000Z_motionhighlight.jpg",
             "data/images/2026/06/25/20260625T001000000Z_motionhighlight.json",
             "2026/06/25/20260625T001000000Z_motionhighlight.jpg",
+            "2026/06/25/20260625T001000000Z_motionhighlight.json",
             "20260625T001000000Z_motionhighlight.jpg",
             motionEvent.OccurredAtUtc,
             CaptureSourceTypes.MotionHighlight);
@@ -46,6 +49,7 @@ public sealed class MotionHighlightServiceTests
         var service = new MotionHighlightService(
             cameraCommandFactory,
             cameraStatusService,
+            captureRecordRepository,
             captureStorage,
             fileSystem,
             processRunner,
@@ -55,6 +59,16 @@ public sealed class MotionHighlightServiceTests
 
         result.Outcome.Should().Be(MotionHighlightOutcome.Captured);
         result.Capture.Should().BeSameAs(storedCapture);
+        await captureRecordRepository.Received(1)
+            .CreateAsync(
+                Arg.Is<CaptureRecord>(record =>
+                    record.RelativeImagePath == storedCapture.RelativeImagePath
+                    && record.RelativeMetadataPath == storedCapture.RelativeMetadataPath
+                    && record.FileName == storedCapture.FileName
+                    && record.SourceType == CaptureSourceTypes.MotionHighlight
+                    && record.CapturedAtUtc == motionEvent.OccurredAtUtc),
+                Arg.Any<CancellationToken>())
+            .ConfigureAwait(true);
         cameraStatusService.Received(1).ReportOnline();
         await stateStore.Received(1).SaveAsync(
                 Arg.Any<StorageOptions>(),
@@ -84,6 +98,7 @@ public sealed class MotionHighlightServiceTests
         var service = new MotionHighlightService(
             cameraCommandFactory,
             cameraStatusService,
+            Substitute.For<ICaptureRecordRepository>(),
             captureStorage,
             fileSystem,
             processRunner,
@@ -119,6 +134,7 @@ public sealed class MotionHighlightServiceTests
         var service = new MotionHighlightService(
             cameraCommandFactory,
             cameraStatusService,
+            Substitute.For<ICaptureRecordRepository>(),
             captureStorage,
             fileSystem,
             processRunner,
@@ -165,6 +181,7 @@ public sealed class MotionHighlightServiceTests
         var service = new MotionHighlightService(
             cameraCommandFactory,
             cameraStatusService,
+            Substitute.For<ICaptureRecordRepository>(),
             captureStorage,
             fileSystem,
             processRunner,
@@ -195,6 +212,7 @@ public sealed class MotionHighlightServiceTests
         var service = new MotionHighlightService(
             cameraCommandFactory,
             cameraStatusService,
+            Substitute.For<ICaptureRecordRepository>(),
             captureStorage,
             fileSystem,
             processRunner,
@@ -217,6 +235,7 @@ public sealed class MotionHighlightServiceTests
     {
         var cameraCommandFactory = Substitute.For<ICameraCommandFactory>();
         var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var captureRecordRepository = Substitute.For<ICaptureRecordRepository>();
         var captureStorage = Substitute.For<ICaptureStorage>();
         var fileSystem = Substitute.For<IFileSystem>();
         var processRunner = Substitute.For<IProcessRunner>();
@@ -234,6 +253,7 @@ public sealed class MotionHighlightServiceTests
         var service = new MotionHighlightService(
             cameraCommandFactory,
             cameraStatusService,
+            captureRecordRepository,
             captureStorage,
             fileSystem,
             processRunner,
@@ -245,6 +265,7 @@ public sealed class MotionHighlightServiceTests
         result.FailureReason.Should().Be(ManualCaptureFailureReasons.CameraUnavailable);
         cameraStatusService.Received(1).ReportDegraded(ManualCaptureFailureReasons.CameraUnavailable);
         await captureStorage.DidNotReceiveWithAnyArgs().StoreAsync(default!, default!, default).ConfigureAwait(true);
+        await captureRecordRepository.DidNotReceiveWithAnyArgs().CreateAsync(default!, default).ConfigureAwait(true);
     }
 
     [Fact]
@@ -254,6 +275,7 @@ public sealed class MotionHighlightServiceTests
         var service = new MotionHighlightService(
             Substitute.For<ICameraCommandFactory>(),
             Substitute.For<ICameraStatusService>(),
+            Substitute.For<ICaptureRecordRepository>(),
             Substitute.For<ICaptureStorage>(),
             Substitute.For<IFileSystem>(),
             Substitute.For<IProcessRunner>(),

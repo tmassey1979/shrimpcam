@@ -2,12 +2,14 @@ using System.ComponentModel.DataAnnotations;
 using ShrimpCam.Core.Abstractions;
 using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Configuration;
+using ShrimpCam.Core.Persistence;
 
 namespace ShrimpCam.Core.Captures;
 
 public sealed class MotionHighlightService(
     ICameraCommandFactory cameraCommandFactory,
     ICameraStatusService cameraStatusService,
+    ICaptureRecordRepository captureRecordRepository,
     ICaptureStorage captureStorage,
     IFileSystem fileSystem,
     IProcessRunner processRunner,
@@ -78,6 +80,8 @@ public sealed class MotionHighlightService(
                     new CaptureStorageRequest(motionEvent.OccurredAtUtc, CaptureSourceTypes.MotionHighlight, stagedFilePath),
                     cancellationToken)
                 .ConfigureAwait(false);
+
+            await captureRecordRepository.CreateAsync(storedCapture.ToCaptureRecord(), cancellationToken).ConfigureAwait(false);
 
             cameraStatusService.ReportOnline();
 

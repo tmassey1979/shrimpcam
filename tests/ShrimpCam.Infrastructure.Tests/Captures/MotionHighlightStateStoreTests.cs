@@ -51,12 +51,31 @@ public sealed class MotionHighlightStateStoreTests
     public void Infrastructure_registers_motion_highlight_services()
     {
         var services = new ServiceCollection();
+        var rootPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+
         Infrastructure.DependencyInjection.AddInfrastructure(services);
+        services.AddSingleton(
+            Microsoft.Extensions.Options.Options.Create(
+                new ShrimpCamOptions
+                {
+                    Storage = new StorageOptions
+                    {
+                        DatabasePath = Path.Combine(rootPath, "shrimpcam.db"),
+                        ImageRootPath = Path.Combine(rootPath, "images"),
+                        TimelapseRootPath = Path.Combine(rootPath, "timelapse"),
+                        RetentionDays = 30,
+                    },
+                }));
 
         using var provider = services.BuildServiceProvider();
 
         provider.GetRequiredService<IMotionHighlightStateStore>().Should().NotBeNull();
         provider.GetRequiredService<IMotionHighlightService>().Should().NotBeNull();
+
+        if (Directory.Exists(rootPath))
+        {
+            Directory.Delete(rootPath, recursive: true);
+        }
     }
 }
 
