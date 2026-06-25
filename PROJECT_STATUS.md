@@ -6,18 +6,18 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-24 22:47:32 -05:00 |
+| Last refreshed | 2026-06-24 22:52:32 -05:00 |
 | Total stories | 49 |
-| Accepted stories | 12 |
-| Remaining stories | 37 |
-| Overall completion | 24.5% |
+| Accepted stories | 13 |
+| Remaining stories | 36 |
+| Overall completion | 26.5% |
 
 ## Epic Progress
 
 | Epic | Accepted | Total | Complete |
 | --- | --- | --- | --- |
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
-| Epic 2: Camera, Capture, and Streaming | 0 | 11 | 0% |
+| Epic 2: Camera, Capture, and Streaming | 1 | 11 | 9.1% |
 | Epic 3: API, Security, and Operations | 0 | 16 | 0% |
 | Epic 4: PWA Product Experience | 0 | 10 | 0% |
 
@@ -25,17 +25,16 @@
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-CC-01 | Discover Cameras on Linux Hosts | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 | SC-PF-010 | Publish build and version metadata | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 |  |
 | SC-PF-009 | Enforce coverage thresholds | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 |  |
 | SC-PF-002 | Enforce clean architecture boundaries | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 |  |
 | SC-PF-008 | Enable TDD-oriented test workflow | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 | fc106a6 |
-| SC-PF-007 | Treat warnings as errors | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 | d96d388 |
 
 ## Next Unaccepted Stories
 
 | Story | Title | Epic |
 | --- | --- | --- |
-| SC-CC-01 | Discover Cameras on Linux Hosts | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-02 | Discover Cameras on Windows Hosts | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-03 | Generate OS-Specific Camera Commands | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-04 | Capture a Manual Snapshot | Epic 2: Camera, Capture, and Streaming |
@@ -45,3 +44,4 @@
 | SC-CC-08 | Store Captures with Deterministic Naming and Layout | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-09 | Clean Up Expired Capture Files | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-10 | Generate Daily Timelapse Videos | Epic 2: Camera, Capture, and Streaming |
+| SC-CC-11 | Capture Motion-Triggered Highlights | Epic 2: Camera, Capture, and Streaming |
