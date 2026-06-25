@@ -1,0 +1,13 @@
+[Unit]
+Description=Shrimp Cam first boot provisioning
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=!/opt/shrimpcam/.firstboot-complete
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/shrimpcam-firstboot.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,16 @@
+[Unit]
+Description=Shrimp Cam API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/shrimpcam/api
+EnvironmentFile=-/etc/default/shrimpcam-api
+ExecStart=/opt/shrimpcam/api/ShrimpCam.Api
+Restart=always
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target

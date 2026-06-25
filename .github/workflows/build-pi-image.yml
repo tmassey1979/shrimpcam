@@ -1,0 +1,68 @@
+name: build-pi-image
+
+on:
+  workflow_dispatch:
+    inputs:
+      hostname:
+        description: Hostname to bake into the image
+        required: true
+        default: shrimpcam
+      image_url:
+        description: Raspberry Pi OS Lite image URL
+        required: true
+        default: https://downloads.raspberrypi.com/raspios_lite_arm64_latest
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: src/ShrimpCam.Web/package-lock.json
+
+      - name: Install image tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends unzip xz-utils kpartx dosfstools e2fsprogs rsync
+
+      - name: Publish Shrimp Cam for Raspberry Pi
+        shell: pwsh
+        run: |
+          ./scripts/publish-shrimpcam.ps1 `
+            -Runtime linux-arm64 `
+            -Configuration Release `
+            -OutputRoot artifacts/publish/pi
+
+      - name: Build Raspberry Pi image
+        env:
+          SHRIMPCAM_HOSTNAME: ${{ inputs.hostname }}
+          SHRIMPCAM_WIFI_SSID: ${{ secrets.PI_WIFI_SSID }}
+          SHRIMPCAM_WIFI_PSK: ${{ secrets.PI_WIFI_PSK }}
+          SHRIMPCAM_WIFI_COUNTRY: ${{ secrets.PI_WIFI_COUNTRY }}
+        run: |
+          chmod +x scripts/pi-image/build-pi-image.sh deploy/raspberry-pi/firstboot-provision.sh
+          ./scripts/pi-image/build-pi-image.sh \
+            "${{ inputs.image_url }}" \
+            "artifacts/publish/pi/api" \
+            "artifacts/publish/pi/web" \
+            "artifacts/pi-image"
+
+      - name: Upload image artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: shrimpcam-pi-image
+          path: artifacts/pi-image/*
