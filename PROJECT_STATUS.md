@@ -6,7 +6,7 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 17:05:48 -05:00 |
+| Last refreshed | 2026-06-25 17:08:04 -05:00 |
 | Total stories | 65 |
 | Accepted stories | 65 |
 | Remaining stories | 0 |
@@ -25,7 +25,7 @@
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
-| SC-CAM-19 | Make Scheduled Capture Worker Exception-Resilient | Epic 2: Camera, Capture, and Streaming | 2026-06-25 |  |
+| SC-CAM-19 | Make Scheduled Capture Worker Exception-Resilient | Epic 2: Camera, Capture, and Streaming | 2026-06-25 | 0a7fe1c |
 | SC-CAM-18 | Kill Still-Capture Child Processes On Cancellation And Timeout | Epic 2: Camera, Capture, and Streaming | 2026-06-25 | 10d96c0 |
 | SC-PWA-17 | Automated Accessibility Regression Coverage | Epic 4: PWA Product Experience | 2026-06-25 | bd5c442 |
 | SC-OPS-321 | Gate Release Image Publishing And First-Boot Networking | Epic 3: API, Security, and Operations | 2026-06-25 | dfaac59 |
