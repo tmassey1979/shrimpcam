@@ -1081,6 +1081,15 @@ function GalleryScreen({
   }
 
   const emptyState = !gallery.isLoading && !gallery.error && gallery.captures.length === 0;
+  const timelineDays = Array.from(
+    new Map(
+      gallery.captures.map((capture) => [
+        new Date(capture.capturedAtUtc).toISOString().slice(0, 10),
+        formatFilterDate(new Date(capture.capturedAtUtc).toISOString().slice(0, 10))
+      ])
+    ).entries()
+  );
+  const captureSources = Array.from(new Set(gallery.captures.map((capture) => capture.sourceType)));
 
   return (
     <ScreenFrame
@@ -1089,6 +1098,43 @@ function GalleryScreen({
     >
       <div className="gallery-layout">
         <section className="gallery-browser" aria-label="Capture browser">
+          <div className="gallery-timeline-header">
+            <div>
+              <p className="eyebrow">Timeline</p>
+              <h3>Recent shrimp moments</h3>
+            </div>
+            <span>{gallery.totalItems} indexed</span>
+          </div>
+
+          <div className="timeline-chip-row" aria-label="Capture timeline days">
+            {timelineDays.length > 0 ? (
+              timelineDays.map(([day, label]) => (
+                <button
+                  key={day}
+                  type="button"
+                  className={dateFilter === day ? "timeline-chip active" : "timeline-chip"}
+                  onClick={() => setDateFilter(day)}
+                >
+                  {label}
+                </button>
+              ))
+            ) : (
+              <span className="timeline-chip muted">No timeline days loaded</span>
+            )}
+          </div>
+
+          <div className="source-chip-row" aria-label="Capture source filters">
+            {captureSources.length > 0 ? (
+              captureSources.map((source) => (
+                <span key={source} className="source-chip">
+                  {source}
+                </span>
+              ))
+            ) : (
+              <span className="source-chip muted">Waiting for captures</span>
+            )}
+          </div>
+
           <div className="gallery-toolbar">
             <label>
               <span>Filter by day</span>
@@ -1130,7 +1176,7 @@ function GalleryScreen({
             </div>
           ) : null}
 
-          <div className="capture-list">
+          <div className="capture-list" aria-label="Capture thumbnail timeline">
             {!gallery.isLoading ? gallery.captures.map((capture) => (
               <button
                 type="button"
@@ -1154,6 +1200,13 @@ function GalleryScreen({
         <section className="viewer-card" aria-label="Focused capture viewer">
           {gallery.selectedCapture ? (
             <>
+              <div className="viewer-hero-header">
+                <div>
+                  <p className="eyebrow">Featured Capture</p>
+                  <h3>{formatDateTime(gallery.selectedCapture.capturedAtUtc)}</h3>
+                </div>
+                <span className="source-chip">{gallery.selectedCapture.sourceType}</span>
+              </div>
               <div className="viewer-frame">
                 {gallery.isImageLoading ? (
                   <div className="stream-fallback" role="status">
@@ -1179,7 +1232,7 @@ function GalleryScreen({
                 <p className="eyebrow">Focused Viewer</p>
                 <h3>{gallery.selectedCapture.fileName}</h3>
                 <p>Captured {formatDateTime(gallery.selectedCapture.capturedAtUtc)}.</p>
-                <div className="action-row">
+                <div className="gallery-action-bar" aria-label="Gallery capture actions">
                   {gallery.selectedImageUrl ? (
                     <a className="primary-button inline-link" href={gallery.selectedImageUrl} target="_blank" rel="noreferrer">
                       Open image

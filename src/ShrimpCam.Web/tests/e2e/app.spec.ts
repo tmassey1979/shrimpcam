@@ -84,11 +84,20 @@ test("browses gallery captures and applies a day filter", async ({ page }) => {
 
   await expect(page.getByRole("heading", { name: "Gallery" })).toBeVisible();
   await expect(page.getByText("2 captures found.")).toBeVisible();
+  await expect(page.getByLabel("Capture timeline days")).toContainText("Jun 25, 2026");
+  await expect(page.getByLabel("Capture source filters")).toContainText("Scheduled");
+  await expect(page.getByLabel("Capture source filters")).toContainText("Manual");
+  await expect(page.getByLabel("Capture thumbnail timeline")).toBeVisible();
+  await expect(page.getByText("Featured Capture")).toBeVisible();
   await expect(page.getByRole("button", { name: /20260625T195000000Z_scheduled.jpg/ })).toBeVisible();
   const captureImage = page.getByRole("img", { name: /Shrimp tank capture/ });
   await expect(captureImage).toBeVisible();
   await expect(captureImage).toHaveAttribute("src", /^blob:/);
   expect(imageAuthorizations).toContain("Bearer e2e-token");
+
+  await page.getByRole("button", { name: /20260625T195005491Z_manual.jpg/ }).click();
+  await expect(page.getByLabel("Focused capture viewer")).toContainText("Manual");
+  await expect(page.getByLabel("Gallery capture actions")).toBeVisible();
 
   await page.getByLabel("Filter captures by day").fill("2026-06-25");
   await expect(page.getByText(/2 captures found for/)).toBeVisible();

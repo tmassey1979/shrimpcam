@@ -851,6 +851,78 @@ select:focus-visible,
   background: var(--surface-strong);
 }
 
+.gallery-timeline-header,
+.viewer-hero-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.gallery-timeline-header h3,
+.viewer-hero-header h3 {
+  margin: 0;
+}
+
+.gallery-timeline-header span {
+  display: inline-flex;
+  min-width: max-content;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(124, 224, 234, 0.18);
+  border-radius: 999px;
+  color: var(--text-soft);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.timeline-chip-row,
+.source-chip-row {
+  display: flex;
+  gap: 0.55rem;
+  overflow-x: auto;
+  padding-bottom: 0.15rem;
+  scrollbar-width: thin;
+}
+
+.timeline-chip,
+.source-chip {
+  display: inline-flex;
+  align-items: center;
+  min-width: max-content;
+  border: 1px solid rgba(124, 224, 234, 0.22);
+  border-radius: 999px;
+  color: #f7feff;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+
+.timeline-chip {
+  min-height: 2.6rem;
+  padding: 0.55rem 0.85rem;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255, 248, 237, 0.18), transparent 55%),
+    rgba(124, 224, 234, 0.1);
+  cursor: pointer;
+}
+
+.timeline-chip.active {
+  border-color: rgba(255, 184, 118, 0.76);
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255, 248, 237, 0.24), transparent 55%),
+    linear-gradient(135deg, rgba(255, 184, 118, 0.36), rgba(54, 214, 198, 0.16));
+}
+
+.timeline-chip.muted,
+.source-chip.muted {
+  color: var(--text-soft);
+}
+
+.source-chip {
+  padding: 0.42rem 0.7rem;
+  background: rgba(8, 125, 142, 0.2);
+}
+
 .gallery-toolbar {
   display: grid;
   gap: 0.75rem;
@@ -897,13 +969,24 @@ select:focus-visible,
   display: grid;
   gap: 0.25rem;
   width: 100%;
+  min-width: 13.5rem;
   padding: 0.9rem;
   border: 1px solid rgba(124, 224, 234, 0.16);
   border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.045);
+  background:
+    radial-gradient(circle at 12% 12%, rgba(54, 214, 198, 0.14), transparent 5rem),
+    rgba(255, 255, 255, 0.045);
   color: #f7feff;
   text-align: left;
   cursor: pointer;
+}
+
+.capture-list {
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(13.5rem, 82%);
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scrollbar-width: thin;
 }
 
 .capture-list-item.active {
@@ -944,6 +1027,16 @@ select:focus-visible,
 
 .viewer-details p {
   color: var(--text-soft);
+}
+
+.gallery-action-bar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  padding: 0.65rem;
+  border: 1px solid rgba(255, 248, 237, 0.14);
+  border-radius: 1.2rem;
+  background: rgba(4, 27, 35, 0.5);
 }
 
 .settings-layout,
