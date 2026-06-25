@@ -44,10 +44,10 @@ internal sealed class CameraCommandFactory : ICameraCommandFactory
         {
             CameraPlatforms.Linux => new ProcessRequest(
                 "ffmpeg",
-                $"-hide_banner -loglevel error -f video4linux2 -framerate {options.StreamFramesPerSecond} -video_size {options.StreamWidth}x{options.StreamHeight} -i {QuoteLinuxSource(options.Source)} -f mjpeg -q:v 5 pipe:1"),
+                $"-hide_banner -loglevel error -f video4linux2 -framerate {options.StreamFramesPerSecond} -video_size {options.StreamWidth}x{options.StreamHeight} -i {QuoteLinuxSource(options.Source)} -f mpjpeg -boundary_tag {LiveStreamConstants.Boundary} -q:v 5 pipe:1"),
             CameraPlatforms.Windows => new ProcessRequest(
                 "ffmpeg",
-                $"-hide_banner -loglevel error -f dshow -framerate {options.StreamFramesPerSecond} -video_size {options.StreamWidth}x{options.StreamHeight} -i video={QuoteWindowsSource(options.Source)} -f mjpeg -q:v 5 pipe:1"),
+                $"-hide_banner -loglevel error -f dshow -framerate {options.StreamFramesPerSecond} -video_size {options.StreamWidth}x{options.StreamHeight} -i video={QuoteWindowsSource(options.Source)} -f mpjpeg -boundary_tag {LiveStreamConstants.Boundary} -q:v 5 pipe:1"),
             _ => throw new ValidationException($"Unsupported camera platform '{options.Platform}'."),
         };
     }

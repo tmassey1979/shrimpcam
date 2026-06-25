@@ -19,7 +19,9 @@ public static class DependencyInjection
         services.AddSingleton<IClock, SystemClock>();
         services.AddSingleton<IFileSystem, SystemFileSystem>();
         services.AddSingleton<IProcessRunner, ProcessRunner>();
+        services.AddSingleton<IProcessStreamRunner, ProcessStreamRunner>();
         services.AddSingleton<ICameraCommandFactory, CameraCommandFactory>();
+        services.AddSingleton<ICameraLiveStreamService, CameraLiveStreamService>();
         services.AddSingleton<ICaptureStorage, FileSystemCaptureStorage>();
         services.AddSingleton<IManualCaptureService, ManualCaptureService>();
         services.AddSingleton<IScheduledCaptureStateStore, ScheduledCaptureStateStore>();

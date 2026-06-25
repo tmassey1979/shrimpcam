@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using ShrimpCam.Api.Build;
 using ShrimpCam.Api.Configuration;
+using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Captures;
 using ShrimpCam.Core.Configuration;
 using ShrimpCam.Infrastructure;
@@ -67,6 +68,40 @@ app.MapPost(
                 relativeImagePath = result.Capture.RelativeImagePath,
                 metadataPath = result.Capture.MetadataPath,
             });
+    });
+
+app.MapGet(
+    "/stream/live",
+    async (ICameraLiveStreamService liveStreamService, IOptions<ShrimpCamOptions> options, CancellationToken cancellationToken) =>
+    {
+        var result = await liveStreamService.StartAsync(options.Value.Camera, cancellationToken).ConfigureAwait(false);
+
+        if (!result.Succeeded)
+        {
+            return Results.Json(
+                new
+                {
+                    status = "failed",
+                    reason = result.FailureReason,
+                },
+                statusCode: StatusCodes.Status503ServiceUnavailable);
+        }
+
+        var session = result.Session!;
+
+        return Results.Stream(
+            async (outputStream) =>
+            {
+                try
+                {
+                    await session.Content.CopyToAsync(outputStream, cancellationToken).ConfigureAwait(false);
+                }
+                finally
+                {
+                    await session.DisposeAsync().ConfigureAwait(false);
+                }
+            },
+            session.ContentType);
     });
 
 app.Run();

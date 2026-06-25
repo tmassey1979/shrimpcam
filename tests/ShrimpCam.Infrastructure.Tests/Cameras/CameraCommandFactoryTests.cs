@@ -75,7 +75,8 @@ public sealed class CameraCommandFactoryTests
         command.Arguments.Should().Contain("-framerate 24");
         command.Arguments.Should().Contain("-video_size 1920x1080");
         command.Arguments.Should().Contain("-i video=\"@device_pnp_\\\\\\\\?\\\\usb#vid_046d\"");
-        command.Arguments.Should().Contain("-f mjpeg");
+        command.Arguments.Should().Contain("-f mpjpeg");
+        command.Arguments.Should().Contain("-boundary_tag shrimpcam");
         command.Arguments.Should().Contain("pipe:1");
     }
 

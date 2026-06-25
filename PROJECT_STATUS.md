@@ -6,18 +6,18 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-24 23:26:21 -05:00 |
+| Last refreshed | 2026-06-24 23:37:51 -05:00 |
 | Total stories | 49 |
-| Accepted stories | 18 |
-| Remaining stories | 31 |
-| Overall completion | 36.7% |
+| Accepted stories | 19 |
+| Remaining stories | 30 |
+| Overall completion | 38.8% |
 
 ## Epic Progress
 
 | Epic | Accepted | Total | Complete |
 | --- | --- | --- | --- |
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
-| Epic 2: Camera, Capture, and Streaming | 6 | 11 | 54.5% |
+| Epic 2: Camera, Capture, and Streaming | 7 | 11 | 63.6% |
 | Epic 3: API, Security, and Operations | 0 | 16 | 0% |
 | Epic 4: PWA Product Experience | 0 | 10 | 0% |
 
@@ -25,17 +25,16 @@
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-CC-06 | Stream Live MJPEG Video | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 | SC-CC-05 | Run Scheduled Timelapse Capture | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 | SC-CC-04 | Capture a Manual Snapshot | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 | SC-CC-08 | Store Captures with Deterministic Naming and Layout | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 | SC-CC-03 | Generate OS-Specific Camera Commands | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
-| SC-CC-02 | Discover Cameras on Windows Hosts | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 
 ## Next Unaccepted Stories
 
 | Story | Title | Epic |
 | --- | --- | --- |
-| SC-CC-06 | Stream Live MJPEG Video | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-07 | Recover from Camera Disconnects and Stream Failures | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-09 | Clean Up Expired Capture Files | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-10 | Generate Daily Timelapse Videos | Epic 2: Camera, Capture, and Streaming |
@@ -45,3 +44,4 @@
 | SC-ASO-303 | Bootstrap administrator flow | Epic 3: API, Security, and Operations |
 | SC-ASO-304 | Authorization roles and policy enforcement | Epic 3: API, Security, and Operations |
 | SC-ASO-305 | Session or token lifecycle management | Epic 3: API, Security, and Operations |
+| SC-ASO-306 | Health and readiness endpoint | Epic 3: API, Security, and Operations |
