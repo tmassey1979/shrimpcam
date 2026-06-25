@@ -71,8 +71,11 @@ select:focus-visible,
 }
 
 .app-shell {
+  --bottom-nav-clearance: calc(7rem + env(safe-area-inset-bottom));
   min-height: 100vh;
-  padding: 0.8rem 0.8rem calc(6rem + env(safe-area-inset-bottom));
+  padding: 0.8rem 0.8rem var(--bottom-nav-clearance);
+  position: relative;
+  isolation: isolate;
 }
 
 .skip-link {
@@ -180,6 +183,7 @@ select:focus-visible,
 }
 
 .content {
+  position: relative;
   display: grid;
   gap: 1rem;
   margin-top: 1rem;
@@ -872,9 +876,11 @@ select:focus-visible,
 
 .bottom-nav {
   position: fixed;
+  z-index: 100;
   left: 1rem;
-  right: 1rem;
-  bottom: calc(1rem + env(safe-area-inset-bottom));
+  bottom: calc(1rem + env(safe-area-inset-bottom) + (100vh - 100svh));
+  width: calc(100svw - 2rem);
+  max-width: calc(100% - 2rem);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0.5rem;
@@ -923,9 +929,9 @@ select:focus-visible,
 
 @media (min-width: 768px) {
   .app-shell {
+    --bottom-nav-clearance: calc(7rem + env(safe-area-inset-bottom));
     max-width: 960px;
     margin: 0 auto;
-    padding-bottom: calc(7rem + env(safe-area-inset-bottom));
   }
 
   .screen,

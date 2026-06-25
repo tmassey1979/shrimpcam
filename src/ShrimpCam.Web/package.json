@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit && vite build",
     "preview": "vite preview",
-    "check": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit"
+    "check": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
+    "e2e": "playwright test",
+    "e2e:install": "playwright install chromium"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -15,6 +17,7 @@
     "react-router-dom": "^6.30.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",

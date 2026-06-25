@@ -75,9 +75,11 @@ type ManualCaptureResponse = {
 type GalleryState = {
   captures: CaptureSummary[];
   selectedCapture: CaptureSummary | null;
+  selectedImageUrl: string | null;
   totalItems: number;
   hasNextPage: boolean;
   isLoading: boolean;
+  isImageLoading: boolean;
   error: string | null;
   imageFailed: boolean;
 };
@@ -844,9 +846,11 @@ function GalleryScreen({
   const [gallery, setGallery] = useState<GalleryState>({
     captures: [],
     selectedCapture: null,
+    selectedImageUrl: null,
     totalItems: 0,
     hasNextPage: false,
     isLoading: true,
+    isImageLoading: false,
     error: null,
     imageFailed: false
   });
@@ -870,9 +874,11 @@ function GalleryScreen({
       setGallery({
         captures: payload.items,
         selectedCapture,
+        selectedImageUrl: null,
         totalItems: payload.paging.totalItems,
         hasNextPage: payload.paging.hasNextPage,
         isLoading: false,
+        isImageLoading: false,
         error: null,
         imageFailed: false
       });
@@ -898,8 +904,50 @@ function GalleryScreen({
     void loadGallery();
   }, [dateFilter, selectedCaptureId]);
 
+  useEffect(() => {
+    if (!gallery.selectedCapture) {
+      setGallery((current) => ({ ...current, selectedImageUrl: null, isImageLoading: false }));
+      return;
+    }
+
+    let revoked = false;
+    let objectUrl: string | null = null;
+    setGallery((current) => ({ ...current, selectedImageUrl: null, isImageLoading: true, imageFailed: false }));
+
+    async function loadSelectedImage(capture: CaptureSummary) {
+      try {
+        const response = await auth.authenticatedFetch(capture.imageUrl);
+        if (!response.ok) {
+          throw new Error("Capture image request failed.");
+        }
+
+        const blob = await response.blob();
+        objectUrl = URL.createObjectURL(blob);
+        if (revoked) {
+          URL.revokeObjectURL(objectUrl);
+          return;
+        }
+
+        setGallery((current) => ({ ...current, selectedImageUrl: objectUrl, isImageLoading: false, imageFailed: false }));
+      } catch {
+        if (!revoked) {
+          setGallery((current) => ({ ...current, selectedImageUrl: null, isImageLoading: false, imageFailed: true }));
+        }
+      }
+    }
+
+    void loadSelectedImage(gallery.selectedCapture);
+
+    return () => {
+      revoked = true;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [auth, gallery.selectedCapture?.id]);
+
   function selectCapture(capture: CaptureSummary) {
-    setGallery((current) => ({ ...current, selectedCapture: capture, imageFailed: false }));
+    setGallery((current) => ({ ...current, selectedCapture: capture, selectedImageUrl: null, imageFailed: false }));
   }
 
   function clearFilter() {
@@ -981,26 +1029,36 @@ function GalleryScreen({
           {gallery.selectedCapture ? (
             <>
               <div className="viewer-frame">
+                {gallery.isImageLoading ? (
+                  <div className="stream-fallback" role="status">
+                    <strong>Loading image</strong>
+                    <span>Fetching the protected capture with your signed-in session.</span>
+                  </div>
+                ) : null}
                 {gallery.imageFailed ? (
                   <div className="stream-fallback" role="alert">
                     <strong>Image unavailable</strong>
-                    <span>The capture metadata loaded, but the image file could not be displayed.</span>
+                    <span>The capture metadata loaded, but the protected image file could not be displayed.</span>
                   </div>
                 ) : null}
-                <img
-                  alt={`Shrimp tank capture from ${formatDateTime(gallery.selectedCapture.capturedAtUtc)}`}
-                  onError={() => setGallery((current) => ({ ...current, imageFailed: true }))}
-                  src={gallery.selectedCapture.imageUrl}
-                />
+                {gallery.selectedImageUrl ? (
+                  <img
+                    alt={`Shrimp tank capture from ${formatDateTime(gallery.selectedCapture.capturedAtUtc)}`}
+                    onError={() => setGallery((current) => ({ ...current, imageFailed: true }))}
+                    src={gallery.selectedImageUrl}
+                  />
+                ) : null}
               </div>
               <div className="viewer-details">
                 <p className="eyebrow">Focused Viewer</p>
                 <h3>{gallery.selectedCapture.fileName}</h3>
                 <p>Captured {formatDateTime(gallery.selectedCapture.capturedAtUtc)}.</p>
                 <div className="action-row">
-                  <a className="primary-button inline-link" href={gallery.selectedCapture.imageUrl} target="_blank" rel="noreferrer">
-                    Open image
-                  </a>
+                  {gallery.selectedImageUrl ? (
+                    <a className="primary-button inline-link" href={gallery.selectedImageUrl} target="_blank" rel="noreferrer">
+                      Open image
+                    </a>
+                  ) : null}
                   <a className="secondary-button inline-link" href={gallery.selectedCapture.metadataUrl} target="_blank" rel="noreferrer">
                     Metadata
                   </a>

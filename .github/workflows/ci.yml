@@ -27,6 +27,14 @@ jobs:
           cache: npm
           cache-dependency-path: src/ShrimpCam.Web/package-lock.json
 
+      - name: Install web dependencies
+        working-directory: src/ShrimpCam.Web
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: src/ShrimpCam.Web
+        run: npx playwright install --with-deps chromium
+
       - name: Restore and verify
         shell: pwsh
         run: |

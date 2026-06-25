@@ -8,6 +8,8 @@ src/ShrimpCam.Api/data/
 src/ShrimpCam.Api/wwwroot/
 coverage/
 coverage-report/
+playwright-report/
+test-results/
 *.coverage
 *.coveragexml
 *.trx
