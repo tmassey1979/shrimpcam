@@ -27,6 +27,36 @@ type LoginState = {
   returnTo: string;
 };
 
+type HealthResponse = {
+  status: string;
+  checkedAtUtc: string;
+  components: Record<string, { status: string; detail: string | null }>;
+};
+
+type CaptureListResponse = {
+  items: CaptureSummary[];
+  paging: {
+    totalItems: number;
+  };
+};
+
+type CaptureSummary = {
+  id: string;
+  fileName: string;
+  sourceType: string;
+  capturedAtUtc: string;
+  imageUrl: string;
+};
+
+type DashboardState = {
+  health: HealthResponse | null;
+  latestCapture: CaptureSummary | null;
+  totalCaptures: number | null;
+  healthError: string | null;
+  capturesError: string | null;
+  isLoading: boolean;
+};
+
 type AuthContext = {
   session: Session | null;
   isAuthenticated: boolean;
@@ -112,16 +142,7 @@ function App() {
             path="/dashboard"
             element={
               <ProtectedRoute auth={auth}>
-                <ScreenFrame
-                  title="Dashboard"
-                  description="Quick system overview with room for health, storage, and latest capture data."
-                >
-                  <div className="stat-grid">
-                    <StatCard eyebrow="Camera" value="Online" detail="Stream and snapshot services ready." />
-                    <StatCard eyebrow="Latest Capture" value="2 min ago" detail="Placeholder metadata for first shell slice." />
-                    <StatCard eyebrow="Storage" value="68%" detail="Compact summary card sized for phones." />
-                  </div>
-                </ScreenFrame>
+                <DashboardScreen auth={auth} />
               </ProtectedRoute>
             }
           />
@@ -404,6 +425,125 @@ function ProtectedRoute({ auth, children }: ProtectedRouteProps) {
   return <>{children}</>;
 }
 
+function DashboardScreen({ auth }: { auth: AuthContext }) {
+  const [dashboard, setDashboard] = useState<DashboardState>({
+    health: null,
+    latestCapture: null,
+    totalCaptures: null,
+    healthError: null,
+    capturesError: null,
+    isLoading: true
+  });
+
+  async function loadDashboard() {
+    setDashboard((current) => ({ ...current, isLoading: true, healthError: null, capturesError: null }));
+
+    const [healthResult, captureResult] = await Promise.allSettled([
+      fetch("/health"),
+      auth.authenticatedFetch("/captures?page=1&pageSize=1")
+    ]);
+
+    let health: HealthResponse | null = null;
+    let latestCapture: CaptureSummary | null = null;
+    let totalCaptures: number | null = null;
+    let healthError: string | null = null;
+    let capturesError: string | null = null;
+
+    if (healthResult.status === "fulfilled" && healthResult.value.ok) {
+      health = (await healthResult.value.json()) as HealthResponse;
+    } else {
+      healthError = "Health data is unavailable. Check diagnostics if this continues.";
+    }
+
+    if (captureResult.status === "fulfilled" && captureResult.value.ok) {
+      const payload = (await captureResult.value.json()) as CaptureListResponse;
+      latestCapture = payload.items[0] ?? null;
+      totalCaptures = payload.paging.totalItems;
+    } else {
+      capturesError = "Capture history is unavailable. Try again after the service reconnects.";
+    }
+
+    setDashboard({ health, latestCapture, totalCaptures, healthError, capturesError, isLoading: false });
+  }
+
+  useEffect(() => {
+    void loadDashboard();
+  }, []);
+
+  const camera = dashboard.health?.components.camera;
+  const storage = dashboard.health?.components.storage;
+  const nextCapture = getNextCaptureEstimate();
+
+  return (
+    <ScreenFrame
+      title="Dashboard"
+      description="A quick mobile-first overview of camera health, latest capture activity, upcoming capture timing, and storage state."
+    >
+      <div className="dashboard-toolbar">
+        <span>{dashboard.isLoading ? "Refreshing dashboard..." : "Dashboard data loaded"}</span>
+        <button type="button" className="secondary-button" onClick={() => void loadDashboard()}>
+          Refresh
+        </button>
+      </div>
+
+      <div className="stat-grid">
+        <StatCard
+          eyebrow="Camera"
+          value={camera?.status ?? "Unavailable"}
+          detail={camera?.detail ?? "Current camera component status."}
+        />
+        <StatCard
+          eyebrow="Latest Capture"
+          value={dashboard.latestCapture ? formatRelativeTime(dashboard.latestCapture.capturedAtUtc) : "No captures"}
+          detail={
+            dashboard.latestCapture
+              ? `${dashboard.latestCapture.fileName} from ${dashboard.latestCapture.sourceType}`
+              : "Capture history will appear after the first snapshot."
+          }
+        />
+        <StatCard eyebrow="Next Capture" value={nextCapture.value} detail={nextCapture.detail} />
+        <StatCard
+          eyebrow="Storage"
+          value={storage?.status ?? "Unavailable"}
+          detail={storage?.detail ?? `${dashboard.totalCaptures ?? 0} captures currently indexed.`}
+        />
+      </div>
+
+      <div className="dashboard-grid">
+        <article className="snapshot-card">
+          <p className="eyebrow">Latest Snapshot</p>
+          {dashboard.latestCapture ? (
+            <>
+              <div className="snapshot-preview" aria-label="Latest snapshot preview">
+                <span>{dashboard.latestCapture.fileName}</span>
+              </div>
+              <p>Captured {formatDateTime(dashboard.latestCapture.capturedAtUtc)}.</p>
+              <NavLink className="primary-button inline-link" to={`/gallery?capture=${dashboard.latestCapture.id}`}>
+                Open snapshot
+              </NavLink>
+            </>
+          ) : (
+            <p>No snapshot is available yet. Take a manual capture from Live View or wait for the next scheduled run.</p>
+          )}
+        </article>
+
+        <article className="panel stack-gap">
+          <p className="eyebrow">Fallbacks</p>
+          {dashboard.healthError || dashboard.capturesError ? (
+            <>
+              {dashboard.healthError ? <p>{dashboard.healthError}</p> : null}
+              {dashboard.capturesError ? <p>{dashboard.capturesError}</p> : null}
+              <p>Use refresh to retry, or open Settings to review system status.</p>
+            </>
+          ) : (
+            <p>All dashboard sections responded. Refresh any time after a capture or reconnect.</p>
+          )}
+        </article>
+      </div>
+    </ScreenFrame>
+  );
+}
+
 function SettingsPlaceholder({ auth }: { auth: AuthContext }) {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(false);
@@ -503,6 +643,53 @@ function expireSession(setSession: (session: Session | null) => void, navigate: 
 
 function clearStoredSession() {
   window.localStorage.removeItem(sessionStorageKey);
+}
+
+function getNextCaptureEstimate() {
+  const now = new Date();
+  const next = new Date(now);
+  const minutes = next.getMinutes();
+  const remainder = minutes % 5;
+  const minutesToAdd = remainder === 0 ? 5 : 5 - remainder;
+  next.setMinutes(minutes + minutesToAdd, 0, 0);
+
+  return {
+    value: formatDateTime(next.toISOString()),
+    detail: "Estimated from the default five-minute interval until schedule settings are wired into the dashboard."
+  };
+}
+
+function formatRelativeTime(value: string) {
+  const timestamp = Date.parse(value);
+  if (Number.isNaN(timestamp)) {
+    return "Unknown";
+  }
+
+  const minutesAgo = Math.max(0, Math.round((Date.now() - timestamp) / 60_000));
+  if (minutesAgo < 1) {
+    return "Just now";
+  }
+
+  if (minutesAgo < 60) {
+    return `${minutesAgo} min ago`;
+  }
+
+  const hoursAgo = Math.round(minutesAgo / 60);
+  return `${hoursAgo} hr ago`;
+}
+
+function formatDateTime(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "Unknown";
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(date);
 }
 
 export default App;
