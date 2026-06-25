@@ -170,6 +170,15 @@ a {
   color: rgba(255, 244, 232, 0.82);
 }
 
+.reconnect-banner {
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(124, 224, 170, 0.25);
+  border-radius: 1.2rem;
+  background: rgba(34, 110, 82, 0.55);
+  color: #eafff5;
+  font-weight: 700;
+}
+
 .offline-cache-grid {
   display: grid;
   gap: 0.85rem;
@@ -256,6 +265,47 @@ a {
   display: block;
   margin-bottom: 0.45rem;
   font-size: 1.45rem;
+}
+
+.loading-skeleton {
+  display: grid;
+  gap: 0.75rem;
+  min-height: 9rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
+  background: var(--surface-strong);
+}
+
+.loading-skeleton.compact {
+  min-height: 6rem;
+}
+
+.loading-skeleton span {
+  display: block;
+  min-height: 1rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(124, 224, 234, 0.08), rgba(124, 224, 234, 0.24), rgba(124, 224, 234, 0.08));
+  background-size: 220% 100%;
+  animation: skeleton-sheen 1.35s ease-in-out infinite;
+}
+
+.loading-skeleton span:nth-child(2) {
+  width: 76%;
+}
+
+.loading-skeleton span:nth-child(3) {
+  width: 52%;
+}
+
+@keyframes skeleton-sheen {
+  0% {
+    background-position: 120% 0;
+  }
+
+  100% {
+    background-position: -120% 0;
+  }
 }
 
 .dashboard-toolbar {

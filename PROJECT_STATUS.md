@@ -6,11 +6,11 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 07:03:36 -05:00 |
+| Last refreshed | 2026-06-25 07:07:23 -05:00 |
 | Total stories | 49 |
-| Accepted stories | 47 |
-| Remaining stories | 2 |
-| Overall completion | 95.9% |
+| Accepted stories | 48 |
+| Remaining stories | 1 |
+| Overall completion | 98% |
 
 ## Epic Progress
 
@@ -19,21 +19,20 @@
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
 | Epic 2: Camera, Capture, and Streaming | 11 | 11 | 100% |
 | Epic 3: API, Security, and Operations | 16 | 16 | 100% |
-| Epic 4: PWA Product Experience | 8 | 10 | 80% |
+| Epic 4: PWA Product Experience | 9 | 10 | 90% |
 
 ## Latest Completed Stories
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-PWA-09 | Loading, Error, And Reconnect States | Epic 4: PWA Product Experience | 2026-06-25 |  |
 | SC-PWA-08 | Installable PWA Behavior | Epic 4: PWA Product Experience | 2026-06-25 |  |
 | SC-PWA-07 | Offline Shell And Cached Core Experience | Epic 4: PWA Product Experience | 2026-06-25 |  |
 | SC-PWA-06 | Settings And System Status Experience | Epic 4: PWA Product Experience | 2026-06-25 |  |
 | SC-PWA-05 | Gallery Browsing And Full-Screen Viewer | Epic 4: PWA Product Experience | 2026-06-25 |  |
-| SC-PWA-04 | Live View And Manual Snapshot UX | Epic 4: PWA Product Experience | 2026-06-25 |  |
 
 ## Next Unaccepted Stories
 
 | Story | Title | Epic |
 | --- | --- | --- |
-| SC-PWA-09 | Loading, Error, And Reconnect States | Epic 4: PWA Product Experience |
 | SC-PWA-10 | Accessibility And Touch Usability | Epic 4: PWA Product Experience |

@@ -195,6 +195,7 @@ function App() {
   const auth = useAuthSession();
   const isOnline = useOnlineStatus();
   const installPrompt = useInstallPrompt();
+  const reconnectNotice = useReconnectNotice(isOnline);
   const [cachedShellMetadata, setCachedShellMetadata] = useState<CachedShellMetadata | null>(() => readCachedShellMetadata());
   const statusLabel = isOnline ? "Connected" : "Offline";
   const shellMessage = isOnline
@@ -223,6 +224,11 @@ function App() {
       <main className="content">
         {!isOnline ? (
           <OfflineShellPanel metadata={cachedShellMetadata} />
+        ) : null}
+        {reconnectNotice ? (
+          <div className="reconnect-banner" role="status">
+            {reconnectNotice}
+          </div>
         ) : null}
 
         <section className="hero-card">
@@ -438,6 +444,27 @@ function useInstallPrompt(): InstallPromptState {
       );
     }
   };
+}
+
+function useReconnectNotice(isOnline: boolean) {
+  const [wasOffline, setWasOffline] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOnline) {
+      setWasOffline(true);
+      setNotice(null);
+      return;
+    }
+
+    if (wasOffline) {
+      setNotice("Connection restored. Refresh a screen to pull the newest camera data.");
+      const timeoutId = window.setTimeout(() => setNotice(null), 8_000);
+      return () => window.clearTimeout(timeoutId);
+    }
+  }, [isOnline, wasOffline]);
+
+  return notice;
 }
 
 function InstallPromptPanel({ installPrompt }: { installPrompt: InstallPromptState }) {
@@ -686,28 +713,32 @@ function DashboardScreen({
         </button>
       </div>
 
-      <div className="stat-grid">
-        <StatCard
-          eyebrow="Camera"
-          value={camera?.status ?? "Unavailable"}
-          detail={camera?.detail ?? "Current camera component status."}
-        />
-        <StatCard
-          eyebrow="Latest Capture"
-          value={dashboard.latestCapture ? formatRelativeTime(dashboard.latestCapture.capturedAtUtc) : "No captures"}
-          detail={
-            dashboard.latestCapture
-              ? `${dashboard.latestCapture.fileName} from ${dashboard.latestCapture.sourceType}`
-              : "Capture history will appear after the first snapshot."
-          }
-        />
-        <StatCard eyebrow="Next Capture" value={nextCapture.value} detail={nextCapture.detail} />
-        <StatCard
-          eyebrow="Storage"
-          value={storage?.status ?? "Unavailable"}
-          detail={storage?.detail ?? `${dashboard.totalCaptures ?? 0} captures currently indexed.`}
-        />
-      </div>
+      {dashboard.isLoading ? (
+        <LoadingSkeleton label="Loading dashboard cards" />
+      ) : (
+        <div className="stat-grid">
+          <StatCard
+            eyebrow="Camera"
+            value={camera?.status ?? "Unavailable"}
+            detail={camera?.detail ?? "Current camera component status."}
+          />
+          <StatCard
+            eyebrow="Latest Capture"
+            value={dashboard.latestCapture ? formatRelativeTime(dashboard.latestCapture.capturedAtUtc) : "No captures"}
+            detail={
+              dashboard.latestCapture
+                ? `${dashboard.latestCapture.fileName} from ${dashboard.latestCapture.sourceType}`
+                : "Capture history will appear after the first snapshot."
+            }
+          />
+          <StatCard eyebrow="Next Capture" value={nextCapture.value} detail={nextCapture.detail} />
+          <StatCard
+            eyebrow="Storage"
+            value={storage?.status ?? "Unavailable"}
+            detail={storage?.detail ?? `${dashboard.totalCaptures ?? 0} captures currently indexed.`}
+          />
+        </div>
+      )}
 
       <div className="dashboard-grid">
         <article className="snapshot-card">
@@ -853,6 +884,8 @@ function GalleryScreen({
 
           {gallery.error ? <p className="form-error">{gallery.error}</p> : null}
 
+          {gallery.isLoading ? <LoadingSkeleton label="Loading capture list" compact /> : null}
+
           {emptyState ? (
             <div className="empty-state">
               <strong>No captures found</strong>
@@ -864,7 +897,7 @@ function GalleryScreen({
           ) : null}
 
           <div className="capture-list">
-            {gallery.captures.map((capture) => (
+            {!gallery.isLoading ? gallery.captures.map((capture) => (
               <button
                 type="button"
                 key={capture.id}
@@ -875,7 +908,7 @@ function GalleryScreen({
                 <strong>{capture.fileName}</strong>
                 <small>{capture.sourceType}</small>
               </button>
-            ))}
+            )) : null}
           </div>
 
           {gallery.hasNextPage ? (
@@ -1190,10 +1223,16 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
             </button>
           </div>
           <div className="stat-grid">
-            <StatCard eyebrow="App" value={state.health?.status ?? "Unknown"} detail={state.health?.checkedAtUtc ? `Checked ${formatDateTime(state.health.checkedAtUtc)}` : "Health check has not loaded."} />
-            <StatCard eyebrow="Camera" value={camera?.status ?? "Unknown"} detail={camera?.detail ?? "Camera status unavailable."} />
-            <StatCard eyebrow="Storage" value={storage?.status ?? "Unknown"} detail={storage?.detail ?? "Storage status unavailable."} />
-            <StatCard eyebrow="Database" value={database?.status ?? "Unknown"} detail={database?.detail ?? "Database status unavailable."} />
+            {state.isLoading ? (
+              <LoadingSkeleton label="Loading system status" compact />
+            ) : (
+              <>
+                <StatCard eyebrow="App" value={state.health?.status ?? "Unknown"} detail={state.health?.checkedAtUtc ? `Checked ${formatDateTime(state.health.checkedAtUtc)}` : "Health check has not loaded."} />
+                <StatCard eyebrow="Camera" value={camera?.status ?? "Unknown"} detail={camera?.detail ?? "Camera status unavailable."} />
+                <StatCard eyebrow="Storage" value={storage?.status ?? "Unknown"} detail={storage?.detail ?? "Storage status unavailable."} />
+                <StatCard eyebrow="Database" value={database?.status ?? "Unknown"} detail={database?.detail ?? "Database status unavailable."} />
+              </>
+            )}
           </div>
         </aside>
 
@@ -1413,6 +1452,16 @@ function StatCard({ eyebrow, value, detail }: StatCardProps) {
       <strong>{value}</strong>
       <span>{detail}</span>
     </article>
+  );
+}
+
+function LoadingSkeleton({ label, compact = false }: { label: string; compact?: boolean }) {
+  return (
+    <div className={compact ? "loading-skeleton compact" : "loading-skeleton"} role="status" aria-label={label}>
+      <span />
+      <span />
+      <span />
+    </div>
   );
 }
 
