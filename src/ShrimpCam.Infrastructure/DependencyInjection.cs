@@ -34,6 +34,7 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
         services.AddSingleton<IAuthenticationService, LocalAuthenticationService>();
         services.AddSingleton<IBackupExportService, BackupExportService>();
+        services.AddSingleton<IBackupRestoreService, BackupRestoreService>();
         services.AddSingleton<IBackupStorageCapacityProbe, DriveInfoBackupStorageCapacityProbe>();
         services.AddSingleton<IDiagnosticsBundleService, DiagnosticsBundleService>();
         services.AddSingleton<IApplicationHealthService, ApplicationHealthService>();

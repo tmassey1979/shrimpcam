@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
@@ -132,6 +133,63 @@ app.MapPost(
                 {
                     status = "failed",
                     reason = result.FailureReason ?? BackupExportFailureReasons.StorageUnavailable,
+                },
+                statusCode: StatusCodes.Status503ServiceUnavailable),
+        };
+    })
+    .RequireAuthorization(AuthorizationPolicies.Administrator);
+
+app.MapPost(
+    "/backups/restore",
+    async (
+        BackupRestoreHttpRequest request,
+        ClaimsPrincipal user,
+        IBackupRestoreService backupRestoreService,
+        IAuditEventService auditEventService,
+        CancellationToken cancellationToken) =>
+    {
+        var result = await backupRestoreService
+            .RestoreAsync(new BackupRestoreRequest(request.ArchivePath), cancellationToken)
+            .ConfigureAwait(false);
+        var actorUserName = user.Identity?.Name ?? "unknown";
+
+        await auditEventService.RecordAsync(
+                new AuditEventRequest(
+                    AuditEventTypes.BackupRestored,
+                    actorUserName,
+                    result.Succeeded ? AuditOutcomes.Succeeded : AuditOutcomes.Failed,
+                    new Dictionary<string, string>
+                    {
+                        ["archivePath"] = request.ArchivePath,
+                        ["reason"] = result.FailureReason ?? string.Empty,
+                    }),
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        if (result.Succeeded)
+        {
+            return Results.Ok(
+                new
+                {
+                    status = "restored",
+                    startedAtUtc = result.StartedAtUtc,
+                    completedAtUtc = result.CompletedAtUtc,
+                });
+        }
+
+        return result.FailureReason switch
+        {
+            BackupRestoreFailureReasons.InvalidBackupPackage or BackupRestoreFailureReasons.UnsupportedSchemaVersion => Results.BadRequest(
+                new
+                {
+                    status = "failed",
+                    reason = result.FailureReason,
+                }),
+            _ => Results.Json(
+                new
+                {
+                    status = "failed",
+                    reason = result.FailureReason ?? BackupRestoreFailureReasons.RestoreFailed,
                 },
                 statusCode: StatusCodes.Status503ServiceUnavailable),
         };
@@ -571,6 +629,8 @@ internal sealed record MotionHighlightRequest(
     DateTimeOffset OccurredAtUtc,
     double Score,
     string? EventId);
+
+internal sealed record BackupRestoreHttpRequest(string ArchivePath);
 
 internal sealed record BootstrapAdministratorHttpRequest(
     string UserName,
