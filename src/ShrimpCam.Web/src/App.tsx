@@ -57,9 +57,12 @@ type CaptureSummary = {
 type DashboardState = {
   health: HealthResponse | null;
   latestCapture: CaptureSummary | null;
+  latestImageUrl: string | null;
   totalCaptures: number | null;
   healthError: string | null;
   capturesError: string | null;
+  imageFailed: boolean;
+  isImageLoading: boolean;
   isLoading: boolean;
 };
 
@@ -694,14 +697,23 @@ function DashboardScreen({
   const [dashboard, setDashboard] = useState<DashboardState>({
     health: null,
     latestCapture: null,
+    latestImageUrl: null,
     totalCaptures: null,
     healthError: null,
     capturesError: null,
+    imageFailed: false,
+    isImageLoading: false,
     isLoading: true
   });
 
   async function loadDashboard() {
-    setDashboard((current) => ({ ...current, isLoading: true, healthError: null, capturesError: null }));
+    setDashboard((current) => ({
+      ...current,
+      isLoading: true,
+      healthError: null,
+      capturesError: null,
+      imageFailed: false
+    }));
 
     const [healthResult, captureResult] = await Promise.allSettled([
       fetch("/health"),
@@ -728,7 +740,15 @@ function DashboardScreen({
       capturesError = "Capture history is unavailable. Try again after the service reconnects.";
     }
 
-    setDashboard({ health, latestCapture, totalCaptures, healthError, capturesError, isLoading: false });
+    setDashboard((current) => ({
+      ...current,
+      health,
+      latestCapture,
+      totalCaptures,
+      healthError,
+      capturesError,
+      isLoading: false
+    }));
     if (health || latestCapture || totalCaptures !== null) {
       onMetadataCached(
         updateCachedShellMetadata({
@@ -746,6 +766,68 @@ function DashboardScreen({
   useEffect(() => {
     void loadDashboard();
   }, []);
+
+  useEffect(() => {
+    if (!dashboard.latestCapture) {
+      setDashboard((current) => ({
+        ...current,
+        latestImageUrl: null,
+        isImageLoading: false,
+        imageFailed: false
+      }));
+      return;
+    }
+
+    let revoked = false;
+    let objectUrl: string | null = null;
+    setDashboard((current) => ({
+      ...current,
+      latestImageUrl: null,
+      isImageLoading: true,
+      imageFailed: false
+    }));
+
+    async function loadLatestImage(capture: CaptureSummary) {
+      try {
+        const response = await auth.authenticatedFetch(capture.imageUrl);
+        if (!response.ok) {
+          throw new Error("Latest capture image request failed.");
+        }
+
+        const blob = await response.blob();
+        objectUrl = URL.createObjectURL(blob);
+        if (revoked) {
+          URL.revokeObjectURL(objectUrl);
+          return;
+        }
+
+        setDashboard((current) => ({
+          ...current,
+          latestImageUrl: objectUrl,
+          isImageLoading: false,
+          imageFailed: false
+        }));
+      } catch {
+        if (!revoked) {
+          setDashboard((current) => ({
+            ...current,
+            latestImageUrl: null,
+            isImageLoading: false,
+            imageFailed: true
+          }));
+        }
+      }
+    }
+
+    void loadLatestImage(dashboard.latestCapture);
+
+    return () => {
+      revoked = true;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [auth, dashboard.latestCapture?.id]);
 
   const camera = dashboard.health?.components.camera;
   const storage = dashboard.health?.components.storage;
@@ -796,8 +878,20 @@ function DashboardScreen({
           {dashboard.latestCapture ? (
             <>
               <div className="snapshot-preview" aria-label="Latest snapshot preview">
-                <span>{dashboard.latestCapture.fileName}</span>
+                {dashboard.isImageLoading ? <span role="status">Loading protected snapshot...</span> : null}
+                {dashboard.imageFailed ? <span role="alert">Protected snapshot image could not be displayed.</span> : null}
+                {dashboard.latestImageUrl ? (
+                  <img
+                    src={dashboard.latestImageUrl}
+                    alt={`Latest shrimp tank snapshot from ${formatDateTime(dashboard.latestCapture.capturedAtUtc)}`}
+                    onError={() => setDashboard((current) => ({ ...current, imageFailed: true }))}
+                  />
+                ) : null}
+                {!dashboard.latestImageUrl && !dashboard.isImageLoading && !dashboard.imageFailed ? (
+                  <span>{dashboard.latestCapture.fileName}</span>
+                ) : null}
               </div>
+              <p className="snapshot-file-name">{dashboard.latestCapture.fileName}</p>
               <p>Captured {formatDateTime(dashboard.latestCapture.capturedAtUtc)}.</p>
               <NavLink className="primary-button inline-link" to={`/gallery?capture=${dashboard.latestCapture.id}`}>
                 Open snapshot

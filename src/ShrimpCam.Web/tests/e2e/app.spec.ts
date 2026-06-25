@@ -6,11 +6,22 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("protects routes and signs in to the dashboard", async ({ page }) => {
+  const imageAuthorizations: Array<string | undefined> = [];
+  page.on("request", (request) => {
+    if (/\/captures\/[^/]+\/image$/.test(new URL(request.url()).pathname)) {
+      imageAuthorizations.push(request.headers().authorization);
+    }
+  });
+
   await signIn(page);
 
   await expect(page.getByText("Signed in as admin.")).toBeVisible();
   await expect(page.getByText("Logi C270 HD WebCam is online.")).toBeVisible();
   await expect(page.getByText("20260625T195000000Z_scheduled.jpg from Scheduled")).toBeVisible();
+  const latestSnapshot = page.getByRole("img", { name: /Latest shrimp tank snapshot/ });
+  await expect(latestSnapshot).toBeVisible();
+  await expect(latestSnapshot).toHaveAttribute("src", /^blob:/);
+  expect(imageAuthorizations).toContain("Bearer e2e-token");
   await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
 });
 
