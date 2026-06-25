@@ -6,7 +6,7 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 16:23:49 -05:00 |
+| Last refreshed | 2026-06-25 16:26:35 -05:00 |
 | Total stories | 57 |
 | Accepted stories | 57 |
 | Remaining stories | 0 |
@@ -25,8 +25,8 @@
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
-| SC-ASO-318 | Protect camera operation endpoints | Epic 3: API, Security, and Operations | 2026-06-25 |  |
-| SC-CAM-16 | Coordinate Live Stream And Timelapse Camera Access | Epic 2: Camera, Capture, and Streaming | 2026-06-25 |  |
+| SC-ASO-318 | Protect camera operation endpoints | Epic 3: API, Security, and Operations | 2026-06-25 | fc50404 |
+| SC-CAM-16 | Coordinate Live Stream And Timelapse Camera Access | Epic 2: Camera, Capture, and Streaming | 2026-06-25 | a857f68 |
 | SC-PWA-15 | Settings Reference Cleanup | Epic 4: PWA Product Experience | 2026-06-25 | 6b94624 |
 | SC-PWA-14 | Gallery Timeline Reference Cleanup | Epic 4: PWA Product Experience | 2026-06-25 | 326db40 |
 | SC-PWA-13 | Live View Reference Cleanup | Epic 4: PWA Product Experience | 2026-06-25 | 0591149 |
