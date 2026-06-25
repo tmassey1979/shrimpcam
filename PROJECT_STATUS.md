@@ -6,7 +6,7 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 16:58:45 -05:00 |
+| Last refreshed | 2026-06-25 16:58:59 -05:00 |
 | Total stories | 63 |
 | Accepted stories | 63 |
 | Remaining stories | 0 |
@@ -25,7 +25,7 @@
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
-| SC-PWA-17 | Automated Accessibility Regression Coverage | Epic 4: PWA Product Experience | 2026-06-25 |  |
+| SC-PWA-17 | Automated Accessibility Regression Coverage | Epic 4: PWA Product Experience | 2026-06-25 | bd5c442 |
 | SC-OPS-321 | Gate Release Image Publishing And First-Boot Networking | Epic 3: API, Security, and Operations | 2026-06-25 | dfaac59 |
 | SC-PWA-16 | Complete PWA Lifecycle Playwright Coverage | Epic 4: PWA Product Experience | 2026-06-25 | f463413 |
 | SC-ASO-320 | Harden Default Administrator Initialization For Internet Exposure | Epic 3: API, Security, and Operations | 2026-06-25 | d8b3088 |
