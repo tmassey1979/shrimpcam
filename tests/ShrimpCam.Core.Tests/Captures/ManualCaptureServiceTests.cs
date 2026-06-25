@@ -19,6 +19,7 @@ public sealed class ManualCaptureServiceTests
         var commandFactory = Substitute.For<ICameraCommandFactory>();
         var captureRecordRepository = Substitute.For<ICaptureRecordRepository>();
         var captureStorage = Substitute.For<ICaptureStorage>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
         var clock = Substitute.For<IClock>();
         var fileSystem = Substitute.For<IFileSystem>();
         var processRunner = Substitute.For<IProcessRunner>();
@@ -49,7 +50,7 @@ public sealed class ManualCaptureServiceTests
                 Arg.Any<CancellationToken>())
             .Returns(storedCapture);
 
-        var service = new ManualCaptureService(commandFactory, new AlwaysAvailableCameraResourceCoordinator(), captureRecordRepository, captureStorage, clock, fileSystem, processRunner);
+        var service = new ManualCaptureService(commandFactory, new AlwaysAvailableCameraResourceCoordinator(), cameraStatusService, captureRecordRepository, captureStorage, clock, fileSystem, processRunner);
 
         var result = await service.CaptureAsync(options, CancellationToken.None).ConfigureAwait(true);
 
@@ -65,6 +66,8 @@ public sealed class ManualCaptureServiceTests
                     && record.CapturedAtUtc == captureTime),
                 Arg.Any<CancellationToken>())
             .ConfigureAwait(true);
+        cameraStatusService.Received(1).ReportOnline();
+        cameraStatusService.DidNotReceiveWithAnyArgs().ReportDegraded(default!);
     }
 
     [Fact]
@@ -74,6 +77,7 @@ public sealed class ManualCaptureServiceTests
         var commandFactory = Substitute.For<ICameraCommandFactory>();
         var captureRecordRepository = Substitute.For<ICaptureRecordRepository>();
         var captureStorage = Substitute.For<ICaptureStorage>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
         var clock = Substitute.For<IClock>();
         var fileSystem = Substitute.For<IFileSystem>();
         var processRunner = Substitute.For<IProcessRunner>();
@@ -87,7 +91,7 @@ public sealed class ManualCaptureServiceTests
         processRunner.RunAsync(command, Arg.Any<CancellationToken>())
             .Returns(new ProcessResult(1, string.Empty, "camera unavailable"));
 
-        var service = new ManualCaptureService(commandFactory, new AlwaysAvailableCameraResourceCoordinator(), captureRecordRepository, captureStorage, clock, fileSystem, processRunner);
+        var service = new ManualCaptureService(commandFactory, new AlwaysAvailableCameraResourceCoordinator(), cameraStatusService, captureRecordRepository, captureStorage, clock, fileSystem, processRunner);
 
         var result = await service.CaptureAsync(options, CancellationToken.None).ConfigureAwait(true);
 
@@ -100,6 +104,8 @@ public sealed class ManualCaptureServiceTests
             .CreateAsync(default!, default)
             .ConfigureAwait(true);
         fileSystem.Received(1).DeleteFile(stagedPath);
+        cameraStatusService.Received(1).ReportDegraded(ManualCaptureFailureReasons.CameraUnavailable);
+        cameraStatusService.DidNotReceive().ReportOnline();
     }
 
     [Fact]
@@ -109,6 +115,7 @@ public sealed class ManualCaptureServiceTests
         var commandFactory = Substitute.For<ICameraCommandFactory>();
         var captureRecordRepository = Substitute.For<ICaptureRecordRepository>();
         var captureStorage = Substitute.For<ICaptureStorage>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
         var clock = Substitute.For<IClock>();
         var fileSystem = Substitute.For<IFileSystem>();
         var processRunner = Substitute.For<IProcessRunner>();
@@ -118,7 +125,7 @@ public sealed class ManualCaptureServiceTests
         fileSystem.GetTemporaryFilePath(".jpg").Returns(stagedPath);
         fileSystem.FileExists(stagedPath).Returns(true);
 
-        var service = new ManualCaptureService(commandFactory, new BusyCameraResourceCoordinator(), captureRecordRepository, captureStorage, clock, fileSystem, processRunner);
+        var service = new ManualCaptureService(commandFactory, new BusyCameraResourceCoordinator(), cameraStatusService, captureRecordRepository, captureStorage, clock, fileSystem, processRunner);
 
         var result = await service.CaptureAsync(options, CancellationToken.None).ConfigureAwait(true);
 
@@ -133,6 +140,8 @@ public sealed class ManualCaptureServiceTests
             .CreateAsync(default!, default)
             .ConfigureAwait(true);
         fileSystem.Received(1).DeleteFile(stagedPath);
+        cameraStatusService.Received(1).ReportDegraded(ManualCaptureFailureReasons.CameraBusy);
+        cameraStatusService.DidNotReceive().ReportOnline();
     }
 
     private static ShrimpCamOptions CreateOptions() =>

@@ -8,6 +8,7 @@ namespace ShrimpCam.Core.Captures;
 public sealed class ManualCaptureService(
     ICameraCommandFactory cameraCommandFactory,
     ICameraResourceCoordinator cameraResourceCoordinator,
+    ICameraStatusService cameraStatusService,
     ICaptureRecordRepository captureRecordRepository,
     ICaptureStorage captureStorage,
     IClock clock,
@@ -28,6 +29,7 @@ public sealed class ManualCaptureService(
         if (cameraLease is null)
         {
             DeleteIfPresent(stagedFilePath);
+            cameraStatusService.ReportDegraded(ManualCaptureFailureReasons.CameraBusy);
             return ManualCaptureResult.Failure(ManualCaptureFailureReasons.CameraBusy);
         }
 
@@ -39,6 +41,7 @@ public sealed class ManualCaptureService(
             if (processResult.ExitCode != 0)
             {
                 DeleteIfPresent(stagedFilePath);
+                cameraStatusService.ReportDegraded(ManualCaptureFailureReasons.CameraUnavailable);
                 return ManualCaptureResult.Failure(ManualCaptureFailureReasons.CameraUnavailable);
             }
 
@@ -49,6 +52,8 @@ public sealed class ManualCaptureService(
                 .ConfigureAwait(false);
 
             await captureRecordRepository.CreateAsync(storedCapture.ToCaptureRecord(), cancellationToken).ConfigureAwait(false);
+
+            cameraStatusService.ReportOnline();
 
             return ManualCaptureResult.Success(storedCapture);
         }

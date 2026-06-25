@@ -52,6 +52,7 @@ These stories should land before most feature work begins:
 - `SC-CC-07` Recover from camera disconnects and stream failures
 - `SC-CC-09` Clean up expired capture files
 - `SC-CAM-16` Coordinate live stream and timelapse camera access
+- `SC-CAM-17` Report manual capture health transitions
 - `SC-ASO-309` Audit and security event logging
 - `SC-ASO-310` Degraded startup and runtime resilience
 - `SC-ASO-311` Structured application logs
@@ -84,7 +85,7 @@ These stories should land before most feature work begins:
 
 ## Priority guidance
 
-- `P0`: `SC-PF-001` through `SC-PF-009`, `SC-PF-011`, `SC-PF-012`, `SC-ASO-301` through `SC-ASO-319`, `SC-CC-01` through `SC-CC-09`, `SC-CAM-16`, `SC-PWA-01` through `SC-PWA-15`
+- `P0`: `SC-PF-001` through `SC-PF-009`, `SC-PF-011`, `SC-PF-012`, `SC-ASO-301` through `SC-ASO-319`, `SC-CC-01` through `SC-CC-09`, `SC-CAM-16`, `SC-CAM-17`, `SC-PWA-01` through `SC-PWA-15`
 - `P1`: `SC-ASO-313`, `SC-ASO-314`, `SC-CC-10`
 - `P2`: `SC-CC-11`, `SC-PF-010`
 

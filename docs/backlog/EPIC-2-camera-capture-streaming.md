@@ -386,3 +386,40 @@ Scenario: Camera arbitration is covered by tests
   Then only one camera process owns the source at a time
   And backend coverage remains at or above 90% line coverage
 ```
+
+### SC-CAM-17 - Report Manual Capture Health Transitions
+
+**User Story**  
+As a remote Shrimp Cam operator, I want manual snapshot attempts to update camera health so that diagnostics and the dashboard reflect current capture failures without waiting for another scheduled job.
+
+**Dependencies**
+- SC-CC-04
+- SC-ASO-306
+- SC-CAM-16
+
+**Test Expectations**
+- Unit tests verify successful manual capture reports the camera online.
+- Unit tests verify camera busy and unavailable manual capture results report degraded camera health with actionable reasons.
+- Existing API and health tests continue to prove diagnostics can surface degraded camera state.
+
+**Acceptance Criteria**
+
+```gherkin
+Scenario: Successful manual capture restores online health
+  Given the camera command succeeds
+  When a manual capture is stored and persisted
+  Then the camera health is reported online
+  And no degraded reason is recorded for that capture
+
+Scenario: Manual capture reports camera unavailable
+  Given the camera command fails
+  When a user requests a manual snapshot
+  Then the manual capture returns a camera unavailable result
+  And the camera health is reported degraded with an actionable reason
+
+Scenario: Manual capture reports camera busy
+  Given another workflow owns the camera resource
+  When a user requests a manual snapshot
+  Then the manual capture returns a camera busy result
+  And the camera health is reported degraded without starting another process
+```
