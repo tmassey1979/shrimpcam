@@ -15,4 +15,6 @@ public interface IFileSystem
     void DeleteFile(string path);
 
     void WriteAllText(string path, string contents);
+
+    string GetTemporaryFilePath(string extension);
 }

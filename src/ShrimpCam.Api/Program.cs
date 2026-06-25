@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using ShrimpCam.Api.Build;
 using ShrimpCam.Api.Configuration;
+using ShrimpCam.Core.Captures;
 using ShrimpCam.Core.Configuration;
 using ShrimpCam.Infrastructure;
 
@@ -37,6 +38,36 @@ app.MapGet(
             sourceRevision = buildMetadata.SourceRevision,
             buildConfiguration = buildMetadata.BuildConfiguration,
         }));
+
+app.MapPost(
+    "/captures/manual",
+    async (IManualCaptureService captureService, IOptions<ShrimpCamOptions> options, CancellationToken cancellationToken) =>
+    {
+        var result = await captureService.CaptureAsync(options.Value, cancellationToken).ConfigureAwait(false);
+
+        if (!result.Succeeded)
+        {
+            return Results.Json(
+                new
+                {
+                    status = "failed",
+                    reason = result.FailureReason,
+                },
+                statusCode: StatusCodes.Status503ServiceUnavailable);
+        }
+
+        return Results.Ok(
+            new
+            {
+                status = "captured",
+                sourceType = result.Capture!.SourceType,
+                capturedAtUtc = result.Capture.CapturedAtUtc,
+                fileName = result.Capture.FileName,
+                imagePath = result.Capture.ImagePath,
+                relativeImagePath = result.Capture.RelativeImagePath,
+                metadataPath = result.Capture.MetadataPath,
+            });
+    });
 
 app.Run();
 

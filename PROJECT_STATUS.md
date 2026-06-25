@@ -6,18 +6,18 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-24 23:09:28 -05:00 |
+| Last refreshed | 2026-06-24 23:15:44 -05:00 |
 | Total stories | 49 |
-| Accepted stories | 16 |
-| Remaining stories | 33 |
-| Overall completion | 32.7% |
+| Accepted stories | 17 |
+| Remaining stories | 32 |
+| Overall completion | 34.7% |
 
 ## Epic Progress
 
 | Epic | Accepted | Total | Complete |
 | --- | --- | --- | --- |
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
-| Epic 2: Camera, Capture, and Streaming | 4 | 11 | 36.4% |
+| Epic 2: Camera, Capture, and Streaming | 5 | 11 | 45.5% |
 | Epic 3: API, Security, and Operations | 0 | 16 | 0% |
 | Epic 4: PWA Product Experience | 0 | 10 | 0% |
 
@@ -25,17 +25,16 @@
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-CC-04 | Capture a Manual Snapshot | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 | SC-CC-08 | Store Captures with Deterministic Naming and Layout | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 | SC-CC-03 | Generate OS-Specific Camera Commands | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 | SC-CC-02 | Discover Cameras on Windows Hosts | Epic 2: Camera, Capture, and Streaming | 2026-06-24 |  |
 | SC-CC-01 | Discover Cameras on Linux Hosts | Epic 2: Camera, Capture, and Streaming | 2026-06-24 | f5f4f8e |
-| SC-PF-010 | Publish build and version metadata | Epic 1: Platform Foundation and Quality Gates | 2026-06-24 | 6813ce3 |
 
 ## Next Unaccepted Stories
 
 | Story | Title | Epic |
 | --- | --- | --- |
-| SC-CC-04 | Capture a Manual Snapshot | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-05 | Run Scheduled Timelapse Capture | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-06 | Stream Live MJPEG Video | Epic 2: Camera, Capture, and Streaming |
 | SC-CC-07 | Recover from Camera Disconnects and Stream Failures | Epic 2: Camera, Capture, and Streaming |
@@ -45,3 +44,4 @@
 | SC-ASO-301 | SQLite schema and repository foundation | Epic 3: API, Security, and Operations |
 | SC-ASO-302 | Local account authentication | Epic 3: API, Security, and Operations |
 | SC-ASO-303 | Bootstrap administrator flow | Epic 3: API, Security, and Operations |
+| SC-ASO-304 | Authorization roles and policy enforcement | Epic 3: API, Security, and Operations |

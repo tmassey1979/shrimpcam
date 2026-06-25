@@ -21,6 +21,7 @@ public static class DependencyInjection
         services.AddSingleton<IProcessRunner, ProcessRunner>();
         services.AddSingleton<ICameraCommandFactory, CameraCommandFactory>();
         services.AddSingleton<ICaptureStorage, FileSystemCaptureStorage>();
+        services.AddSingleton<IManualCaptureService, ManualCaptureService>();
         services.AddSingleton<ILinuxCameraDiscovery, LinuxCameraDiscovery>();
         services.AddSingleton<IWindowsCameraDiscovery, WindowsCameraDiscovery>();
 
