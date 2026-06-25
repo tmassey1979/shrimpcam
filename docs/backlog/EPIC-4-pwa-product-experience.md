@@ -1,0 +1,314 @@
+# Epic 4: PWA Product Experience
+
+## Epic Summary
+
+Deliver a production-ready, mobile-first Progressive Web App for Shrimp Cam that makes the camera system easy to use on phones, tablets, and desktops across normal, degraded, and offline conditions. This epic covers the end-user experience for navigation, authentication flow, dashboard monitoring, live viewing, gallery browsing, settings and status visibility, installability, resilience states, and accessible touch-friendly interactions.
+
+## Story Backlog
+
+### SC-PWA-01 App Shell And Mobile Routing
+
+**User story:** As a Shrimp Cam user, I want a fast mobile-first app shell with clear routing so that I can move between core areas of the app without confusion.
+
+**Dependencies:** None
+
+**Test expectations:**
+- Component tests for shared shell layout, active navigation states, and protected route handling.
+- Routing tests for direct URL entry, browser refresh, and unknown route fallback.
+- End-to-end test covering navigation between dashboard, live view, gallery, and settings/status on a mobile viewport.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: User navigates between core app sections
+  Given the user opens the Shrimp Cam PWA while the service is reachable
+  When the app finishes loading
+  Then the user sees the shared app shell with navigation to Dashboard, Live, Gallery, and Settings
+  And the current route is visually identified
+  When the user selects another navigation destination
+  Then the destination screen loads without a full page refresh
+  And the app shell remains visible and consistent
+
+Scenario: User enters an unknown route
+  Given the user opens a URL that does not match a valid route
+  When the app resolves routing
+  Then the user sees a not found state with a clear path back to the dashboard
+```
+
+### SC-PWA-02 Sign-In And Session Experience
+
+**User story:** As a user accessing a protected Shrimp Cam instance, I want a simple sign-in and session experience so that I can securely reach the app and recover cleanly when my session expires.
+
+**Dependencies:** SC-PWA-01
+
+**Test expectations:**
+- Component tests for sign-in form validation, loading state, and session-expired messaging.
+- API integration tests for authenticated bootstrap, unauthorized responses, and logout behavior.
+- End-to-end test for sign-in, persisted session restore, and forced re-authentication after session expiration.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: User signs in successfully
+  Given authentication is enabled for the Shrimp Cam instance
+  And the user is not signed in
+  When the user submits valid credentials
+  Then the user is signed in
+  And the app redirects to the last requested protected screen or the dashboard
+  And the session is restored on reload until it expires or the user signs out
+
+Scenario: User submits invalid credentials
+  Given authentication is enabled for the Shrimp Cam instance
+  When the user submits invalid credentials
+  Then the user remains on the sign-in screen
+  And the app shows a non-technical error message
+  And the password field is cleared or masked according to security rules
+
+Scenario: Session expires during use
+  Given the user is signed in on a protected screen
+  When the backend reports the session is no longer valid
+  Then the user is returned to sign-in
+  And the app explains that the session expired
+  And unsaved settings edits are not submitted silently
+```
+
+### SC-PWA-03 Dashboard Overview
+
+**User story:** As a Shrimp Cam user, I want a concise dashboard so that I can quickly understand camera health, the latest capture, next scheduled capture, and storage usage.
+
+**Dependencies:** SC-PWA-01
+
+**Test expectations:**
+- Component tests for status cards, latest snapshot preview, and empty data presentation.
+- API integration tests for successful dashboard data load and partial-data degradation.
+- End-to-end test validating the dashboard on first load and after a manual refresh.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: Dashboard loads current system overview
+  Given the Shrimp Cam backend is reachable
+  When the user opens the dashboard
+  Then the user sees camera status, latest snapshot, next scheduled capture, and storage usage
+  And each value is labeled clearly for quick scanning on mobile
+  And the latest snapshot can be opened from the dashboard
+
+Scenario: Dashboard data is partially unavailable
+  Given the dashboard loads while one or more overview fields cannot be retrieved
+  When the app receives the partial response or error
+  Then the available data still renders
+  And unavailable sections show an inline fallback state
+  And the user is told how to retry or check status
+```
+
+### SC-PWA-04 Live View And Manual Snapshot UX
+
+**User story:** As a Shrimp Cam user, I want a stable live view with clear stream status and manual capture controls so that I can monitor the tank and capture a still image when needed.
+
+**Dependencies:** SC-PWA-01
+
+**Test expectations:**
+- Component tests for live stream container states, manual snapshot button states, and last-capture timestamp updates.
+- API and stream integration tests for live availability polling and manual capture success/failure handling.
+- End-to-end test for opening live view, seeing the stream, and taking a manual snapshot.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: User views the live camera feed and captures a snapshot
+  Given the camera stream is available
+  When the user opens the live view
+  Then the live feed is displayed within a mobile-friendly viewport
+  And the stream status is shown as online
+  When the user taps the manual snapshot action
+  Then the app shows capture progress
+  And the new capture timestamp is updated after success
+
+Scenario: Live stream is unavailable
+  Given the live view is opened while the camera stream cannot be started
+  When the app checks stream availability
+  Then the live feed area shows an offline or unavailable state
+  And the user sees guidance to retry or check device status
+  And the manual snapshot action is disabled or handled with a clear error if capture is impossible
+```
+
+### SC-PWA-05 Gallery Browsing And Full-Screen Viewer
+
+**User story:** As a Shrimp Cam user, I want to browse captures by recency and date so that I can quickly review tank activity and open images in a focused viewer.
+
+**Dependencies:** SC-PWA-01
+
+**Test expectations:**
+- Component tests for gallery list rendering, day filtering, empty results, and full-screen viewer controls.
+- API integration tests for paged capture retrieval, filter changes, and image load failure handling.
+- End-to-end test for browsing recent captures, filtering by day, and opening an image viewer on mobile.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: User browses captures and opens an image
+  Given capture metadata and image files are available
+  When the user opens the gallery
+  Then captures are listed in reverse chronological order
+  And the user can filter by day
+  When the user selects a capture
+  Then the image opens in a focused viewer with capture time and navigation controls
+
+Scenario: Gallery filter returns no captures
+  Given the user applies a date filter with no matching captures
+  When the filtered gallery finishes loading
+  Then the app shows an empty state explaining that no captures were found
+  And the user can clear or change the filter easily
+```
+
+### SC-PWA-06 Settings And System Status Experience
+
+**User story:** As a Shrimp Cam user, I want a combined settings and system status area so that I can safely review device health and update supported preferences with confidence.
+
+**Dependencies:** SC-PWA-01, SC-PWA-02
+
+**Test expectations:**
+- Component tests for editable settings forms, validation, dirty-state warnings, and health/status summaries.
+- API integration tests for reading current settings, successful updates, validation failures, and stale-session handling.
+- End-to-end test covering settings update, success confirmation, and device status review.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: User updates supported settings successfully
+  Given the user is authorized to manage Shrimp Cam settings
+  When the user changes supported capture or retention settings with valid values
+  And submits the form
+  Then the app saves the settings
+  And shows a success confirmation
+  And the refreshed values match what was saved
+
+Scenario: User submits invalid settings
+  Given the user is editing settings
+  When the user enters an invalid value or conflicting schedule
+  Then the app blocks submission
+  And highlights the invalid fields with clear guidance
+  And preserves the user's unsaved edits for correction
+```
+
+### SC-PWA-07 Offline Shell And Cached Core Experience
+
+**User story:** As a user on an unstable local network, I want the Shrimp Cam shell to open even when the device is offline so that I can understand the connection state and access recently cached core metadata.
+
+**Dependencies:** SC-PWA-01, SC-PWA-03, SC-PWA-05
+
+**Test expectations:**
+- Service worker tests for shell caching, cache versioning, and stale asset replacement.
+- Component tests for offline banners, cached metadata markers, and unavailable action states.
+- End-to-end test simulating offline launch after a successful prior visit.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: User opens the app while offline after a previous successful visit
+  Given the user has previously loaded the Shrimp Cam PWA successfully
+  And the app shell and recent metadata have been cached
+  When the user opens the app while the backend is unreachable
+  Then the app shell still loads
+  And the user sees that the app is offline
+  And any cached dashboard or gallery metadata is marked as potentially stale
+
+Scenario: User opens the app offline with no prior cached visit
+  Given the app has not been loaded successfully on this device before
+  When the user opens the app while offline
+  Then the app shows an offline-first failure state
+  And the message explains that an initial online visit is required
+```
+
+### SC-PWA-08 Installable PWA Behavior
+
+**User story:** As a frequent Shrimp Cam user, I want to install the app on my device so that I can launch it like a native app and keep it easy to access.
+
+**Dependencies:** SC-PWA-01, SC-PWA-07
+
+**Test expectations:**
+- Manifest and service worker verification tests for installability requirements.
+- Component tests for install prompt affordances, dismissed prompt behavior, and platform-specific fallback guidance.
+- Manual acceptance checks on iOS Safari, Android Chrome, and desktop Chromium-class browsers.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: User installs the PWA on a supported device
+  Given the Shrimp Cam PWA meets installability requirements
+  And the user is on a supported browser
+  When the install prompt is available and the user chooses to install
+  Then the app installs with the Shrimp Cam name, icon, and standalone launch behavior
+  And the user can reopen it from the device app launcher or home screen
+
+Scenario: Install prompt is not available
+  Given the user is on a browser that does not expose a standard install prompt
+  When the user opens the app
+  Then the app does not show a broken install action
+  And the user sees platform-appropriate guidance if manual installation is supported
+```
+
+### SC-PWA-09 Loading, Error, And Reconnect States
+
+**User story:** As a Shrimp Cam user, I want clear loading, error, and reconnect feedback so that I always know whether the app is working, waiting, or needs my attention.
+
+**Dependencies:** SC-PWA-03, SC-PWA-04, SC-PWA-05, SC-PWA-06, SC-PWA-07
+
+**Test expectations:**
+- Component tests for skeleton states, retry actions, polling backoff, and reconnect banners across key screens.
+- API integration tests for timeout, server error, and recovery-after-retry behavior.
+- End-to-end test for temporary backend loss followed by successful reconnection.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: Screen data loads successfully after a brief delay
+  Given the user opens a data-driven screen
+  When the response is still pending
+  Then the app shows a loading state appropriate to that screen
+  And the layout remains stable enough to avoid accidental taps
+  When the response succeeds
+  Then the loading state is replaced with the final content
+
+Scenario: Connection is lost and later restored
+  Given the user is viewing a screen that refreshes live or recent data
+  When the backend becomes temporarily unreachable
+  Then the app shows a clear error or reconnect state
+  And the user can retry manually when appropriate
+  When connectivity returns
+  Then the app recovers without requiring a full app restart
+```
+
+### SC-PWA-10 Accessibility And Touch Usability
+
+**User story:** As a mobile and assistive-technology user, I want the Shrimp Cam PWA to be accessible and touch-friendly so that I can use every core feature reliably and comfortably.
+
+**Dependencies:** SC-PWA-01, SC-PWA-03, SC-PWA-04, SC-PWA-05, SC-PWA-06, SC-PWA-09
+
+**Test expectations:**
+- Automated accessibility checks for color contrast, semantic landmarks, labels, focus order, and aria usage on all core screens.
+- Component tests for keyboard navigation, visible focus treatment, and screen-reader naming of major controls.
+- Manual QA on mobile for touch target size, orientation changes, and one-handed use of primary actions.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: User completes core navigation and actions with accessible controls
+  Given the user relies on keyboard, switch, or screen-reader navigation
+  When the user moves through the app shell and core screens
+  Then interactive elements have accessible names and logical focus order
+  And status changes are announced appropriately
+  And primary actions meet mobile touch target expectations
+
+Scenario: Accessibility or touch constraints would hide or block a primary action
+  Given a screen is displayed on a small mobile viewport or under zoom
+  When a primary action would otherwise be clipped, overlapped, or too small to use
+  Then the layout adapts to keep the action reachable
+  And no core workflow depends on gesture-only interaction
+```
+
+## Delivery Notes
+
+- Story sequencing should start with shell and routing, then move through authentication, core screens, resilience behavior, and final accessibility hardening.
+- Each story is expected to ship with automated coverage at the appropriate UI, API contract, and end-to-end layers in line with the project definition of done.
+- Any backend dependency not yet available should be mocked behind stable contracts so PWA implementation can proceed in parallel without weakening acceptance coverage.
