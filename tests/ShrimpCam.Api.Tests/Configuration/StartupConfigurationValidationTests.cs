@@ -7,6 +7,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using ShrimpCam.Core.Abstractions;
 using ShrimpCam.Core.Health;
 
 #nullable enable
@@ -26,12 +27,14 @@ public sealed class StartupConfigurationValidationTests
         {
             var overrides = new Dictionary<string, string>
             {
+                ["ShrimpCam:Camera:Platform"] = "Linux",
+                ["ShrimpCam:Camera:Source"] = "/dev/video0",
                 ["ShrimpCam:Storage:DatabasePath"] = Path.Combine(rootPath, "shrimpcam.db"),
                 ["ShrimpCam:Storage:ImageRootPath"] = Path.Combine(rootPath, "images"),
                 ["ShrimpCam:Storage:TimelapseRootPath"] = Path.Combine(rootPath, "timelapse"),
             };
 
-            await using var factory = new ConfigurationWebApplicationFactory(overrides);
+            await using var factory = new ConfigurationWebApplicationFactory(overrides, cameraAvailable: true);
             using var client = factory.CreateClient();
 
             var response = await client.GetAsync("/health").ConfigureAwait(true);
@@ -51,6 +54,44 @@ public sealed class StartupConfigurationValidationTests
             payload.SourceRevision.Should().Be("local");
             payload.BuildConfiguration.Should().Be("Debug");
             File.Exists(Path.Combine(rootPath, "shrimpcam.db")).Should().BeTrue();
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
+    public async Task Missing_camera_at_startup_keeps_api_available_with_degraded_health()
+    {
+        var rootPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            var overrides = new Dictionary<string, string>
+            {
+                ["ShrimpCam:Camera:Platform"] = "Linux",
+                ["ShrimpCam:Camera:Source"] = "/dev/video404",
+                ["ShrimpCam:Storage:DatabasePath"] = Path.Combine(rootPath, "shrimpcam.db"),
+                ["ShrimpCam:Storage:ImageRootPath"] = Path.Combine(rootPath, "images"),
+                ["ShrimpCam:Storage:TimelapseRootPath"] = Path.Combine(rootPath, "timelapse"),
+            };
+
+            await using var factory = new ConfigurationWebApplicationFactory(overrides, cameraAvailable: false);
+            using var client = factory.CreateClient();
+
+            var response = await client.GetAsync("/health").ConfigureAwait(true);
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var payload = await response.Content.ReadFromJsonAsync<HealthResponseContract>().ConfigureAwait(true);
+
+            payload.Should().NotBeNull();
+            payload!.Status.Should().Be(HealthStatusLevel.Degraded);
+            payload.Components["database"].Status.Should().Be(HealthStatusLevel.Healthy);
+            payload.Components["camera"].Status.Should().Be(HealthStatusLevel.Unhealthy);
+            payload.Components["camera"].Detail.Should().Contain("/dev/video404");
         }
         finally
         {
@@ -124,6 +165,39 @@ public sealed class StartupConfigurationValidationTests
         }
     }
 
+    [Fact]
+    [Trait("Category", "Api")]
+    public async Task Unopenable_database_path_blocks_startup_before_ready_state()
+    {
+        var rootPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        var databasePath = Path.Combine(rootPath, "database-directory");
+        Directory.CreateDirectory(databasePath);
+
+        try
+        {
+            var overrides = new Dictionary<string, string>
+            {
+                ["ShrimpCam:Camera:Platform"] = "Linux",
+                ["ShrimpCam:Camera:Source"] = "/dev/video0",
+                ["ShrimpCam:Storage:DatabasePath"] = databasePath,
+                ["ShrimpCam:Storage:ImageRootPath"] = Path.Combine(rootPath, "images"),
+                ["ShrimpCam:Storage:TimelapseRootPath"] = Path.Combine(rootPath, "timelapse"),
+            };
+
+            await using var factory = new ConfigurationWebApplicationFactory(overrides, cameraAvailable: true);
+            var act = () => Task.Run(() => factory.CreateClient());
+
+            await act.Should()
+                .ThrowAsync<SqliteException>()
+                .WithMessage("*unable to open database file*")
+                .ConfigureAwait(true);
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
     private sealed record HealthResponseContract(
         string Status,
         DateTimeOffset CheckedAtUtc,
@@ -136,7 +210,8 @@ public sealed class StartupConfigurationValidationTests
     private sealed record HealthComponentContract(string Status, string? Detail);
 
     private sealed class ConfigurationWebApplicationFactory(
-        IReadOnlyDictionary<string, string>? overrides = null) : WebApplicationFactory<Program>
+        IReadOnlyDictionary<string, string>? overrides = null,
+        bool cameraAvailable = true) : WebApplicationFactory<Program>
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -152,7 +227,28 @@ public sealed class StartupConfigurationValidationTests
                     overrides.Select(pair => new KeyValuePair<string, string?>(pair.Key, pair.Value))));
 
             builder.ConfigureServices(
-                services => services.AddSingleton<IDataProtectionProvider>(new EphemeralDataProtectionProvider()));
+                services =>
+                {
+                    services.AddSingleton<IDataProtectionProvider>(new EphemeralDataProtectionProvider());
+                    services.AddSingleton<IProcessRunner>(new StubProcessRunner(cameraAvailable));
+                });
+        }
+    }
+
+    private sealed class StubProcessRunner(bool cameraAvailable) : IProcessRunner
+    {
+        public Task<ProcessResult> RunAsync(ProcessRequest request, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var standardOutput = cameraAvailable
+                ? """
+                  Logitech USB Camera:
+                      /dev/video0
+                  """
+                : string.Empty;
+
+            return Task.FromResult(new ProcessResult(0, standardOutput, string.Empty));
         }
     }
 

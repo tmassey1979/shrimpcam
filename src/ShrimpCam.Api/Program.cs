@@ -33,6 +33,9 @@ var options = app.Services.GetRequiredService<IOptions<ShrimpCamOptions>>().Valu
 await app.Services.GetRequiredService<IApplicationDataInitializer>()
     .InitializeAsync(options.Storage, CancellationToken.None)
     .ConfigureAwait(false);
+await app.Services.GetRequiredService<ICameraStartupProbe>()
+    .CheckAsync(CancellationToken.None)
+    .ConfigureAwait(false);
 
 app.UseSwagger();
 
