@@ -17,6 +17,44 @@ public sealed class BootstrapAdministratorEndpointTests
 {
     [Fact]
     [Trait("Category", "Api")]
+    public async Task Startup_creates_default_administrator_for_fresh_install()
+    {
+        var rootPath = CreateTempRoot();
+
+        try
+        {
+            await using var factory = new BootstrapWebApplicationFactory(rootPath, seedInitialAdministrator: true);
+            using var client = factory.CreateClient();
+
+            var response = await client.PostAsJsonAsync(
+                    "/auth/login",
+                    new LoginRequest("admin", "AdminPass1234"))
+                .ConfigureAwait(true);
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var payload = await response.Content.ReadFromJsonAsync<LoginSuccessResponse>().ConfigureAwait(true);
+            payload.Should().NotBeNull();
+            payload!.UserName.Should().Be("admin");
+
+            using var provider = BuildProvider(rootPath);
+            var userRepository = provider.GetRequiredService<IUserRepository>();
+            var roleRepository = provider.GetRequiredService<IUserRoleRepository>();
+            var user = await userRepository.GetByUserNameAsync("admin", CancellationToken.None).ConfigureAwait(true);
+
+            user.Should().NotBeNull();
+            user!.IsEnabled.Should().BeTrue();
+            (await roleRepository.ListByUserIdAsync(user.Id, CancellationToken.None).ConfigureAwait(true))
+                .Should()
+                .ContainSingle(role => role.RoleName == "Administrator");
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
     public async Task Bootstrap_creates_the_first_administrator_and_assigns_the_admin_role()
     {
         var rootPath = CreateTempRoot();
@@ -189,11 +227,21 @@ public sealed class BootstrapAdministratorEndpointTests
 
     private sealed record BootstrapSuccessResponse(string Status, Guid UserId, string UserName, string RoleName);
 
+    private sealed record LoginRequest(string UserName, string Password);
+
+    private sealed record LoginSuccessResponse(
+        string Status,
+        Guid SessionId,
+        Guid UserId,
+        string UserName,
+        string Token,
+        DateTimeOffset ExpiresAtUtc);
+
     private sealed record ProblemDetailsResponse(string Type, string Title, int Status, string Detail);
 
     private sealed record ValidationProblemDetailsResponse(string Type, string Title, int Status, Dictionary<string, string[]> Errors);
 
-    private sealed class BootstrapWebApplicationFactory(string rootPath) : WebApplicationFactory<Program>
+    private sealed class BootstrapWebApplicationFactory(string rootPath, bool seedInitialAdministrator = false) : WebApplicationFactory<Program>
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -205,6 +253,7 @@ public sealed class BootstrapAdministratorEndpointTests
                         ["ShrimpCam:Storage:DatabasePath"] = Path.Combine(rootPath, "shrimpcam.db"),
                         ["ShrimpCam:Storage:ImageRootPath"] = Path.Combine(rootPath, "images"),
                         ["ShrimpCam:Storage:TimelapseRootPath"] = Path.Combine(rootPath, "timelapse"),
+                        ["ShrimpCam:Security:InitialAdministrator:Enabled"] = seedInitialAdministrator ? "true" : "false",
                     }));
         }
     }

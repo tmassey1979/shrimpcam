@@ -68,6 +68,8 @@ var options = app.Services.GetRequiredService<IOptions<ShrimpCamOptions>>().Valu
 await app.Services.GetRequiredService<IApplicationDataInitializer>()
     .InitializeAsync(options.Storage, CancellationToken.None)
     .ConfigureAwait(false);
+await InitialAdministratorStartup.InitializeAsync(options.Security.InitialAdministrator, app.Services, CancellationToken.None)
+    .ConfigureAwait(false);
 await app.Services.GetRequiredService<ICameraStartupProbe>()
     .CheckAsync(CancellationToken.None)
     .ConfigureAwait(false);
@@ -1039,6 +1041,32 @@ internal static class CameraDiscoveryEndpointMapping
                     })
                 .ToArray(),
         };
+}
+
+internal static class InitialAdministratorStartup
+{
+    public static async Task InitializeAsync(
+        InitialAdministratorOptions options,
+        IServiceProvider serviceProvider,
+        CancellationToken cancellationToken)
+    {
+        if (!options.Enabled)
+        {
+            return;
+        }
+
+        var bootstrapService = serviceProvider.GetRequiredService<IBootstrapAdministratorService>();
+        var result = await bootstrapService
+            .BootstrapAsync(new BootstrapAdministratorRequest(options.UserName, options.Password), cancellationToken)
+            .ConfigureAwait(false);
+
+        if (result.Succeeded || result.FailureReason == BootstrapAdministratorFailureReasons.AlreadyConfigured)
+        {
+            return;
+        }
+
+        throw new InvalidOperationException($"Initial administrator could not be created: {result.FailureReason}.");
+    }
 }
 
 public partial class Program;

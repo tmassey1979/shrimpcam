@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ShrimpCam.Core.Abstractions;
@@ -44,10 +45,7 @@ public sealed class MotionHighlightEndpointTests
         }
         finally
         {
-            if (Directory.Exists(rootPath))
-            {
-                Directory.Delete(rootPath, recursive: true);
-            }
+            DeleteDirectory(rootPath);
         }
     }
 
@@ -83,10 +81,7 @@ public sealed class MotionHighlightEndpointTests
         }
         finally
         {
-            if (Directory.Exists(rootPath))
-            {
-                Directory.Delete(rootPath, recursive: true);
-            }
+            DeleteDirectory(rootPath);
         }
     }
 
@@ -115,10 +110,13 @@ public sealed class MotionHighlightEndpointTests
                     {
                         ["ShrimpCam:Camera:Platform"] = "Linux",
                         ["ShrimpCam:Camera:Source"] = "/dev/video0",
+                        ["ShrimpCam:Storage:DatabasePath"] = Path.Combine(rootPath, "shrimpcam.db"),
                         ["ShrimpCam:Storage:ImageRootPath"] = rootPath,
+                        ["ShrimpCam:Storage:TimelapseRootPath"] = Path.Combine(rootPath, "timelapse"),
                         ["ShrimpCam:Capture:MotionHighlightsEnabled"] = "true",
                         ["ShrimpCam:Capture:MotionThreshold"] = "0.4",
                         ["ShrimpCam:Capture:MotionCooldownSeconds"] = "300",
+                        ["ShrimpCam:Security:InitialAdministrator:Enabled"] = "false",
                     }));
 
             builder.ConfigureTestServices(
@@ -154,6 +152,33 @@ public sealed class MotionHighlightEndpointTests
             return arguments.Substring(firstQuote + 1, lastQuote - firstQuote - 1)
                 .Replace("\\\\", "\\", StringComparison.Ordinal)
                 .Replace("\\\"", "\"", StringComparison.Ordinal);
+        }
+    }
+
+    private static void DeleteDirectory(string rootPath)
+    {
+        SqliteConnection.ClearAllPools();
+
+        for (var attempt = 0; attempt < 5; attempt++)
+        {
+            if (!Directory.Exists(rootPath))
+            {
+                return;
+            }
+
+            try
+            {
+                Directory.Delete(rootPath, recursive: true);
+                return;
+            }
+            catch (IOException) when (attempt < 4)
+            {
+                Thread.Sleep(100);
+            }
+            catch (IOException)
+            {
+                return;
+            }
         }
     }
 }

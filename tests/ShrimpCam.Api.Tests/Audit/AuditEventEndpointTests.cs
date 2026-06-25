@@ -343,6 +343,7 @@ public sealed class AuditEventEndpointTests
                         ["ShrimpCam:Storage:DatabasePath"] = Path.Combine(rootPath, "shrimpcam.db"),
                         ["ShrimpCam:Storage:ImageRootPath"] = Path.Combine(rootPath, "images"),
                         ["ShrimpCam:Storage:TimelapseRootPath"] = Path.Combine(rootPath, "timelapse"),
+                        ["ShrimpCam:Security:InitialAdministrator:Enabled"] = "false",
                     }));
             builder.ConfigureServices(
                 services => services.AddSingleton<IDataProtectionProvider>(new EphemeralDataProtectionProvider()));

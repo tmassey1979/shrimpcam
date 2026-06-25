@@ -9,4 +9,6 @@ public sealed class SecurityOptions
         "LocalOnly|RemoteReady|InternetExposed",
         ErrorMessage = "Host mode must be LocalOnly, RemoteReady, or InternetExposed.")]
     public string HostMode { get; init; } = "InternetExposed";
+
+    public InitialAdministratorOptions InitialAdministrator { get; init; } = new();
 }

@@ -119,6 +119,38 @@ public sealed class StartupConfigurationValidationTests
 
     [Fact]
     [Trait("Category", "Api")]
+    public async Task Weak_initial_administrator_password_fails_fast_on_startup()
+    {
+        var rootPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            var overrides = new Dictionary<string, string>
+            {
+                ["ShrimpCam:Camera:Platform"] = "Linux",
+                ["ShrimpCam:Camera:Source"] = "/dev/video0",
+                ["ShrimpCam:Storage:DatabasePath"] = Path.Combine(rootPath, "shrimpcam.db"),
+                ["ShrimpCam:Storage:ImageRootPath"] = Path.Combine(rootPath, "images"),
+                ["ShrimpCam:Storage:TimelapseRootPath"] = Path.Combine(rootPath, "timelapse"),
+                ["ShrimpCam:Security:InitialAdministrator:Password"] = "weak",
+            };
+
+            await using var factory = new ConfigurationWebApplicationFactory(overrides);
+
+            var act = () => Task.Run(() => factory.CreateClient());
+
+            await act.Should().ThrowAsync<OptionsValidationException>()
+                .WithMessage("*Initial administrator credentials*")
+                .ConfigureAwait(true);
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
     public async Task Newer_database_schema_version_blocks_startup_with_clear_error()
     {
         var rootPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));

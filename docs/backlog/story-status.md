@@ -6,6 +6,7 @@
 
 | Story | Completed On | Commit |
 | --- | --- | --- |
+| SC-ASO-317 | 2026-06-25 | pending |
 | SC-PWA-10 | 2026-06-25 |  |
 | SC-PWA-09 | 2026-06-25 |  |
 | SC-PWA-08 | 2026-06-25 |  |

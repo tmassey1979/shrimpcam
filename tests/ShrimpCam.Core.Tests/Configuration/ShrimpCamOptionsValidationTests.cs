@@ -55,6 +55,9 @@ public sealed class ShrimpCamOptionsValidationTests
         options.Storage.TimelapseRootPath.Should().BeEmpty();
         options.Storage.RetentionDays.Should().Be(30);
         options.Security.HostMode.Should().Be("InternetExposed");
+        options.Security.InitialAdministrator.Enabled.Should().BeTrue();
+        options.Security.InitialAdministrator.UserName.Should().Be("admin");
+        options.Security.InitialAdministrator.Password.Should().Be("AdminPass1234");
     }
 
     [Fact]
