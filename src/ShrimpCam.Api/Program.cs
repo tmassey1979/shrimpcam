@@ -561,6 +561,54 @@ app.MapGet(
         })
     .WithName("GetCapture");
 
+app.MapGet(
+        "/captures/{id:guid}/image",
+        [Authorize(Policy = AuthorizationPolicies.Viewer)] async (
+            Guid id,
+            ICaptureRecordRepository captureRepository,
+            IOptions<ShrimpCamOptions> options,
+            CancellationToken cancellationToken) =>
+        {
+            var capture = await captureRepository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
+            if (capture is null)
+            {
+                return Results.NotFound();
+            }
+
+            var imagePath = CaptureFileEndpointMapping.TryResolveManagedCapturePath(
+                options.Value.Storage.ImageRootPath,
+                capture.RelativeImagePath);
+
+            return imagePath is null || !File.Exists(imagePath)
+                ? Results.NotFound()
+                : Results.File(imagePath, CaptureFileEndpointMapping.GetImageContentType(imagePath), capture.FileName);
+        })
+    .WithName("GetCaptureImage");
+
+app.MapGet(
+        "/captures/{id:guid}/metadata",
+        [Authorize(Policy = AuthorizationPolicies.Viewer)] async (
+            Guid id,
+            ICaptureRecordRepository captureRepository,
+            IOptions<ShrimpCamOptions> options,
+            CancellationToken cancellationToken) =>
+        {
+            var capture = await captureRepository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
+            if (capture is null)
+            {
+                return Results.NotFound();
+            }
+
+            var metadataPath = CaptureFileEndpointMapping.TryResolveManagedCapturePath(
+                options.Value.Storage.ImageRootPath,
+                capture.RelativeMetadataPath);
+
+            return metadataPath is null || !File.Exists(metadataPath)
+                ? Results.NotFound()
+                : Results.File(metadataPath, "application/json", Path.GetFileName(metadataPath));
+        })
+    .WithName("GetCaptureMetadata");
+
 app.MapPost(
     "/captures/manual",
     async (IManualCaptureService captureService, IOptions<ShrimpCamOptions> options, CancellationToken cancellationToken) =>
@@ -850,6 +898,31 @@ internal static class CaptureBrowsingEndpointMapping
             capture.CapturedAtUtc,
             imageUrl = $"/captures/{capture.Id}/image",
             metadataUrl = $"/captures/{capture.Id}/metadata",
+        };
+}
+
+internal static class CaptureFileEndpointMapping
+{
+    public static string? TryResolveManagedCapturePath(string imageRootPath, string relativePath)
+    {
+        if (string.IsNullOrWhiteSpace(imageRootPath) || string.IsNullOrWhiteSpace(relativePath) || Path.IsPathRooted(relativePath))
+        {
+            return null;
+        }
+
+        var rootPath = Path.GetFullPath(imageRootPath);
+        var candidatePath = Path.GetFullPath(Path.Combine(rootPath, relativePath.Replace('/', Path.DirectorySeparatorChar)));
+        var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+        return candidatePath.StartsWith(rootPath + Path.DirectorySeparatorChar, comparison) ? candidatePath : null;
+    }
+
+    public static string GetImageContentType(string imagePath) =>
+        Path.GetExtension(imagePath).ToLowerInvariant() switch
+        {
+            ".png" => "image/png",
+            ".webp" => "image/webp",
+            _ => "image/jpeg",
         };
 }
 

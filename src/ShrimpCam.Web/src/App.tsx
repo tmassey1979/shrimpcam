@@ -36,7 +36,12 @@ type HealthResponse = {
 type CaptureListResponse = {
   items: CaptureSummary[];
   paging: {
+    pageNumber: number;
+    pageSize: number;
     totalItems: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
   };
 };
 
@@ -46,6 +51,7 @@ type CaptureSummary = {
   sourceType: string;
   capturedAtUtc: string;
   imageUrl: string;
+  metadataUrl: string;
 };
 
 type DashboardState = {
@@ -64,6 +70,16 @@ type ManualCaptureResponse = {
   reason?: string;
   capturedAtUtc?: string;
   fileName?: string;
+};
+
+type GalleryState = {
+  captures: CaptureSummary[];
+  selectedCapture: CaptureSummary | null;
+  totalItems: number;
+  hasNextPage: boolean;
+  isLoading: boolean;
+  error: string | null;
+  imageFailed: boolean;
 };
 
 type AuthContext = {
@@ -167,21 +183,7 @@ function App() {
             path="/gallery"
             element={
               <ProtectedRoute auth={auth}>
-                <ScreenFrame
-                  title="Gallery"
-                  description="Recent captures list scaffolded for cards, filters, and a future focused viewer."
-                >
-                  <div className="list-card">
-                    <div className="gallery-item">
-                      <strong>Today</strong>
-                      <span>Recent captures will appear here in reverse chronological order.</span>
-                    </div>
-                    <div className="gallery-item">
-                      <strong>Viewer-ready</strong>
-                      <span>The shell leaves room for full-screen image review and date filters.</span>
-                    </div>
-                  </div>
-                </ScreenFrame>
+                <GalleryScreen auth={auth} />
               </ProtectedRoute>
             }
           />
@@ -538,6 +540,171 @@ function DashboardScreen({ auth }: { auth: AuthContext }) {
   );
 }
 
+function GalleryScreen({ auth }: { auth: AuthContext }) {
+  const location = useLocation();
+  const selectedCaptureId = new URLSearchParams(location.search).get("capture");
+  const [dateFilter, setDateFilter] = useState("");
+  const [gallery, setGallery] = useState<GalleryState>({
+    captures: [],
+    selectedCapture: null,
+    totalItems: 0,
+    hasNextPage: false,
+    isLoading: true,
+    error: null,
+    imageFailed: false
+  });
+
+  async function loadGallery() {
+    setGallery((current) => ({ ...current, isLoading: true, error: null, imageFailed: false }));
+
+    try {
+      const query = buildCaptureQuery(dateFilter);
+      const response = await auth.authenticatedFetch(`/captures?${query.toString()}`);
+      if (!response.ok) {
+        throw new Error("Capture history is unavailable.");
+      }
+
+      const payload = (await response.json()) as CaptureListResponse;
+      const selectedCapture = selectedCaptureId
+        ? payload.items.find((capture) => capture.id === selectedCaptureId) ?? null
+        : payload.items[0] ?? null;
+
+      setGallery({
+        captures: payload.items,
+        selectedCapture,
+        totalItems: payload.paging.totalItems,
+        hasNextPage: payload.paging.hasNextPage,
+        isLoading: false,
+        error: null,
+        imageFailed: false
+      });
+    } catch {
+      setGallery((current) => ({
+        ...current,
+        isLoading: false,
+        error: "We could not load captures. Check the connection and try again."
+      }));
+    }
+  }
+
+  useEffect(() => {
+    void loadGallery();
+  }, [dateFilter, selectedCaptureId]);
+
+  function selectCapture(capture: CaptureSummary) {
+    setGallery((current) => ({ ...current, selectedCapture: capture, imageFailed: false }));
+  }
+
+  function clearFilter() {
+    setDateFilter("");
+  }
+
+  const emptyState = !gallery.isLoading && !gallery.error && gallery.captures.length === 0;
+
+  return (
+    <ScreenFrame
+      title="Gallery"
+      description="Reverse-chronological capture browsing with date filters and a focused mobile viewer."
+    >
+      <div className="gallery-layout">
+        <section className="gallery-browser" aria-label="Capture browser">
+          <div className="gallery-toolbar">
+            <label>
+              <span>Filter by day</span>
+              <input
+                type="date"
+                value={dateFilter}
+                onChange={(event) => setDateFilter(event.target.value)}
+                aria-label="Filter captures by day"
+              />
+            </label>
+            <button type="button" className="secondary-button" disabled={!dateFilter} onClick={clearFilter}>
+              Clear filter
+            </button>
+          </div>
+
+          <div className="gallery-summary" role="status">
+            {gallery.isLoading
+              ? "Loading captures..."
+              : `${gallery.totalItems} capture${gallery.totalItems === 1 ? "" : "s"} found${
+                  dateFilter ? ` for ${formatFilterDate(dateFilter)}` : ""
+                }.`}
+          </div>
+
+          {gallery.error ? <p className="form-error">{gallery.error}</p> : null}
+
+          {emptyState ? (
+            <div className="empty-state">
+              <strong>No captures found</strong>
+              <span>Try a different day, clear the filter, or take a manual snapshot from Live View.</span>
+              <button type="button" className="secondary-button" disabled={!dateFilter} onClick={clearFilter}>
+                Clear date filter
+              </button>
+            </div>
+          ) : null}
+
+          <div className="capture-list">
+            {gallery.captures.map((capture) => (
+              <button
+                type="button"
+                key={capture.id}
+                className={gallery.selectedCapture?.id === capture.id ? "capture-list-item active" : "capture-list-item"}
+                onClick={() => selectCapture(capture)}
+              >
+                <span>{formatDateTime(capture.capturedAtUtc)}</span>
+                <strong>{capture.fileName}</strong>
+                <small>{capture.sourceType}</small>
+              </button>
+            ))}
+          </div>
+
+          {gallery.hasNextPage ? (
+            <p className="support-copy">Showing the newest 25 captures. Narrow by day to focus the review.</p>
+          ) : null}
+        </section>
+
+        <section className="viewer-card" aria-label="Focused capture viewer">
+          {gallery.selectedCapture ? (
+            <>
+              <div className="viewer-frame">
+                {gallery.imageFailed ? (
+                  <div className="stream-fallback" role="alert">
+                    <strong>Image unavailable</strong>
+                    <span>The capture metadata loaded, but the image file could not be displayed.</span>
+                  </div>
+                ) : null}
+                <img
+                  alt={`Shrimp tank capture from ${formatDateTime(gallery.selectedCapture.capturedAtUtc)}`}
+                  onError={() => setGallery((current) => ({ ...current, imageFailed: true }))}
+                  src={gallery.selectedCapture.imageUrl}
+                />
+              </div>
+              <div className="viewer-details">
+                <p className="eyebrow">Focused Viewer</p>
+                <h3>{gallery.selectedCapture.fileName}</h3>
+                <p>Captured {formatDateTime(gallery.selectedCapture.capturedAtUtc)}.</p>
+                <div className="action-row">
+                  <a className="primary-button inline-link" href={gallery.selectedCapture.imageUrl} target="_blank" rel="noreferrer">
+                    Open image
+                  </a>
+                  <a className="secondary-button inline-link" href={gallery.selectedCapture.metadataUrl} target="_blank" rel="noreferrer">
+                    Metadata
+                  </a>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="empty-state">
+              <strong>Select a capture</strong>
+              <span>Captured images open here with timestamp and navigation controls.</span>
+            </div>
+          )}
+        </section>
+      </div>
+    </ScreenFrame>
+  );
+}
+
 function LiveViewScreen({ auth }: { auth: AuthContext }) {
   const [streamVersion, setStreamVersion] = useState(1);
   const [streamStatus, setStreamStatus] = useState<LiveStreamStatus>("connecting");
@@ -769,6 +936,32 @@ function getNextCaptureEstimate() {
     value: formatDateTime(next.toISOString()),
     detail: "Estimated from the default five-minute interval until schedule settings are wired into the dashboard."
   };
+}
+
+function buildCaptureQuery(dateFilter: string) {
+  const query = new URLSearchParams({ page: "1", pageSize: "25" });
+  if (!dateFilter) {
+    return query;
+  }
+
+  const fromUtc = new Date(`${dateFilter}T00:00:00`);
+  const toUtc = new Date(`${dateFilter}T23:59:59.999`);
+  query.set("fromUtc", fromUtc.toISOString());
+  query.set("toUtc", toUtc.toISOString());
+  return query;
+}
+
+function formatFilterDate(value: string) {
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  }).format(date);
 }
 
 function formatRelativeTime(value: string) {

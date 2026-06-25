@@ -360,6 +360,118 @@ a {
   background: rgba(124, 224, 234, 0.08);
 }
 
+.gallery-layout,
+.gallery-browser,
+.viewer-card,
+.capture-list,
+.viewer-details {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.gallery-browser,
+.viewer-card {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  background: var(--surface-strong);
+}
+
+.gallery-toolbar {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.gallery-toolbar label {
+  display: grid;
+  gap: 0.45rem;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.gallery-toolbar input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgba(124, 224, 234, 0.22);
+  border-radius: 1rem;
+  background: rgba(3, 14, 18, 0.78);
+  color: #f7feff;
+  font: inherit;
+}
+
+.gallery-summary,
+.empty-state {
+  color: var(--text-soft);
+}
+
+.empty-state {
+  display: grid;
+  gap: 0.65rem;
+  padding: 1rem;
+  border: 1px dashed rgba(124, 224, 234, 0.22);
+  border-radius: 1rem;
+  background: rgba(124, 224, 234, 0.06);
+}
+
+.empty-state strong {
+  color: #ffffff;
+}
+
+.capture-list-item {
+  display: grid;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 0.9rem;
+  border: 1px solid rgba(124, 224, 234, 0.16);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.045);
+  color: #f7feff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.capture-list-item.active {
+  border-color: rgba(124, 224, 234, 0.52);
+  background: rgba(124, 224, 234, 0.12);
+}
+
+.capture-list-item span,
+.capture-list-item small {
+  color: var(--text-soft);
+}
+
+.viewer-frame {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 18rem;
+  overflow: hidden;
+  border: 1px solid rgba(124, 224, 234, 0.2);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 70% 15%, rgba(124, 224, 234, 0.18), transparent 30%),
+    linear-gradient(145deg, rgba(3, 13, 17, 0.96), rgba(9, 38, 46, 0.92));
+}
+
+.viewer-frame img {
+  display: block;
+  width: 100%;
+  min-height: 18rem;
+  max-height: 65vh;
+  object-fit: contain;
+}
+
+.viewer-details h3,
+.viewer-details p {
+  margin: 0;
+}
+
+.viewer-details p {
+  color: var(--text-soft);
+}
+
 .video-placeholder {
   display: grid;
   place-items: center;
@@ -544,6 +656,16 @@ a {
 
   .dashboard-grid {
     grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.75fr);
+  }
+
+  .gallery-layout {
+    grid-template-columns: minmax(18rem, 0.8fr) minmax(0, 1.2fr);
+    align-items: start;
+  }
+
+  .gallery-toolbar {
+    grid-template-columns: 1fr auto;
+    align-items: end;
   }
 
   .live-layout {

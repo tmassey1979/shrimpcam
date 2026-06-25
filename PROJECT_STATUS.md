@@ -6,11 +6,11 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 04:14:57 -05:00 |
+| Last refreshed | 2026-06-25 04:20:33 -05:00 |
 | Total stories | 49 |
-| Accepted stories | 43 |
-| Remaining stories | 6 |
-| Overall completion | 87.8% |
+| Accepted stories | 44 |
+| Remaining stories | 5 |
+| Overall completion | 89.8% |
 
 ## Epic Progress
 
@@ -19,23 +19,22 @@
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
 | Epic 2: Camera, Capture, and Streaming | 11 | 11 | 100% |
 | Epic 3: API, Security, and Operations | 16 | 16 | 100% |
-| Epic 4: PWA Product Experience | 4 | 10 | 40% |
+| Epic 4: PWA Product Experience | 5 | 10 | 50% |
 
 ## Latest Completed Stories
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-PWA-05 | Gallery Browsing And Full-Screen Viewer | Epic 4: PWA Product Experience | 2026-06-25 |  |
 | SC-PWA-04 | Live View And Manual Snapshot UX | Epic 4: PWA Product Experience | 2026-06-25 |  |
 | SC-PWA-03 | Dashboard Overview | Epic 4: PWA Product Experience | 2026-06-25 |  |
 | SC-PWA-02 | Sign-In And Session Experience | Epic 4: PWA Product Experience | 2026-06-25 |  |
 | SC-PWA-01 | App Shell And Mobile Routing | Epic 4: PWA Product Experience | 2026-06-25 |  |
-| SC-ASO-316 | External-hosting hardening baseline | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 
 ## Next Unaccepted Stories
 
 | Story | Title | Epic |
 | --- | --- | --- |
-| SC-PWA-05 | Gallery Browsing And Full-Screen Viewer | Epic 4: PWA Product Experience |
 | SC-PWA-06 | Settings And System Status Experience | Epic 4: PWA Product Experience |
 | SC-PWA-07 | Offline Shell And Cached Core Experience | Epic 4: PWA Product Experience |
 | SC-PWA-08 | Installable PWA Behavior | Epic 4: PWA Product Experience |

@@ -98,6 +98,65 @@ public sealed class CaptureBrowsingEndpointTests
 
     [Fact]
     [Trait("Category", "Api")]
+    public async Task Viewer_can_retrieve_capture_image_and_metadata_files()
+    {
+        var rootPath = CreateTempRoot();
+
+        try
+        {
+            var token = await SeedUserAndLoginAsync(rootPath, "shrimp-viewer", "ViewerPass123", "Viewer").ConfigureAwait(true);
+            var capture = CreateCapture("2026-06-24T12:00:00Z", "file-access");
+            await SeedCapturesAsync(rootPath, [capture]).ConfigureAwait(true);
+            WriteCaptureFiles(rootPath, capture, [0xFF, 0xD8, 0xFF, 0xD9], """{"source":"test"}""");
+
+            await using var factory = new CaptureBrowsingWebApplicationFactory(rootPath);
+            using var client = factory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var imageResponse = await client.GetAsync($"/captures/{capture.Id}/image").ConfigureAwait(true);
+            var metadataResponse = await client.GetAsync($"/captures/{capture.Id}/metadata").ConfigureAwait(true);
+
+            imageResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+            imageResponse.Content.Headers.ContentType!.MediaType.Should().Be("image/jpeg");
+            (await imageResponse.Content.ReadAsByteArrayAsync().ConfigureAwait(true)).Should().Equal([0xFF, 0xD8, 0xFF, 0xD9]);
+            metadataResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+            metadataResponse.Content.Headers.ContentType!.MediaType.Should().Be("application/json");
+            (await metadataResponse.Content.ReadAsStringAsync().ConfigureAwait(true)).Should().Be("""{"source":"test"}""");
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
+    public async Task Missing_capture_file_returns_not_found()
+    {
+        var rootPath = CreateTempRoot();
+
+        try
+        {
+            var token = await SeedUserAndLoginAsync(rootPath, "shrimp-viewer", "ViewerPass123", "Viewer").ConfigureAwait(true);
+            var capture = CreateCapture("2026-06-24T12:00:00Z", "missing-file");
+            await SeedCapturesAsync(rootPath, [capture]).ConfigureAwait(true);
+
+            await using var factory = new CaptureBrowsingWebApplicationFactory(rootPath);
+            using var client = factory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await client.GetAsync($"/captures/{capture.Id}/image").ConfigureAwait(true);
+
+            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
     public async Task Invalid_capture_filters_are_rejected()
     {
         var rootPath = CreateTempRoot();
@@ -147,6 +206,30 @@ public sealed class CaptureBrowsingEndpointTests
         }
     }
 
+    [Fact]
+    [Trait("Category", "Api")]
+    public async Task Unauthenticated_callers_cannot_retrieve_capture_files()
+    {
+        var rootPath = CreateTempRoot();
+
+        try
+        {
+            var capture = CreateCapture("2026-06-24T12:00:00Z", "protected-file");
+            await SeedCapturesAsync(rootPath, [capture]).ConfigureAwait(true);
+
+            await using var factory = new CaptureBrowsingWebApplicationFactory(rootPath);
+            using var client = factory.CreateClient();
+
+            var response = await client.GetAsync($"/captures/{capture.Id}/image").ConfigureAwait(true);
+
+            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
     private static CaptureRecord CreateCapture(string capturedAtUtc, string name)
     {
         var instant = DateTimeOffset.Parse(capturedAtUtc, System.Globalization.CultureInfo.InvariantCulture);
@@ -172,6 +255,17 @@ public sealed class CaptureBrowsingEndpointTests
         {
             await captureRepository.CreateAsync(capture, CancellationToken.None).ConfigureAwait(true);
         }
+    }
+
+    private static void WriteCaptureFiles(string rootPath, CaptureRecord capture, byte[] imageBytes, string metadata)
+    {
+        var imagePath = Path.Combine(rootPath, "images", capture.RelativeImagePath.Replace('/', Path.DirectorySeparatorChar));
+        var metadataPath = Path.Combine(rootPath, "images", capture.RelativeMetadataPath.Replace('/', Path.DirectorySeparatorChar));
+
+        Directory.CreateDirectory(Path.GetDirectoryName(imagePath)!);
+        Directory.CreateDirectory(Path.GetDirectoryName(metadataPath)!);
+        File.WriteAllBytes(imagePath, imageBytes);
+        File.WriteAllText(metadataPath, metadata);
     }
 
     private static async Task<string> SeedUserAndLoginAsync(string rootPath, string userName, string password, string roleName)
