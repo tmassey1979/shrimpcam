@@ -57,6 +57,15 @@ type DashboardState = {
   isLoading: boolean;
 };
 
+type LiveStreamStatus = "connecting" | "online" | "offline";
+
+type ManualCaptureResponse = {
+  status: string;
+  reason?: string;
+  capturedAtUtc?: string;
+  fileName?: string;
+};
+
 type AuthContext = {
   session: Session | null;
   isAuthenticated: boolean;
@@ -150,22 +159,7 @@ function App() {
             path="/live"
             element={
               <ProtectedRoute auth={auth}>
-                <ScreenFrame
-                  title="Live"
-                  description="Live stream area with space for connection status and primary capture actions."
-                >
-                  <div className="panel stack-gap">
-                    <div className="video-placeholder" aria-label="Live stream placeholder">
-                      <span>Live viewport placeholder</span>
-                    </div>
-                    <div className="action-row">
-                      <button type="button" className="primary-button">
-                        Capture Snapshot
-                      </button>
-                      <span className="support-copy">Manual controls will attach here once APIs are available.</span>
-                    </div>
-                  </div>
-                </ScreenFrame>
+                <LiveViewScreen auth={auth} />
               </ProtectedRoute>
             }
           />
@@ -538,6 +532,124 @@ function DashboardScreen({ auth }: { auth: AuthContext }) {
           ) : (
             <p>All dashboard sections responded. Refresh any time after a capture or reconnect.</p>
           )}
+        </article>
+      </div>
+    </ScreenFrame>
+  );
+}
+
+function LiveViewScreen({ auth }: { auth: AuthContext }) {
+  const [streamVersion, setStreamVersion] = useState(1);
+  const [streamStatus, setStreamStatus] = useState<LiveStreamStatus>("connecting");
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [lastCaptureAtUtc, setLastCaptureAtUtc] = useState<string | null>(null);
+  const [lastCaptureFileName, setLastCaptureFileName] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>("Connecting to the camera stream...");
+  const streamUnavailable = streamStatus === "offline";
+
+  function retryStream() {
+    setStreamStatus("connecting");
+    setMessage("Reconnecting to the camera stream...");
+    setStreamVersion((current) => current + 1);
+  }
+
+  async function captureSnapshot() {
+    setIsCapturing(true);
+    setMessage("Capturing a manual snapshot...");
+
+    try {
+      const response = await auth.authenticatedFetch("/captures/manual", { method: "POST" });
+      const payload = (await response.json().catch(() => null)) as ManualCaptureResponse | null;
+
+      if (!response.ok || payload?.status === "failed") {
+        throw new Error(payload?.reason ?? "The camera could not capture a snapshot.");
+      }
+
+      const capturedAtUtc = payload?.capturedAtUtc ?? new Date().toISOString();
+      setLastCaptureAtUtc(capturedAtUtc);
+      setLastCaptureFileName(payload?.fileName ?? null);
+      setMessage("Snapshot captured. Gallery history will include the new still image.");
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : "Try again after checking camera status.";
+      setMessage(`Manual snapshot failed. ${detail}`);
+    } finally {
+      setIsCapturing(false);
+    }
+  }
+
+  return (
+    <ScreenFrame
+      title="Live"
+      description="A mobile-friendly camera feed with stream status, reconnect controls, and manual snapshot capture."
+    >
+      <div className="live-layout">
+        <article className="stream-card">
+          <div className="stream-header">
+            <div>
+              <p className="eyebrow">Camera Feed</p>
+              <strong>{streamStatus === "online" ? "Live stream online" : "Waiting for stream"}</strong>
+            </div>
+            <span className={`status-pill ${streamStatus}`}>{streamStatus}</span>
+          </div>
+
+          <div className={`stream-frame ${streamUnavailable ? "offline" : ""}`}>
+            {streamUnavailable ? (
+              <div className="stream-fallback" role="status">
+                <strong>Stream unavailable</strong>
+                <span>Retry the stream or check camera status if the Logitech webcam is disconnected.</span>
+              </div>
+            ) : null}
+            <img
+              alt="Live shrimp tank camera feed"
+              onError={() => {
+                setStreamStatus("offline");
+                setMessage("The live stream is unavailable. Retry the stream or check device status.");
+              }}
+              onLoad={() => {
+                setStreamStatus("online");
+                setMessage("Live stream is online.");
+              }}
+              src={`/stream/live?view=${streamVersion}`}
+            />
+          </div>
+
+          <div className="action-row">
+            <button type="button" className="secondary-button" onClick={retryStream}>
+              Retry stream
+            </button>
+            <span className="support-copy">If the stream drops, Shrimp Cam keeps the shell usable while you reconnect.</span>
+          </div>
+        </article>
+
+        <article className="capture-card">
+          <p className="eyebrow">Manual Snapshot</p>
+          <h3>Capture the moment</h3>
+          <p>
+            Take a still image from the current camera source. The timestamp updates here after a successful capture.
+          </p>
+          <button
+            type="button"
+            className="primary-button"
+            disabled={isCapturing || streamUnavailable}
+            onClick={() => void captureSnapshot()}
+          >
+            {isCapturing ? "Capturing..." : "Capture snapshot"}
+          </button>
+          <dl className="capture-facts">
+            <div>
+              <dt>Last manual capture</dt>
+              <dd>{lastCaptureAtUtc ? formatDateTime(lastCaptureAtUtc) : "Not captured this session"}</dd>
+            </div>
+            <div>
+              <dt>Saved file</dt>
+              <dd>{lastCaptureFileName ?? "Waiting for snapshot"}</dd>
+            </div>
+          </dl>
+          {message ? (
+            <p className="live-message" role={message.includes("failed") || streamUnavailable ? "alert" : "status"}>
+              {message}
+            </p>
+          ) : null}
         </article>
       </div>
     </ScreenFrame>
