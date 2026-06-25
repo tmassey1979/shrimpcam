@@ -695,7 +695,8 @@ app.MapPost(
                 relativeImagePath = result.Capture.RelativeImagePath,
                 metadataPath = result.Capture.MetadataPath,
             });
-    });
+    })
+    .RequireAuthorization(AuthorizationPolicies.Operator);
 
 app.MapPost(
     "/captures/highlights/motion",
@@ -741,7 +742,8 @@ app.MapPost(
                 relativeImagePath = result.Capture.RelativeImagePath,
                 metadataPath = result.Capture.MetadataPath,
             });
-    });
+    })
+    .RequireAuthorization(AuthorizationPolicies.Operator);
 
 app.MapGet(
     "/stream/live",
@@ -775,7 +777,8 @@ app.MapGet(
                 }
             },
             session.ContentType);
-    });
+    })
+    .RequireAuthorization(AuthorizationPolicies.Viewer);
 
 if (hasWebShell)
 {

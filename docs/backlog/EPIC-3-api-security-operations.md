@@ -531,6 +531,38 @@ Scenario: Configured startup credential is invalid
   Then startup fails with an actionable configuration or initialization error
 ```
 
+### SC-ASO-318 - Protect camera operation endpoints
+
+**User story**  
+As a Shrimp Cam administrator, I want live stream and camera-triggering endpoints protected by authorization so that internet-exposed deployments cannot be viewed or controlled anonymously.
+
+**Dependencies**  
+SC-ASO-302, SC-ASO-304, SC-ASO-305, SC-CC-04, SC-CC-06, SC-CC-11
+
+**Test expectations**  
+API tests cover anonymous, viewer, and administrator authorization boundaries for live stream, manual capture, and motion highlight camera operations.
+
+**Acceptance criteria**
+
+```gherkin
+Scenario: Anonymous users cannot view or trigger camera operations
+  Given no valid session token is present
+  When a request is made to live stream, manual capture, or motion highlight endpoints
+  Then the API rejects the request with 401
+
+Scenario: Viewer can watch live feed but cannot trigger privileged camera work
+  Given a signed-in viewer session
+  When the viewer opens the live stream
+  Then the live stream request is allowed
+  When the viewer triggers manual capture or motion highlight ingestion
+  Then the request is forbidden
+
+Scenario: Admin can perform camera operations
+  Given a signed-in administrator session
+  When the admin opens live stream or triggers capture operations
+  Then the API authorizes the request before invoking camera services
+```
+
 ## Delivery Notes
 
 - Recommended implementation order: `SC-ASO-301` through `SC-ASO-316` in sequence, with `SC-ASO-306` to `SC-ASO-311` parallelizable after authentication foundations land.

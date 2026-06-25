@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -6,7 +7,11 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using ShrimpCam.Core.Abstractions;
+using ShrimpCam.Core.Authentication;
+using ShrimpCam.Core.Configuration;
+using ShrimpCam.Core.Persistence;
 
 #nullable enable
 #pragma warning disable CA2007
@@ -23,8 +28,10 @@ public sealed class MotionHighlightEndpointTests
 
         try
         {
+            var token = await SeedUserAndLoginAsync(rootPath, "shrimp-admin", "AdminPass1234", "Administrator").ConfigureAwait(true);
             await using var factory = new MotionHighlightWebApplicationFactory(rootPath, shouldFail: false);
             using var client = factory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var response = await client.PostAsJsonAsync(
                     "/captures/highlights/motion",
@@ -57,8 +64,10 @@ public sealed class MotionHighlightEndpointTests
 
         try
         {
+            var token = await SeedUserAndLoginAsync(rootPath, "shrimp-admin", "AdminPass1234", "Administrator").ConfigureAwait(true);
             await using var factory = new MotionHighlightWebApplicationFactory(rootPath, shouldFail: false);
             using var client = factory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var firstResponse = await client.PostAsJsonAsync(
                     "/captures/highlights/motion",
@@ -85,6 +94,56 @@ public sealed class MotionHighlightEndpointTests
         }
     }
 
+    [Fact]
+    [Trait("Category", "Api")]
+    public async Task Motion_highlight_returns_unauthorized_for_anonymous_callers()
+    {
+        var rootPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            await using var factory = new MotionHighlightWebApplicationFactory(rootPath, shouldFail: false);
+            using var client = factory.CreateClient();
+
+            var response = await client.PostAsJsonAsync(
+                    "/captures/highlights/motion",
+                    new MotionHighlightRequest(new DateTimeOffset(2026, 06, 25, 00, 10, 00, TimeSpan.Zero), 0.82d, "event-401"))
+                .ConfigureAwait(true);
+
+            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
+    public async Task Motion_highlight_returns_forbidden_for_viewers()
+    {
+        var rootPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            var token = await SeedUserAndLoginAsync(rootPath, "shrimp-viewer", "ViewerPass123", "Viewer").ConfigureAwait(true);
+            await using var factory = new MotionHighlightWebApplicationFactory(rootPath, shouldFail: false);
+            using var client = factory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await client.PostAsJsonAsync(
+                    "/captures/highlights/motion",
+                    new MotionHighlightRequest(new DateTimeOffset(2026, 06, 25, 00, 10, 00, TimeSpan.Zero), 0.82d, "event-402"))
+                .ConfigureAwait(true);
+
+            response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
     private sealed record MotionHighlightRequest(DateTimeOffset OccurredAtUtc, double Score, string? EventId);
 
     private sealed record MotionHighlightCaptureResponse(
@@ -98,6 +157,73 @@ public sealed class MotionHighlightEndpointTests
         string MetadataPath);
 
     private sealed record MotionHighlightSkippedResponse(string Status, string Outcome);
+
+    private static async Task<string> SeedUserAndLoginAsync(string rootPath, string userName, string password, string roleName)
+    {
+        var createdAtUtc = new DateTimeOffset(2026, 06, 25, 04, 00, 00, TimeSpan.Zero);
+        using var provider = BuildProvider(rootPath);
+        var initializer = provider.GetRequiredService<IApplicationDataInitializer>();
+        var passwordHasher = provider.GetRequiredService<IPasswordHasher>();
+        var userRepository = provider.GetRequiredService<IUserRepository>();
+        var roleRepository = provider.GetRequiredService<IUserRoleRepository>();
+        var userId = Guid.NewGuid();
+
+        await initializer.InitializeAsync(provider.GetRequiredService<IOptions<ShrimpCamOptions>>().Value.Storage, CancellationToken.None).ConfigureAwait(true);
+        await userRepository.CreateAsync(
+                new UserRecord(userId, userName, passwordHasher.HashPassword(password), true, createdAtUtc),
+                CancellationToken.None)
+            .ConfigureAwait(true);
+        await roleRepository.AssignAsync(new UserRoleRecord(userId, roleName, createdAtUtc), CancellationToken.None).ConfigureAwait(true);
+
+        await using var factory = new MotionHighlightWebApplicationFactory(rootPath, shouldFail: false);
+        using var client = factory.CreateClient();
+        var loginResponse = await client.PostAsJsonAsync("/auth/login", new LoginRequest(userName, password)).ConfigureAwait(true);
+        loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await loginResponse.Content.ReadFromJsonAsync<LoginSuccessResponse>().ConfigureAwait(true);
+        payload.Should().NotBeNull();
+        return payload!.Token;
+    }
+
+    private static ServiceProvider BuildProvider(string rootPath)
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<IOptions<ShrimpCamOptions>>(Options.Create(CreateOptions(rootPath)));
+        ShrimpCam.Infrastructure.DependencyInjection.AddInfrastructure(services);
+        return services.BuildServiceProvider();
+    }
+
+    private static ShrimpCamOptions CreateOptions(string rootPath) =>
+        new()
+        {
+            Camera = new CameraOptions
+            {
+                Platform = "Linux",
+                Source = "/dev/video0",
+            },
+            Capture = new CaptureOptions
+            {
+                MotionHighlightsEnabled = true,
+                MotionThreshold = 0.4d,
+                MotionCooldownSeconds = 300,
+            },
+            Storage = new StorageOptions
+            {
+                DatabasePath = Path.Combine(rootPath, "shrimpcam.db"),
+                ImageRootPath = rootPath,
+                TimelapseRootPath = Path.Combine(rootPath, "timelapse"),
+                RetentionDays = 30,
+            },
+        };
+
+    private sealed record LoginRequest(string UserName, string Password);
+
+    private sealed record LoginSuccessResponse(
+        string Status,
+        Guid SessionId,
+        Guid UserId,
+        string UserName,
+        string Token,
+        DateTimeOffset ExpiresAtUtc);
 
     private sealed class MotionHighlightWebApplicationFactory(string rootPath, bool shouldFail) : WebApplicationFactory<Program>
     {

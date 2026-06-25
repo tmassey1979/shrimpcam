@@ -6,9 +6,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 16:16:23 -05:00 |
-| Total stories | 56 |
-| Accepted stories | 56 |
+| Last refreshed | 2026-06-25 16:23:49 -05:00 |
+| Total stories | 57 |
+| Accepted stories | 57 |
 | Remaining stories | 0 |
 | Overall completion | 100% |
 
@@ -18,18 +18,18 @@
 | --- | --- | --- | --- |
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
 | Epic 2: Camera, Capture, and Streaming | 12 | 12 | 100% |
-| Epic 3: API, Security, and Operations | 17 | 17 | 100% |
+| Epic 3: API, Security, and Operations | 18 | 18 | 100% |
 | Epic 4: PWA Product Experience | 15 | 15 | 100% |
 
 ## Latest Completed Stories
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-ASO-318 | Protect camera operation endpoints | Epic 3: API, Security, and Operations | 2026-06-25 |  |
 | SC-CAM-16 | Coordinate Live Stream And Timelapse Camera Access | Epic 2: Camera, Capture, and Streaming | 2026-06-25 |  |
 | SC-PWA-15 | Settings Reference Cleanup | Epic 4: PWA Product Experience | 2026-06-25 | 6b94624 |
 | SC-PWA-14 | Gallery Timeline Reference Cleanup | Epic 4: PWA Product Experience | 2026-06-25 | 326db40 |
 | SC-PWA-13 | Live View Reference Cleanup | Epic 4: PWA Product Experience | 2026-06-25 | 0591149 |
-| SC-PWA-12 | Dashboard Reference Cleanup | Epic 4: PWA Product Experience | 2026-06-25 | 326a40a |
 
 ## Next Unaccepted Stories
 
