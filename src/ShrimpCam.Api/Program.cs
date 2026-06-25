@@ -7,6 +7,7 @@ using ShrimpCam.Api.Configuration;
 using ShrimpCam.Api.Logging;
 using ShrimpCam.Core.Audit;
 using ShrimpCam.Core.Authentication;
+using ShrimpCam.Core.Backups;
 using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Captures;
 using ShrimpCam.Core.Configuration;
@@ -89,6 +90,51 @@ app.MapGet(
                 configuration = bundle.Configuration,
                 recentAuditEvents = bundle.RecentAuditEvents,
             });
+    })
+    .RequireAuthorization(AuthorizationPolicies.Administrator);
+
+app.MapPost(
+    "/backups/export",
+    async (IBackupExportService backupExportService, CancellationToken cancellationToken) =>
+    {
+        var result = await backupExportService.ExportAsync(cancellationToken).ConfigureAwait(false);
+        if (result.Succeeded)
+        {
+            return Results.Ok(
+                new
+                {
+                    status = "exported",
+                    archivePath = result.ArchivePath,
+                    fileName = result.FileName,
+                    archiveSizeBytes = result.ArchiveSizeBytes,
+                    startedAtUtc = result.StartedAtUtc,
+                    completedAtUtc = result.CompletedAtUtc,
+                });
+        }
+
+        return result.FailureReason switch
+        {
+            BackupExportFailureReasons.ExportAlreadyRunning => Results.Conflict(
+                new
+                {
+                    status = "failed",
+                    reason = result.FailureReason,
+                }),
+            BackupExportFailureReasons.InsufficientStorage => Results.Json(
+                new
+                {
+                    status = "failed",
+                    reason = result.FailureReason,
+                },
+                statusCode: StatusCodes.Status507InsufficientStorage),
+            _ => Results.Json(
+                new
+                {
+                    status = "failed",
+                    reason = result.FailureReason ?? BackupExportFailureReasons.StorageUnavailable,
+                },
+                statusCode: StatusCodes.Status503ServiceUnavailable),
+        };
     })
     .RequireAuthorization(AuthorizationPolicies.Administrator);
 
