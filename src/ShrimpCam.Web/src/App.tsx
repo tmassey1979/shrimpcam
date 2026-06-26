@@ -56,6 +56,7 @@ type CaptureSummary = {
 
 type DashboardState = {
   health: HealthResponse | null;
+  settings: SettingsResponse | null;
   latestCapture: CaptureSummary | null;
   latestImageUrl: string | null;
   totalCaptures: number | null;
@@ -701,6 +702,7 @@ function DashboardScreen({
 }) {
   const [dashboard, setDashboard] = useState<DashboardState>({
     health: null,
+    settings: null,
     latestCapture: null,
     latestImageUrl: null,
     totalCaptures: null,
@@ -720,12 +722,14 @@ function DashboardScreen({
       imageFailed: false
     }));
 
-    const [healthResult, captureResult] = await Promise.allSettled([
+    const [healthResult, captureResult, settingsResult] = await Promise.allSettled([
       fetch("/health"),
-      auth.authenticatedFetch("/captures?page=1&pageSize=1")
+      auth.authenticatedFetch("/captures?page=1&pageSize=1"),
+      auth.authenticatedFetch("/settings")
     ]);
 
     let health: HealthResponse | null = null;
+    let settings: SettingsResponse | null = null;
     let latestCapture: CaptureSummary | null = null;
     let totalCaptures: number | null = null;
     let healthError: string | null = null;
@@ -745,9 +749,14 @@ function DashboardScreen({
       capturesError = "Capture history is unavailable. Try again after the service reconnects.";
     }
 
+    if (settingsResult.status === "fulfilled" && settingsResult.value.ok) {
+      settings = (await settingsResult.value.json()) as SettingsResponse;
+    }
+
     setDashboard((current) => ({
       ...current,
       health,
+      settings,
       latestCapture,
       totalCaptures,
       healthError,
@@ -836,7 +845,7 @@ function DashboardScreen({
 
   const camera = dashboard.health?.components.camera;
   const storage = dashboard.health?.components.storage;
-  const nextCapture = getNextCaptureEstimate();
+  const nextCapture = getNextCaptureEstimate(dashboard.settings);
   const storageUsage = getDashboardStorageUsage(dashboard.totalCaptures);
 
   return (
@@ -2312,18 +2321,91 @@ function updateCachedShellMetadata(update: Partial<Omit<CachedShellMetadata, "ca
   return next;
 }
 
-function getNextCaptureEstimate() {
+function getNextCaptureEstimate(settings: SettingsResponse | null) {
+  if (settings && !settings.capture.enabled) {
+    return {
+      value: "Paused",
+      detail: "Timelapse disabled"
+    };
+  }
+
   const now = new Date();
-  const next = new Date(now);
-  const minutes = next.getMinutes();
-  const remainder = minutes % 5;
-  const minutesToAdd = remainder === 0 ? 5 : 5 - remainder;
-  next.setMinutes(minutes + minutesToAdd, 0, 0);
+  const intervalMinutes = Math.max(1, settings?.capture.intervalMinutes ?? 5);
+  const activeStartHourUtc = settings?.capture.activeStartHourUtc ?? 0;
+  const activeEndHourUtc = settings?.capture.activeEndHourUtc ?? 24;
+  const nextWindowStart = getNextActiveCaptureWindowStart(now, activeStartHourUtc, activeEndHourUtc);
+  const scheduleBase = nextWindowStart > now ? nextWindowStart : now;
+  const next = getNextIntervalBoundary(scheduleBase, intervalMinutes);
+
+  if (!isWithinActiveCaptureWindow(next, activeStartHourUtc, activeEndHourUtc)) {
+    const windowStart = getNextActiveCaptureWindowStart(next, activeStartHourUtc, activeEndHourUtc);
+    return {
+      value: new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(windowStart),
+      detail: describeNextCaptureDay(windowStart, now)
+    };
+  }
 
   return {
     value: new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(next),
-    detail: "Today"
+    detail: describeNextCaptureDay(next, now)
   };
+}
+
+function getNextIntervalBoundary(base: Date, intervalMinutes: number) {
+  const intervalMilliseconds = intervalMinutes * 60_000;
+  const baseMilliseconds = base.getTime();
+  const nextBoundaryMilliseconds = Math.floor(baseMilliseconds / intervalMilliseconds) * intervalMilliseconds + intervalMilliseconds;
+  return new Date(nextBoundaryMilliseconds);
+}
+
+function getNextActiveCaptureWindowStart(now: Date, activeStartHourUtc: number, activeEndHourUtc: number) {
+  if (isWithinActiveCaptureWindow(now, activeStartHourUtc, activeEndHourUtc)) {
+    return now;
+  }
+
+  const next = new Date(now);
+  next.setUTCMinutes(0, 0, 0);
+
+  if (activeStartHourUtc < activeEndHourUtc) {
+    if (now.getUTCHours() < activeStartHourUtc) {
+      next.setUTCHours(activeStartHourUtc);
+      return next;
+    }
+
+    next.setUTCDate(next.getUTCDate() + 1);
+    next.setUTCHours(activeStartHourUtc);
+    return next;
+  }
+
+  next.setUTCHours(activeStartHourUtc);
+  return next;
+}
+
+function isWithinActiveCaptureWindow(date: Date, activeStartHourUtc: number, activeEndHourUtc: number) {
+  if (activeStartHourUtc === 0 && activeEndHourUtc === 24) {
+    return true;
+  }
+
+  const hour = date.getUTCHours();
+  return activeStartHourUtc < activeEndHourUtc
+    ? hour >= activeStartHourUtc && hour < activeEndHourUtc
+    : hour >= activeStartHourUtc || hour < activeEndHourUtc;
+}
+
+function describeNextCaptureDay(next: Date, now: Date) {
+  const localNext = new Date(next.getFullYear(), next.getMonth(), next.getDate());
+  const localToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dayDelta = Math.round((localNext.getTime() - localToday.getTime()) / 86_400_000);
+
+  if (dayDelta === 0) {
+    return "Today";
+  }
+
+  if (dayDelta === 1) {
+    return "Tomorrow";
+  }
+
+  return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(next);
 }
 
 function getDashboardStorageUsage(totalCaptures: number | null) {
