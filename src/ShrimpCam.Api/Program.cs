@@ -3,6 +3,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using Microsoft.Extensions.Options;
 using ShrimpCam.Api.Authentication;
 using ShrimpCam.Api.Build;
@@ -28,6 +29,11 @@ builder.Host.UseWindowsService(
     {
         options.ServiceName = "ShrimpCam";
     });
+
+if (OperatingSystem.IsWindows() && !WindowsServiceHelpers.IsWindowsService())
+{
+    builder.Logging.AddFilter("Microsoft.Extensions.Logging.EventLog.EventLogLoggerProvider", LogLevel.None);
+}
 
 builder.Services.AddShrimpCamConfiguration(builder.Configuration, builder.Environment);
 builder.Services.AddInfrastructure();

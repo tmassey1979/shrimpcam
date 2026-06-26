@@ -31,6 +31,17 @@ public sealed class DeploymentSupportTests
 
     [Fact]
     [Trait("Category", "Api")]
+    public void Program_disables_windows_event_log_provider_for_interactive_runs()
+    {
+        var program = File.ReadAllText(Path.Combine(ResolveRepositoryRoot(), "src", "ShrimpCam.Api", "Program.cs"));
+
+        program.Should().Contain("!WindowsServiceHelpers.IsWindowsService()");
+        program.Should().Contain("Microsoft.Extensions.Logging.EventLog.EventLogLoggerProvider");
+        program.Should().Contain("LogLevel.None");
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
     public void Systemd_unit_starts_automatically_with_restart_policy_and_data_paths()
     {
         var service = File.ReadAllText(Path.Combine(ResolveRepositoryRoot(), "deploy", "raspberry-pi", "shrimpcam-api.service"));
