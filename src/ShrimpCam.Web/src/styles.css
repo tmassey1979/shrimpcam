@@ -5579,6 +5579,55 @@ body,
   }
 }
 
+/* Final nav clearance pass: compact the floating tab bar and keep content readable underneath. */
+.app-shell-authenticated .bottom-nav,
+.app-shell:has(.screen-settings) .bottom-nav,
+.app-shell:has(.screen-live) .bottom-nav {
+  min-height: 4.25rem !important;
+  padding: 0.42rem !important;
+  border-radius: 1.45rem !important;
+}
+
+.app-shell-authenticated .nav-link {
+  min-height: 3.25rem !important;
+  gap: 0.18rem !important;
+  font-size: 0.72rem !important;
+}
+
+.app-shell-authenticated .nav-icon {
+  width: 1.85rem !important;
+  height: 1.85rem !important;
+}
+
+.screen-dashboard .snapshot-card,
+.screen-gallery .viewer-card,
+.screen-live .live-stage,
+.screen-settings .settings-form {
+  margin-bottom: 5.75rem !important;
+}
+
+.screen-dashboard .quick-actions-card,
+.screen-gallery .gallery-browser,
+.screen-live .live-status-panel,
+.screen-settings .status-panel {
+  margin-bottom: 2.5rem !important;
+}
+
+@media (max-width: 520px) {
+  .app-shell-authenticated {
+    padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)) !important;
+  }
+
+  .app-shell-authenticated .bottom-nav,
+  .app-shell:has(.screen-settings) .bottom-nav,
+  .app-shell:has(.screen-live) .bottom-nav {
+    right: 0.85rem !important;
+    bottom: calc(0.65rem + env(safe-area-inset-bottom)) !important;
+    left: 0.85rem !important;
+  }
+}
+
+
 /* Final mobile reference corrections after screenshot comparison. */
 .app-shell-authenticated {
   padding-bottom: calc(9rem + env(safe-area-inset-bottom)) !important;
