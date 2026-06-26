@@ -6055,3 +6055,70 @@ body,
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Reference parity pass: compress Gallery search/date controls into a slim toolbar. */
+.screen-timeline .gallery-toolbar,
+.screen-gallery .gallery-toolbar {
+  grid-template-columns: minmax(0, 1fr) 3.7rem !important;
+  align-items: center !important;
+  gap: 0.58rem !important;
+}
+
+.screen-timeline .gallery-toolbar label,
+.screen-gallery .gallery-toolbar label {
+  min-width: 0 !important;
+  width: 100% !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.screen-timeline .gallery-toolbar input,
+.screen-gallery .gallery-toolbar input {
+  width: 100% !important;
+  min-height: 3.15rem !important;
+  border-radius: 999px !important;
+}
+
+.screen-timeline .gallery-toolbar input[type="date"],
+.screen-gallery .gallery-toolbar input[type="date"] {
+  width: 3.7rem !important;
+  min-width: 3.7rem !important;
+  max-width: 3.7rem !important;
+  padding: 0 !important;
+  color: transparent !important;
+  text-align: center;
+}
+
+.screen-timeline .gallery-toolbar input[type="date"]::-webkit-datetime-edit,
+.screen-gallery .gallery-toolbar input[type="date"]::-webkit-datetime-edit {
+  color: transparent !important;
+}
+
+.screen-timeline .gallery-toolbar input[type="date"]::-webkit-calendar-picker-indicator,
+.screen-gallery .gallery-toolbar input[type="date"]::-webkit-calendar-picker-indicator {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0 auto;
+  opacity: 0;
+}
+
+.screen-timeline .gallery-toolbar label:nth-child(2),
+.screen-gallery .gallery-toolbar label:nth-child(2) {
+  position: relative !important;
+}
+
+.screen-timeline .gallery-toolbar label:nth-child(2)::after,
+.screen-gallery .gallery-toolbar label:nth-child(2)::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.1rem;
+  height: 1rem;
+  border: 0.14rem solid rgba(255, 255, 255, 0.96);
+  border-top-width: 0.24rem;
+  border-radius: 0.16rem;
+  content: "";
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
