@@ -6,9 +6,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 19:52:58 -05:00 |
-| Total stories | 66 |
-| Accepted stories | 66 |
+| Last refreshed | 2026-06-25 19:57:29 -05:00 |
+| Total stories | 67 |
+| Accepted stories | 67 |
 | Remaining stories | 0 |
 | Overall completion | 100% |
 
@@ -19,17 +19,17 @@
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
 | Epic 2: Camera, Capture, and Streaming | 15 | 15 | 100% |
 | Epic 3: API, Security, and Operations | 21 | 21 | 100% |
-| Epic 4: PWA Product Experience | 18 | 18 | 100% |
+| Epic 4: PWA Product Experience | 19 | 19 | 100% |
 
 ## Latest Completed Stories
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-PWA-19 | PWA Manifest And Service Worker Installability Verification | Epic 4: PWA Product Experience | 2026-06-25 | ffc02d7 |
 | SC-PWA-18 | Reference-Led Aquarium Visual Fidelity Pass | Epic 4: PWA Product Experience | 2026-06-25 | f70214f |
 | SC-CAM-19 | Make Scheduled Capture Worker Exception-Resilient | Epic 2: Camera, Capture, and Streaming | 2026-06-25 | 0a7fe1c |
 | SC-CAM-18 | Kill Still-Capture Child Processes On Cancellation And Timeout | Epic 2: Camera, Capture, and Streaming | 2026-06-25 | 10d96c0 |
 | SC-PWA-17 | Automated Accessibility Regression Coverage | Epic 4: PWA Product Experience | 2026-06-25 | bd5c442 |
-| SC-OPS-321 | Gate Release Image Publishing And First-Boot Networking | Epic 3: API, Security, and Operations | 2026-06-25 | dfaac59 |
 
 ## Next Unaccepted Stories
 
