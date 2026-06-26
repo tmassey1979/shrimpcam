@@ -545,6 +545,33 @@ Scenario: Reference styling remains covered by Playwright
   And accessibility checks still report no serious or critical violations
 ```
 
+### SC-PWA-19 PWA Manifest And Service Worker Installability Verification
+
+**User story:** As a Shrimp Cam operator, I want automated verification of the production manifest and service worker output so that installability does not regress before the app is flashed or deployed.
+
+**Dependencies:** SC-PWA-08, SC-PWA-16, SC-PWA-17
+
+**Test expectations:**
+- Samsung S26 Playwright tests fetch the production `manifest.webmanifest` from the preview server and assert installability fields, theme colors, standalone display mode, scope, start URL, and icon metadata.
+- Playwright verifies the production service worker is emitted and precaches the app shell, manifest, and icon assets.
+- Existing install prompt lifecycle tests continue to cover supported prompt, dismissed prompt, and installed app states.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: Production bundle includes an installable manifest
+  Given the PWA production build has completed
+  When the manifest is requested from the hosted app
+  Then it declares the Shrimp Cam app name, standalone display, root scope, root start URL, theme colors, and install icon
+  And the referenced icon is served successfully
+
+Scenario: Production bundle includes a service worker
+  Given the PWA production build has completed
+  When the service worker is requested from the hosted app
+  Then it is served successfully as JavaScript
+  And it precaches the app shell, manifest, and install icon assets
+```
+
 ## Delivery Notes
 
 - Story sequencing should start with shell and routing, then move through authentication, core screens, resilience behavior, and final accessibility hardening.
