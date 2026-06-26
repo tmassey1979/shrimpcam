@@ -5738,6 +5738,109 @@ body,
   }
 }
 
+/* Final collision fixes: keep mobile header badges from covering the title. */
+@media (max-width: 520px) {
+  .screen-dashboard .reference-screen-header {
+    grid-template-columns: 4rem minmax(0, 1fr) 3.05rem !important;
+    column-gap: 0.45rem !important;
+  }
+
+  .screen-dashboard .reference-brand-copy h2 {
+    font-size: clamp(2rem, 9.1vw, 2.42rem) !important;
+    line-height: 0.96 !important;
+    white-space: nowrap !important;
+  }
+
+  .screen-dashboard .reference-brand-copy p {
+    font-size: 0.98rem !important;
+    white-space: nowrap !important;
+  }
+
+  .reference-header-action.dashboard,
+  .reference-header-action.live {
+    width: 2.85rem !important;
+    height: 2.85rem !important;
+  }
+
+  .screen-gallery .reference-screen-header,
+  .screen-timeline .reference-screen-header {
+    grid-template-columns: 3.65rem minmax(0, 1fr) 6.1rem !important;
+    column-gap: 0.5rem !important;
+  }
+
+  .screen-gallery .reference-brand-copy h2,
+  .screen-timeline .reference-brand-copy h2 {
+    font-size: clamp(2rem, 9.3vw, 2.45rem) !important;
+    line-height: 0.98 !important;
+  }
+
+  .screen-gallery .reference-brand-copy p,
+  .screen-timeline .reference-brand-copy p {
+    font-size: 0.94rem !important;
+    line-height: 1.05 !important;
+  }
+
+  .screen-gallery .reference-header-action,
+  .screen-timeline .reference-header-action {
+    width: 6.1rem !important;
+    height: 2.95rem !important;
+  }
+}
+
+.snapshot-preview-empty,
+.stream-placeholder,
+.viewer-empty,
+.gallery-empty {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(2, 20, 28, 0.52)),
+    url("./assets/ref-settings-camera.png") center / cover no-repeat !important;
+}
+
+.snapshot-preview-empty strong,
+.stream-placeholder strong,
+.viewer-empty strong,
+.gallery-empty strong {
+  text-shadow: 0 0.35rem 0.85rem rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Header collision lock: reserve action space instead of letting badges cover text. */
+@media (max-width: 520px) {
+  .screen-dashboard .reference-screen-header,
+  .screen-gallery .reference-screen-header,
+  .screen-timeline .reference-screen-header {
+    position: relative !important;
+    padding-right: 3.85rem !important;
+  }
+
+  .screen-gallery .reference-screen-header,
+  .screen-timeline .reference-screen-header {
+    padding-right: 6.9rem !important;
+  }
+
+  .screen-dashboard .reference-header-action.dashboard {
+    position: absolute !important;
+    right: 0.1rem !important;
+    top: 4.5rem !important;
+  }
+
+  .screen-gallery .reference-header-action,
+  .screen-timeline .reference-header-action {
+    position: absolute !important;
+    right: 0 !important;
+    top: 4.35rem !important;
+  }
+
+  .screen-dashboard .reference-brand-copy h2 {
+    font-size: clamp(1.9rem, 8.4vw, 2.18rem) !important;
+  }
+
+  .screen-gallery .reference-brand-copy h2,
+  .screen-timeline .reference-brand-copy h2 {
+    font-size: clamp(1.85rem, 8vw, 2.12rem) !important;
+    white-space: nowrap !important;
+  }
+}
+
 /* Final reference lock: this must stay last so the render matches the supplied images. */
 .app-shell-authenticated {
   width: min(100%, 45rem) !important;
