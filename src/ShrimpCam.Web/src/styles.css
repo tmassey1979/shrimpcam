@@ -7336,3 +7336,249 @@ body,
   padding: 0 0.9rem !important;
   border-radius: 999px !important;
 }
+
+/* Reference parity pass: move Timeline toward feature-first capture review. */
+.screen-timeline .gallery-layout,
+.screen-gallery .gallery-layout {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.7rem !important;
+}
+
+.screen-timeline .viewer-card,
+.screen-gallery .viewer-card {
+  order: 2 !important;
+  margin-top: 0.3rem !important;
+}
+
+.screen-timeline .gallery-browser,
+.screen-gallery .gallery-browser {
+  display: contents !important;
+}
+
+.screen-timeline .gallery-timeline-header,
+.screen-gallery .gallery-timeline-header {
+  order: 1 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  margin: 0.25rem 0 0 !important;
+}
+
+.screen-timeline .gallery-timeline-header .eyebrow,
+.screen-gallery .gallery-timeline-header .eyebrow {
+  display: none !important;
+}
+
+.screen-timeline .gallery-timeline-header h3,
+.screen-gallery .gallery-timeline-header h3 {
+  color: #fff !important;
+  font-size: clamp(1.22rem, 4.2vw, 1.55rem) !important;
+  letter-spacing: -0.05em !important;
+}
+
+.screen-timeline .gallery-timeline-header h3::before,
+.screen-gallery .gallery-timeline-header h3::before {
+  content: "Today";
+}
+
+.screen-timeline .gallery-timeline-header h3,
+.screen-gallery .gallery-timeline-header h3 {
+  font-size: 0 !important;
+}
+
+.screen-timeline .gallery-timeline-header h3::before,
+.screen-gallery .gallery-timeline-header h3::before {
+  font-size: clamp(1.22rem, 4.2vw, 1.55rem) !important;
+}
+
+.screen-timeline .gallery-timeline-header > span,
+.screen-gallery .gallery-timeline-header > span {
+  color: rgba(232, 255, 252, 0.78) !important;
+  font-size: 0.92rem !important;
+  font-weight: 800 !important;
+}
+
+.screen-timeline .timeline-chip-row,
+.screen-gallery .timeline-chip-row {
+  order: -2 !important;
+  display: flex !important;
+  gap: 0.52rem !important;
+  overflow-x: auto !important;
+  padding: 0.1rem 0 0.2rem !important;
+  scrollbar-width: none;
+}
+
+.screen-timeline .timeline-chip-row::-webkit-scrollbar,
+.screen-gallery .timeline-chip-row::-webkit-scrollbar {
+  display: none;
+}
+
+.screen-timeline .timeline-chip,
+.screen-gallery .timeline-chip {
+  flex: 0 0 auto !important;
+  min-width: 4.2rem !important;
+  min-height: 2.75rem !important;
+  border-radius: 0.72rem !important;
+  background: rgba(7, 79, 92, 0.58) !important;
+}
+
+.screen-timeline .timeline-chip.active,
+.screen-gallery .timeline-chip.active {
+  background: linear-gradient(135deg, rgba(42, 238, 225, 0.98), rgba(16, 137, 157, 0.95)) !important;
+}
+
+.screen-timeline .gallery-toolbar,
+.screen-gallery .gallery-toolbar {
+  order: -3 !important;
+  margin-top: 0.1rem !important;
+}
+
+.screen-timeline .source-chip-row,
+.screen-gallery .source-chip-row {
+  order: -1 !important;
+}
+
+.screen-timeline .source-chip-row:nth-of-type(2),
+.screen-gallery .source-chip-row:nth-of-type(2) {
+  order: 0 !important;
+}
+
+.screen-timeline .gallery-summary,
+.screen-gallery .gallery-summary {
+  order: 1 !important;
+  margin-top: 0.15rem !important;
+}
+
+.screen-timeline .capture-list,
+.screen-gallery .capture-list {
+  order: 3 !important;
+  margin-top: -0.25rem !important;
+}
+
+.screen-timeline .viewer-hero-header,
+.screen-gallery .viewer-hero-header {
+  margin-top: 0 !important;
+}
+
+.screen-timeline .viewer-hero-header .eyebrow,
+.screen-gallery .viewer-hero-header .eyebrow {
+  display: none !important;
+}
+
+.screen-timeline .viewer-hero-header h3,
+.screen-gallery .viewer-hero-header h3 {
+  font-size: clamp(1.02rem, 3.8vw, 1.35rem) !important;
+}
+
+.screen-timeline .viewer-frame,
+.screen-gallery .viewer-frame {
+  min-height: clamp(13.75rem, 52vw, 18.5rem) !important;
+  border-width: 0.14rem !important;
+}
+
+.screen-timeline .viewer-frame::before,
+.screen-gallery .viewer-frame::before {
+  position: absolute;
+  top: 0.72rem;
+  left: 0.72rem;
+  z-index: 2;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.48);
+  color: #fff;
+  content: "LIVE";
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.screen-timeline .capture-list-item::before,
+.screen-gallery .capture-list-item::before {
+  position: absolute;
+  top: 0.38rem;
+  left: 0.42rem;
+  display: grid;
+  width: 1.22rem;
+  height: 1.22rem;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.42);
+  color: #fff;
+  content: "";
+}
+
+/* Reference parity pass: make live status panel feel like the render's camera-status sheet. */
+.screen-live .live-status-panel h3 {
+  font-size: clamp(1.2rem, 4.1vw, 1.55rem) !important;
+}
+
+.screen-live .live-status-panel h3::before {
+  display: inline-block;
+  width: 1.42rem;
+  height: 1.05rem;
+  margin-right: 0.6rem;
+  border: 0.16rem solid #fff;
+  border-radius: 0.24rem;
+  box-shadow: 0.82rem 0.06rem 0 -0.26rem #fff;
+  content: "";
+  vertical-align: -0.12rem;
+}
+
+.screen-live .live-status-panel h3 {
+  font-size: 0 !important;
+}
+
+.screen-live .live-status-panel h3::after {
+  content: "Camera Status";
+  font-size: clamp(1.2rem, 4.1vw, 1.55rem) !important;
+}
+
+.screen-live .capture-facts {
+  display: block !important;
+  gap: 0 !important;
+}
+
+.screen-live .capture-facts div {
+  display: grid !important;
+  grid-template-columns: 4.5rem minmax(0, 1fr) !important;
+  align-items: center !important;
+  min-height: 3.6rem !important;
+  padding: 0.56rem 0 !important;
+}
+
+.screen-live .capture-facts div + div {
+  grid-template-columns: 2.8rem minmax(0, 1fr) !important;
+}
+
+.screen-live .capture-facts div + div::before {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border: 1px solid rgba(128, 255, 244, 0.44);
+  border-radius: 999px;
+  background: rgba(31, 216, 201, 0.16);
+  content: "";
+}
+
+.screen-live .capture-facts div:first-child::before {
+  display: block;
+  width: 3.7rem;
+  height: 2.55rem;
+  border-radius: 0.4rem;
+  background: url("./assets/ref-settings-camera.png") center / cover no-repeat;
+  content: "";
+}
+
+.screen-live .capture-facts dt {
+  color: #fff !important;
+  font-size: 0.92rem !important;
+  letter-spacing: -0.04em !important;
+  text-transform: none !important;
+}
+
+.screen-live .capture-facts dd {
+  grid-column: 2 !important;
+  font-size: 0.82rem !important;
+}
