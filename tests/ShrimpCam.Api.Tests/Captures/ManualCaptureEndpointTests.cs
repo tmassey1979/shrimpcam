@@ -242,6 +242,7 @@ public sealed class ManualCaptureEndpointTests
                     {
                         ["ShrimpCam:Camera:Platform"] = "Linux",
                         ["ShrimpCam:Camera:Source"] = "/dev/video0",
+                        ["ShrimpCam:Camera:AlwaysOnStreamEnabled"] = "false",
                         ["ShrimpCam:Storage:DatabasePath"] = Path.Combine(rootPath, "shrimpcam.db"),
                         ["ShrimpCam:Storage:ImageRootPath"] = rootPath,
                         ["ShrimpCam:Storage:TimelapseRootPath"] = Path.Combine(rootPath, "timelapse"),

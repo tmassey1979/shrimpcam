@@ -336,6 +336,7 @@ app.MapPost(
 app.MapPost(
     "/auth/login",
     async (
+        HttpContext httpContext,
         LoginRequest request,
         ShrimpCam.Core.Authentication.IAuthenticationService authenticationService,
         IAuditEventService auditEventService,
@@ -377,6 +378,19 @@ app.MapPost(
                     }),
                 cancellationToken)
             .ConfigureAwait(false);
+
+        httpContext.Response.Cookies.Append(
+            BearerSessionAuthenticationHandler.SessionCookieName,
+            result.Session.Token,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                IsEssential = true,
+                Path = "/",
+                SameSite = SameSiteMode.Strict,
+                Secure = httpContext.Request.IsHttps,
+                Expires = result.Session.ExpiresAtUtc,
+            });
 
         return Results.Ok(
             new
@@ -455,6 +469,17 @@ app.MapPost(
                         }),
                     cancellationToken)
                 .ConfigureAwait(false);
+
+            httpContext.Response.Cookies.Delete(
+                BearerSessionAuthenticationHandler.SessionCookieName,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    IsEssential = true,
+                    Path = "/",
+                    SameSite = SameSiteMode.Strict,
+                    Secure = httpContext.Request.IsHttps,
+                });
 
             return Results.Ok(
                 new
@@ -818,6 +843,7 @@ internal sealed record UpdateSettingsHttpRequest(
                 StreamFramesPerSecond = Camera.StreamFramesPerSecond,
                 ReconnectRetryAttempts = Camera.ReconnectRetryAttempts,
                 ReconnectBackoffSeconds = Camera.ReconnectBackoffSeconds,
+                AlwaysOnStreamEnabled = Camera.AlwaysOnStreamEnabled,
             },
             new CaptureOptions
             {
@@ -845,7 +871,8 @@ internal sealed record CameraSettingsHttpRequest(
     int StreamHeight,
     int StreamFramesPerSecond,
     int ReconnectRetryAttempts,
-    int ReconnectBackoffSeconds);
+    int ReconnectBackoffSeconds,
+    bool AlwaysOnStreamEnabled);
 
 internal sealed record CaptureSettingsHttpRequest(
     bool Enabled,
@@ -1005,6 +1032,7 @@ internal static class SettingsEndpointMapping
                 settings.Camera.StreamFramesPerSecond,
                 settings.Camera.ReconnectRetryAttempts,
                 settings.Camera.ReconnectBackoffSeconds,
+                settings.Camera.AlwaysOnStreamEnabled,
             },
             capture = new
             {

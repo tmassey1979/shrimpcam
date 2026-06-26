@@ -15,7 +15,8 @@ public sealed class ScheduledCaptureService(
     IClock clock,
     IFileSystem fileSystem,
     IProcessRunner processRunner,
-    IScheduledCaptureStateStore stateStore) : IScheduledCaptureService
+    IScheduledCaptureStateStore stateStore,
+    ILiveFrameSnapshotStore? liveFrameSnapshotStore = null) : IScheduledCaptureService
 {
     public async Task<ScheduledCaptureRunResult> RunDueCaptureAsync(
         ShrimpCamOptions options,
@@ -79,6 +80,12 @@ public sealed class ScheduledCaptureService(
 
             if (cameraLease is null)
             {
+                if (liveFrameSnapshotStore is not null &&
+                    await liveFrameSnapshotStore.TryWriteLatestFrameAsync(stagedFilePath, cancellationToken).ConfigureAwait(false))
+                {
+                    return await StoreScheduledFrameAsync(options, plan, stagedFilePath, cancellationToken).ConfigureAwait(false);
+                }
+
                 DeleteIfPresent(stagedFilePath);
                 return await PersistFailureAsync(
                         options,
@@ -129,42 +136,51 @@ public sealed class ScheduledCaptureService(
                     .ConfigureAwait(false);
             }
 
-            StoredCapture capture;
-            try
-            {
-                capture = await captureStorage.StoreAsync(
-                        options.Storage,
-                        new CaptureStorageRequest(plan.IntervalStartUtc, CaptureSourceTypes.Scheduled, stagedFilePath),
-                        cancellationToken)
-                    .ConfigureAwait(false);
+            return await StoreScheduledFrameAsync(options, plan, stagedFilePath, cancellationToken).ConfigureAwait(false);
+        }
+    }
 
-                await captureRecordRepository.CreateAsync(capture.ToCaptureRecord(), cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                DeleteIfPresent(stagedFilePath);
-                return await PersistFailureAsync(
-                        options,
-                        plan,
-                        exception.Message,
-                        cancellationToken)
-                    .ConfigureAwait(false);
-            }
-
-            cameraStatusService.ReportOnline();
-
-            await stateStore.SaveAsync(
+    private async Task<ScheduledCaptureRunResult> StoreScheduledFrameAsync(
+        ShrimpCamOptions options,
+        ScheduledCapturePlan plan,
+        string stagedFilePath,
+        CancellationToken cancellationToken)
+    {
+        StoredCapture capture;
+        try
+        {
+            capture = await captureStorage.StoreAsync(
                     options.Storage,
-                    new ScheduledCaptureState(plan.IntervalStartUtc, ScheduledCaptureOutcome.Captured, null),
+                    new CaptureStorageRequest(plan.IntervalStartUtc, CaptureSourceTypes.Scheduled, stagedFilePath),
                     cancellationToken)
                 .ConfigureAwait(false);
 
-            return ScheduledCaptureRunResult.Create(
-                ScheduledCaptureOutcome.Captured,
-                plan.IntervalStartUtc,
-                plan.NextEligibleIntervalUtc,
-                capture);
+            await captureRecordRepository.CreateAsync(capture.ToCaptureRecord(), cancellationToken).ConfigureAwait(false);
         }
+        catch (Exception exception)
+        {
+            DeleteIfPresent(stagedFilePath);
+            return await PersistFailureAsync(
+                    options,
+                    plan,
+                    exception.Message,
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        cameraStatusService.ReportOnline();
+
+        await stateStore.SaveAsync(
+                options.Storage,
+                new ScheduledCaptureState(plan.IntervalStartUtc, ScheduledCaptureOutcome.Captured, null),
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        return ScheduledCaptureRunResult.Create(
+            ScheduledCaptureOutcome.Captured,
+            plan.IntervalStartUtc,
+            plan.NextEligibleIntervalUtc,
+            capture);
     }
 
     private async Task<ScheduledCaptureRunResult> PersistFailureAsync(

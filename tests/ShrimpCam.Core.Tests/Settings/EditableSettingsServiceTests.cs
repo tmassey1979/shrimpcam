@@ -72,7 +72,7 @@ public sealed class EditableSettingsServiceTests
 
         await service.UpdateAsync(settings, CancellationToken.None).ConfigureAwait(true);
 
-        await settingsRepository.Received(18)
+        await settingsRepository.Received(19)
             .UpsertAsync(Arg.Any<PersistedSetting>(), CancellationToken.None)
             .ConfigureAwait(true);
         await settingsRepository.Received(1)

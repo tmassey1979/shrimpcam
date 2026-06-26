@@ -27,6 +27,7 @@ public sealed class EditableSettingsService(
                 StreamFramesPerSecond = GetInt(persisted, "camera.streamFramesPerSecond", defaults.Camera.StreamFramesPerSecond),
                 ReconnectRetryAttempts = GetInt(persisted, "camera.reconnectRetryAttempts", defaults.Camera.ReconnectRetryAttempts),
                 ReconnectBackoffSeconds = GetInt(persisted, "camera.reconnectBackoffSeconds", defaults.Camera.ReconnectBackoffSeconds),
+                AlwaysOnStreamEnabled = GetBool(persisted, "camera.alwaysOnStreamEnabled", defaults.Camera.AlwaysOnStreamEnabled),
             },
             new CaptureOptions
             {
@@ -94,6 +95,7 @@ public sealed class EditableSettingsService(
             CreateSetting("camera.streamFramesPerSecond", settings.Camera.StreamFramesPerSecond, "Stream frames per second", updatedAtUtc),
             CreateSetting("camera.reconnectRetryAttempts", settings.Camera.ReconnectRetryAttempts, "Reconnect retry attempts", updatedAtUtc),
             CreateSetting("camera.reconnectBackoffSeconds", settings.Camera.ReconnectBackoffSeconds, "Reconnect backoff seconds", updatedAtUtc),
+            CreateSetting("camera.alwaysOnStreamEnabled", settings.Camera.AlwaysOnStreamEnabled, "Always-on stream enabled", updatedAtUtc),
             CreateSetting("capture.enabled", settings.Capture.Enabled, "Capture enabled", updatedAtUtc),
             CreateSetting("capture.intervalMinutes", settings.Capture.IntervalMinutes, "Capture interval minutes", updatedAtUtc),
             CreateSetting("capture.activeStartHourUtc", settings.Capture.ActiveStartHourUtc, "Capture active start hour UTC", updatedAtUtc),

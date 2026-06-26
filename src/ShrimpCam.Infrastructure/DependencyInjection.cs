@@ -55,6 +55,8 @@ public static class DependencyInjection
         services.AddSingleton<IAuditRecordRepository, SqliteAuditRecordRepository>();
         services.AddSingleton<ICameraCommandFactory, CameraCommandFactory>();
         services.AddSingleton<ICameraResourceCoordinator, InMemoryCameraResourceCoordinator>();
+        services.AddSingleton<ILiveFrameSnapshotStore, LiveFrameSnapshotStore>();
+        services.AddSingleton<ISharedCameraStreamHub, SharedCameraStreamHub>();
         services.AddSingleton<ICameraStartupProbe, CameraStartupProbe>();
         services.AddSingleton<ICameraStatusService, CameraStatusService>();
         services.AddSingleton<ICameraLiveStreamService, CameraLiveStreamService>();
@@ -63,16 +65,39 @@ public static class DependencyInjection
         services.AddSingleton<ICaptureRetentionService, CaptureRetentionService>();
         services.AddSingleton<IDailyTimelapseService, DailyTimelapseService>();
         services.AddSingleton<IMotionHighlightStateStore, MotionHighlightStateStore>();
-        services.AddSingleton<IManualCaptureService, ManualCaptureService>();
+        services.AddSingleton<IManualCaptureService>(
+            provider => new ManualCaptureService(
+                provider.GetRequiredService<ICameraCommandFactory>(),
+                provider.GetRequiredService<ICameraResourceCoordinator>(),
+                provider.GetRequiredService<ICameraStatusService>(),
+                provider.GetRequiredService<ICaptureRecordRepository>(),
+                provider.GetRequiredService<ICaptureStorage>(),
+                provider.GetRequiredService<IClock>(),
+                provider.GetRequiredService<IFileSystem>(),
+                provider.GetRequiredService<IProcessRunner>(),
+                provider.GetRequiredService<ILiveFrameSnapshotStore>()));
         services.AddSingleton<IMotionHighlightService, MotionHighlightService>();
         services.AddSingleton<ISettingsRepository, SqliteSettingsRepository>();
         services.AddSingleton<ISessionRepository, SqliteSessionRepository>();
         services.AddSingleton<IScheduledCaptureStateStore, ScheduledCaptureStateStore>();
-        services.AddSingleton<IScheduledCaptureService, ScheduledCaptureService>();
+        services.AddSingleton<IScheduledCaptureService>(
+            provider => new ScheduledCaptureService(
+                provider.GetRequiredService<IAsyncDelay>(),
+                provider.GetRequiredService<ICameraCommandFactory>(),
+                provider.GetRequiredService<ICameraResourceCoordinator>(),
+                provider.GetRequiredService<ICameraStatusService>(),
+                provider.GetRequiredService<ICaptureRecordRepository>(),
+                provider.GetRequiredService<ICaptureStorage>(),
+                provider.GetRequiredService<IClock>(),
+                provider.GetRequiredService<IFileSystem>(),
+                provider.GetRequiredService<IProcessRunner>(),
+                provider.GetRequiredService<IScheduledCaptureStateStore>(),
+                provider.GetRequiredService<ILiveFrameSnapshotStore>()));
         services.AddSingleton<ILinuxCameraDiscovery, LinuxCameraDiscovery>();
         services.AddSingleton<IUserRepository, SqliteUserRepository>();
         services.AddSingleton<IUserRoleRepository, SqliteUserRoleRepository>();
         services.AddSingleton<IWindowsCameraDiscovery, WindowsCameraDiscovery>();
+        services.AddHostedService<CameraFrameEvaluationWorker>();
         services.AddHostedService<ScheduledCaptureWorker>();
 
         return services;

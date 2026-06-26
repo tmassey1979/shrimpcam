@@ -39,6 +39,12 @@ public sealed class LoginEndpointTests
             payload.UserName.Should().Be("shrimp-admin");
             payload.Token.Should().NotBeNullOrWhiteSpace();
             payload.ExpiresAtUtc.Should().BeAfter(DateTimeOffset.UtcNow.AddHours(7));
+            response.Headers.TryGetValues("Set-Cookie", out var cookies).Should().BeTrue();
+            cookies.Should().Contain(cookie =>
+                cookie.StartsWith("shrimpcam-session=", StringComparison.Ordinal) &&
+                cookie.Contains("httponly", StringComparison.OrdinalIgnoreCase) &&
+                cookie.Contains("path=/", StringComparison.OrdinalIgnoreCase) &&
+                cookie.Contains("samesite=strict", StringComparison.OrdinalIgnoreCase));
         }
         finally
         {

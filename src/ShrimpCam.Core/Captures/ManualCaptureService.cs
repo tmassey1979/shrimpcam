@@ -13,7 +13,8 @@ public sealed class ManualCaptureService(
     ICaptureStorage captureStorage,
     IClock clock,
     IFileSystem fileSystem,
-    IProcessRunner processRunner) : IManualCaptureService
+    IProcessRunner processRunner,
+    ILiveFrameSnapshotStore? liveFrameSnapshotStore = null) : IManualCaptureService
 {
     public async Task<ManualCaptureResult> CaptureAsync(
         ShrimpCamOptions options,
@@ -28,6 +29,12 @@ public sealed class ManualCaptureService(
 
         if (cameraLease is null)
         {
+            if (liveFrameSnapshotStore is not null &&
+                await liveFrameSnapshotStore.TryWriteLatestFrameAsync(stagedFilePath, cancellationToken).ConfigureAwait(false))
+            {
+                return await StoreCaptureAsync(options, stagedFilePath, cancellationToken).ConfigureAwait(false);
+            }
+
             DeleteIfPresent(stagedFilePath);
             cameraStatusService.ReportDegraded(ManualCaptureFailureReasons.CameraBusy);
             return ManualCaptureResult.Failure(ManualCaptureFailureReasons.CameraBusy);
@@ -45,17 +52,7 @@ public sealed class ManualCaptureService(
                 return ManualCaptureResult.Failure(ManualCaptureFailureReasons.CameraUnavailable);
             }
 
-            var storedCapture = await captureStorage.StoreAsync(
-                    options.Storage,
-                    new CaptureStorageRequest(clock.UtcNow, CaptureSourceTypes.Manual, stagedFilePath),
-                    cancellationToken)
-                .ConfigureAwait(false);
-
-            await captureRecordRepository.CreateAsync(storedCapture.ToCaptureRecord(), cancellationToken).ConfigureAwait(false);
-
-            cameraStatusService.ReportOnline();
-
-            return ManualCaptureResult.Success(storedCapture);
+            return await StoreCaptureAsync(options, stagedFilePath, cancellationToken).ConfigureAwait(false);
         }
         catch
         {
@@ -66,6 +63,24 @@ public sealed class ManualCaptureService(
         {
             await cameraLease.DisposeAsync().ConfigureAwait(false);
         }
+    }
+
+    private async Task<ManualCaptureResult> StoreCaptureAsync(
+        ShrimpCamOptions options,
+        string stagedFilePath,
+        CancellationToken cancellationToken)
+    {
+        var storedCapture = await captureStorage.StoreAsync(
+                options.Storage,
+                new CaptureStorageRequest(clock.UtcNow, CaptureSourceTypes.Manual, stagedFilePath),
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        await captureRecordRepository.CreateAsync(storedCapture.ToCaptureRecord(), cancellationToken).ConfigureAwait(false);
+
+        cameraStatusService.ReportOnline();
+
+        return ManualCaptureResult.Success(storedCapture);
     }
 
     private void DeleteIfPresent(string stagedFilePath)

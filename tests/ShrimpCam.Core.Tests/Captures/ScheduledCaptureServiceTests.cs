@@ -390,6 +390,75 @@ public sealed class ScheduledCaptureServiceTests
 
     [Fact]
     [Trait("Category", "Unit")]
+    public async Task Busy_camera_uses_latest_live_frame_when_stream_is_active()
+    {
+        var asyncDelay = Substitute.For<IAsyncDelay>();
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var captureRecordRepository = Substitute.For<ICaptureRecordRepository>();
+        var captureStorage = Substitute.For<ICaptureStorage>();
+        var clock = Substitute.For<IClock>();
+        var fileSystem = Substitute.For<IFileSystem>();
+        var liveFrameSnapshotStore = Substitute.For<ILiveFrameSnapshotStore>();
+        var processRunner = Substitute.For<IProcessRunner>();
+        var stateStore = Substitute.For<IScheduledCaptureStateStore>();
+        var options = CreateOptions();
+        var stagedPath = "temp/live-frame.jpg";
+        var dueInterval = new DateTimeOffset(2026, 06, 24, 12, 00, 00, TimeSpan.Zero);
+        var storedCapture = new StoredCapture(
+            "data/images/2026/06/24/live-frame.jpg",
+            "data/images/2026/06/24/live-frame.json",
+            "2026/06/24/live-frame.jpg",
+            "2026/06/24/live-frame.json",
+            "live-frame.jpg",
+            dueInterval,
+            CaptureSourceTypes.Scheduled);
+
+        clock.UtcNow.Returns(new DateTimeOffset(2026, 06, 24, 12, 03, 00, TimeSpan.Zero));
+        stateStore.LoadAsync(options.Storage, Arg.Any<CancellationToken>()).Returns(ScheduledCaptureState.Empty);
+        fileSystem.GetTemporaryFilePath(".jpg").Returns(stagedPath);
+        liveFrameSnapshotStore.TryWriteLatestFrameAsync(stagedPath, Arg.Any<CancellationToken>()).Returns(true);
+        captureStorage.StoreAsync(
+                options.Storage,
+                Arg.Is<CaptureStorageRequest>(request =>
+                    request.SourceType == CaptureSourceTypes.Scheduled
+                    && request.StagedFilePath == stagedPath
+                    && request.CapturedAtUtc == dueInterval),
+                Arg.Any<CancellationToken>())
+            .Returns(storedCapture);
+
+        var service = new ScheduledCaptureService(
+            asyncDelay,
+            commandFactory,
+            new BusyCameraResourceCoordinator(),
+            cameraStatusService,
+            captureRecordRepository,
+            captureStorage,
+            clock,
+            fileSystem,
+            processRunner,
+            stateStore,
+            liveFrameSnapshotStore);
+
+        var result = await service.RunDueCaptureAsync(options, CancellationToken.None).ConfigureAwait(true);
+
+        result.Outcome.Should().Be(ScheduledCaptureOutcome.Captured);
+        result.Capture.Should().Be(storedCapture);
+        commandFactory.DidNotReceiveWithAnyArgs().BuildStillCaptureCommand(default!, default!);
+        await processRunner.DidNotReceiveWithAnyArgs().RunAsync(default!, default).ConfigureAwait(true);
+        await captureRecordRepository.Received(1)
+            .CreateAsync(Arg.Is<CaptureRecord>(record => record.FileName == storedCapture.FileName), Arg.Any<CancellationToken>())
+            .ConfigureAwait(true);
+        cameraStatusService.Received(1).ReportOnline();
+        await stateStore.Received(1).SaveAsync(
+                options.Storage,
+                new ScheduledCaptureState(dueInterval, ScheduledCaptureOutcome.Captured, null),
+                Arg.Any<CancellationToken>())
+            .ConfigureAwait(true);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
     public async Task Missing_staged_capture_file_marks_interval_failed_without_throwing()
     {
         var asyncDelay = Substitute.For<IAsyncDelay>();

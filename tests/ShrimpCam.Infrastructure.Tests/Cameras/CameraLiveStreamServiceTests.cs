@@ -1,5 +1,5 @@
 using System.Text;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using ShrimpCam.Core.Abstractions;
 using ShrimpCam.Core.Cameras;
@@ -14,210 +14,168 @@ public sealed class CameraLiveStreamServiceTests
 {
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task Start_async_returns_session_when_process_produces_stream_bytes()
+    public async Task Multiple_subscribers_share_one_camera_process()
     {
-        var asyncDelay = Substitute.For<IAsyncDelay>();
         var commandFactory = Substitute.For<ICameraCommandFactory>();
         var cameraStatusService = Substitute.For<ICameraStatusService>();
         var processStreamRunner = Substitute.For<IProcessStreamRunner>();
-        var processStream = new StubProcessStream(
-            new MemoryStream(Encoding.ASCII.GetBytes($"--{LiveStreamConstants.Boundary}\r\nContent-Type: image/jpeg\r\n\r\nframe-01\r\n")),
-            new ProcessResult(0, string.Empty, string.Empty));
+        var stream = new BlockingAppendStream();
+        var processStream = new StubProcessStream(stream, new ProcessResult(0, string.Empty, string.Empty));
         var options = CreateOptions();
+        var command = new ProcessRequest("ffmpeg", "-stream");
 
-        commandFactory.BuildLiveStreamCommand(options).Returns(new ProcessRequest("ffmpeg", "-stream"));
-        processStreamRunner.StartAsync(Arg.Any<ProcessRequest>(), Arg.Any<CancellationToken>())
-            .Returns(processStream);
+        commandFactory.BuildLiveStreamCommand(Arg.Any<CameraOptions>()).Returns(command);
+        processStreamRunner.StartAsync(command, Arg.Any<CancellationToken>()).Returns(processStream);
 
-        var service = new CameraLiveStreamService(
-            asyncDelay,
-            commandFactory,
-            new AlwaysAvailableCameraResourceCoordinator(),
-            cameraStatusService,
-            processStreamRunner,
-            new ListLogger<CameraLiveStreamService>());
+        var hub = CreateHub(commandFactory, cameraStatusService, processStreamRunner);
+        var service = new CameraLiveStreamService(hub);
 
-        var result = await service.StartAsync(options, CancellationToken.None).ConfigureAwait(true);
+        var firstSubscriptionTask = service.StartAsync(options, CancellationToken.None);
+        await stream.AppendAsync("--shrimpcam\r\nContent-Type: image/jpeg\r\n\r\nframe-01\r\n").ConfigureAwait(true);
+        var firstSubscription = await firstSubscriptionTask.ConfigureAwait(true);
 
-        result.Succeeded.Should().BeTrue();
-        result.Session.Should().NotBeNull();
-        result.Session!.ContentType.Should().Be(LiveStreamConstants.ContentType);
+        var secondSubscriptionTask = service.StartAsync(options, CancellationToken.None);
+        await Task.Delay(50).ConfigureAwait(true);
+        await stream.AppendAsync("--shrimpcam\r\nContent-Type: image/jpeg\r\n\r\nframe-02\r\n").ConfigureAwait(true);
+        var secondSubscription = await secondSubscriptionTask.ConfigureAwait(true);
 
-        var buffer = new byte[128];
-        var bytesRead = result.Session.Content.Read(buffer, 0, buffer.Length);
-        var payload = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-        payload.Should().Contain("frame-01");
+        firstSubscription.Succeeded.Should().BeTrue();
+        secondSubscription.Succeeded.Should().BeTrue();
         cameraStatusService.Received(1).ReportOnline();
 
-        await result.Session.DisposeAsync().ConfigureAwait(true);
+        await firstSubscription.Session!.DisposeAsync().ConfigureAwait(true);
+        await secondSubscription.Session!.DisposeAsync().ConfigureAwait(true);
     }
 
     [Fact]
-    [Trait("Category", "Integration")]
-    public async Task Start_async_returns_camera_busy_without_starting_process_when_resource_is_reserved()
+    [Trait("Category", "Unit")]
+    public async Task Shared_stream_feeds_latest_frame_cache_without_requiring_new_viewer_processes()
     {
-        var asyncDelay = Substitute.For<IAsyncDelay>();
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var frameStore = new LiveFrameSnapshotStore();
+        var processStreamRunner = Substitute.For<IProcessStreamRunner>();
+        var stream = new BlockingAppendStream();
+        var processStream = new StubProcessStream(stream, new ProcessResult(0, string.Empty, string.Empty));
+        var options = CreateOptions();
+        var command = new ProcessRequest("ffmpeg", "-stream");
+        var outputPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.jpg");
+        var jpeg = new byte[] { 0xFF, 0xD8, 0x01, 0x02, 0xFF, 0xD9 };
+        var hub = CreateHub(commandFactory, cameraStatusService, processStreamRunner, frameStore);
+
+        try
+        {
+            commandFactory.BuildLiveStreamCommand(Arg.Any<CameraOptions>()).Returns(command);
+            processStreamRunner.StartAsync(command, Arg.Any<CancellationToken>()).Returns(processStream);
+
+            await hub.EnsureRunningAsync(options, CancellationToken.None).ConfigureAwait(true);
+            await stream.AppendAsync(Encoding.ASCII.GetBytes("--shrimpcam\r\nContent-Type: image/jpeg\r\n\r\n").Concat(jpeg).ToArray()).ConfigureAwait(true);
+
+            await EventuallyAsync(async () =>
+            {
+                (await frameStore.TryWriteLatestFrameAsync(outputPath, CancellationToken.None).ConfigureAwait(true))
+                    .Should()
+                    .BeTrue();
+                File.Exists(outputPath).Should().BeTrue();
+                File.ReadAllBytes(outputPath).Should().Equal(jpeg);
+            }).ConfigureAwait(true);
+            await processStreamRunner.Received(1).StartAsync(command, Arg.Any<CancellationToken>()).ConfigureAwait(true);
+        }
+        finally
+        {
+            await hub.DisposeAsync().ConfigureAwait(true);
+            await DeleteIfExistsAsync(outputPath).ConfigureAwait(true);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task Busy_camera_returns_failure_without_starting_process()
+    {
         var commandFactory = Substitute.For<ICameraCommandFactory>();
         var cameraStatusService = Substitute.For<ICameraStatusService>();
         var processStreamRunner = Substitute.For<IProcessStreamRunner>();
-        var logger = new ListLogger<CameraLiveStreamService>();
-        var options = CreateOptions();
-
-        var service = new CameraLiveStreamService(
-            asyncDelay,
+        var hub = CreateHub(
             commandFactory,
-            new BusyCameraResourceCoordinator(),
             cameraStatusService,
             processStreamRunner,
-            logger);
+            resourceCoordinator: new BusyCameraResourceCoordinator());
+        var service = new CameraLiveStreamService(hub);
 
-        var result = await service.StartAsync(options, CancellationToken.None).ConfigureAwait(true);
+        var result = await service.StartAsync(CreateOptions(), CancellationToken.None).ConfigureAwait(true);
 
         result.Succeeded.Should().BeFalse();
         result.FailureReason.Should().Be(CameraLiveStreamFailureReasons.CameraBusy);
-        commandFactory.DidNotReceiveWithAnyArgs().BuildLiveStreamCommand(default!);
         await processStreamRunner.DidNotReceiveWithAnyArgs().StartAsync(default!, default).ConfigureAwait(true);
         cameraStatusService.Received(1).ReportDegraded(CameraLiveStreamFailureReasons.CameraBusy);
     }
 
-    [Fact]
-    [Trait("Category", "Integration")]
-    public async Task Start_async_returns_failure_and_logs_when_process_exits_without_stream_data()
-    {
-        var asyncDelay = Substitute.For<IAsyncDelay>();
-        var commandFactory = Substitute.For<ICameraCommandFactory>();
-        var cameraStatusService = Substitute.For<ICameraStatusService>();
-        var processStreamRunner = Substitute.For<IProcessStreamRunner>();
-        var logger = new ListLogger<CameraLiveStreamService>();
-        var processStream = new StubProcessStream(
-            new MemoryStream(Array.Empty<byte>()),
-            new ProcessResult(1, string.Empty, "camera unavailable"));
-        var options = CreateOptions(reconnectRetryAttempts: 0);
+    private static SharedCameraStreamHub CreateHub(
+        ICameraCommandFactory commandFactory,
+        ICameraStatusService cameraStatusService,
+        IProcessStreamRunner processStreamRunner,
+        ILiveFrameSnapshotStore? frameStore = null,
+        ICameraResourceCoordinator? resourceCoordinator = null) =>
+        new(
+            commandFactory,
+            resourceCoordinator ?? new AlwaysAvailableCameraResourceCoordinator(),
+            cameraStatusService,
+            frameStore ?? new LiveFrameSnapshotStore(),
+            processStreamRunner,
+            NullLogger<SharedCameraStreamHub>.Instance);
 
-        commandFactory.BuildLiveStreamCommand(options).Returns(new ProcessRequest("ffmpeg", "-stream"));
-        processStreamRunner.StartAsync(Arg.Any<ProcessRequest>(), Arg.Any<CancellationToken>())
-            .Returns(processStream);
-
-        var service = new CameraLiveStreamService(asyncDelay, commandFactory, new AlwaysAvailableCameraResourceCoordinator(), cameraStatusService, processStreamRunner, logger);
-
-        var result = await service.StartAsync(options, CancellationToken.None).ConfigureAwait(true);
-
-        result.Succeeded.Should().BeFalse();
-        result.FailureReason.Should().Be(CameraLiveStreamFailureReasons.CameraUnavailable);
-        cameraStatusService.Received(1).ReportDegraded("camera unavailable");
-        logger.Entries.Should().ContainSingle(entry =>
-            entry.LogLevel == LogLevel.Warning
-            && entry.Message.Contains("camera unavailable", StringComparison.Ordinal));
-    }
-
-    [Fact]
-    [Trait("Category", "Unit")]
-    public async Task Start_async_returns_failure_when_startup_times_out()
-    {
-        var asyncDelay = Substitute.For<IAsyncDelay>();
-        var commandFactory = Substitute.For<ICameraCommandFactory>();
-        var cameraStatusService = Substitute.For<ICameraStatusService>();
-        var processStreamRunner = Substitute.For<IProcessStreamRunner>();
-        var logger = new ListLogger<CameraLiveStreamService>();
-        var processStream = new TimeoutProcessStream();
-        var options = CreateOptions();
-
-        commandFactory.BuildLiveStreamCommand(options).Returns(new ProcessRequest("ffmpeg", "-stream"));
-        processStreamRunner.StartAsync(Arg.Any<ProcessRequest>(), Arg.Any<CancellationToken>())
-            .Returns(processStream);
-
-        var service = new CameraLiveStreamService(asyncDelay, commandFactory, new AlwaysAvailableCameraResourceCoordinator(), cameraStatusService, processStreamRunner, logger);
-
-        var result = await service.StartAsync(options, CancellationToken.None).ConfigureAwait(true);
-
-        result.Succeeded.Should().BeFalse();
-        result.FailureReason.Should().Be(CameraLiveStreamFailureReasons.CameraUnavailable);
-        processStream.Disposed.Should().BeTrue();
-        cameraStatusService.Received(1).ReportDegraded("Timed out waiting for live stream data.");
-        logger.Entries.Should().ContainSingle(entry =>
-            entry.LogLevel == LogLevel.Warning
-            && entry.Message.Contains("Timed out", StringComparison.Ordinal));
-    }
-
-    [Fact]
-    [Trait("Category", "Integration")]
-    public async Task Dropped_stream_reconnects_when_camera_returns_within_retry_window()
-    {
-        var asyncDelay = Substitute.For<IAsyncDelay>();
-        var commandFactory = Substitute.For<ICameraCommandFactory>();
-        var cameraStatusService = Substitute.For<ICameraStatusService>();
-        var processStreamRunner = Substitute.For<IProcessStreamRunner>();
-        var logger = new ListLogger<CameraLiveStreamService>();
-        var options = CreateOptions();
-        var firstStream = new StubProcessStream(
-            new MemoryStream(Encoding.ASCII.GetBytes($"--{LiveStreamConstants.Boundary}\r\nContent-Type: image/jpeg\r\n\r\nframe-01\r\n")),
-            new ProcessResult(0, string.Empty, string.Empty));
-        var secondStream = new StubProcessStream(
-            new MemoryStream(Encoding.ASCII.GetBytes($"--{LiveStreamConstants.Boundary}\r\nContent-Type: image/jpeg\r\n\r\nframe-02\r\n")),
-            new ProcessResult(0, string.Empty, string.Empty));
-
-        commandFactory.BuildLiveStreamCommand(options).Returns(new ProcessRequest("ffmpeg", "-stream"));
-        processStreamRunner.StartAsync(Arg.Any<ProcessRequest>(), Arg.Any<CancellationToken>())
-            .Returns(firstStream, secondStream);
-
-        var service = new CameraLiveStreamService(asyncDelay, commandFactory, new AlwaysAvailableCameraResourceCoordinator(), cameraStatusService, processStreamRunner, logger);
-
-        var result = await service.StartAsync(options, CancellationToken.None).ConfigureAwait(true);
-        var payload = await ReadUntilAsync(result.Session!.Content, "frame-02").ConfigureAwait(true);
-
-        payload.Should().Contain("frame-01");
-        payload.Should().Contain("frame-02");
-        await asyncDelay.Received(1)
-            .DelayAsync(TimeSpan.FromSeconds(1), Arg.Any<CancellationToken>())
-            .ConfigureAwait(true);
-        cameraStatusService.Received(2).ReportOnline();
-
-        await result.Session.DisposeAsync().ConfigureAwait(true);
-    }
-
-    [Fact]
-    [Trait("Category", "Unit")]
-    public async Task Repeated_reconnect_failures_mark_camera_degraded_without_runaway_retries()
-    {
-        var asyncDelay = Substitute.For<IAsyncDelay>();
-        var commandFactory = Substitute.For<ICameraCommandFactory>();
-        var cameraStatusService = Substitute.For<ICameraStatusService>();
-        var processStreamRunner = Substitute.For<IProcessStreamRunner>();
-        var logger = new ListLogger<CameraLiveStreamService>();
-        var options = CreateOptions();
-        var firstStream = new StubProcessStream(
-            new MemoryStream(Encoding.ASCII.GetBytes($"--{LiveStreamConstants.Boundary}\r\nContent-Type: image/jpeg\r\n\r\nframe-01\r\n")),
-            new ProcessResult(0, string.Empty, string.Empty));
-        var failedReconnect1 = new StubProcessStream(new MemoryStream(Array.Empty<byte>()), new ProcessResult(1, string.Empty, "camera unavailable"));
-        var failedReconnect2 = new StubProcessStream(new MemoryStream(Array.Empty<byte>()), new ProcessResult(1, string.Empty, "camera unavailable"));
-
-        commandFactory.BuildLiveStreamCommand(options).Returns(new ProcessRequest("ffmpeg", "-stream"));
-        processStreamRunner.StartAsync(Arg.Any<ProcessRequest>(), Arg.Any<CancellationToken>())
-            .Returns(firstStream, failedReconnect1, failedReconnect2);
-
-        var service = new CameraLiveStreamService(asyncDelay, commandFactory, new AlwaysAvailableCameraResourceCoordinator(), cameraStatusService, processStreamRunner, logger);
-
-        var result = await service.StartAsync(options, CancellationToken.None).ConfigureAwait(true);
-        using var reader = new StreamReader(result.Session!.Content, Encoding.ASCII, leaveOpen: true);
-        var payload = await reader.ReadToEndAsync().ConfigureAwait(true);
-
-        payload.Should().Contain("frame-01");
-        await asyncDelay.Received(2).DelayAsync(Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>()).ConfigureAwait(true);
-        cameraStatusService.Received(1).ReportDegraded("camera unavailable");
-        logger.Entries.Count(entry => entry.Message.Contains("Attempting to reconnect", StringComparison.Ordinal)).Should().Be(2);
-        logger.Entries.Count(entry => entry.Message.Contains("reconnect attempts were exhausted", StringComparison.OrdinalIgnoreCase)).Should().Be(1);
-
-        await result.Session.DisposeAsync().ConfigureAwait(true);
-    }
-
-    private static CameraOptions CreateOptions(int reconnectRetryAttempts = 2) =>
+    private static CameraOptions CreateOptions() =>
         new()
         {
-            Platform = CameraPlatforms.Linux,
-            Source = "/dev/video0",
-            ReconnectRetryAttempts = reconnectRetryAttempts,
+            Platform = CameraPlatforms.Windows,
+            Source = "Logi C270 HD WebCam",
+            StreamWidth = 1280,
+            StreamHeight = 720,
+            StreamFramesPerSecond = 15,
+            ReconnectRetryAttempts = 2,
             ReconnectBackoffSeconds = 1,
         };
+
+    private static async Task EventuallyAsync(Action assertion)
+    {
+        Exception? lastException = null;
+
+        for (var attempt = 0; attempt < 20; attempt++)
+        {
+            try
+            {
+                assertion();
+                return;
+            }
+            catch (Exception exception)
+            {
+                lastException = exception;
+                await Task.Delay(50).ConfigureAwait(true);
+            }
+        }
+
+        throw lastException ?? new InvalidOperationException("Assertion did not complete.");
+    }
+
+    private static async Task DeleteIfExistsAsync(string path)
+    {
+        for (var attempt = 0; attempt < 10; attempt++)
+        {
+            try
+            {
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+
+                return;
+            }
+            catch (IOException) when (attempt < 9)
+            {
+                await Task.Delay(50).ConfigureAwait(true);
+            }
+        }
+    }
 
     private sealed class AlwaysAvailableCameraResourceCoordinator : ICameraResourceCoordinator
     {
@@ -229,25 +187,6 @@ public sealed class CameraLiveStreamServiceTests
     {
         public ValueTask<CameraResourceLease?> TryAcquireAsync(string owner, CancellationToken cancellationToken) =>
             ValueTask.FromResult<CameraResourceLease?>(null);
-    }
-
-    private static async Task<string> ReadUntilAsync(Stream stream, string marker)
-    {
-        var buffer = new byte[128];
-        var builder = new StringBuilder();
-
-        while (!builder.ToString().Contains(marker, StringComparison.Ordinal))
-        {
-            var bytesRead = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), CancellationToken.None).ConfigureAwait(true);
-            if (bytesRead == 0)
-            {
-                break;
-            }
-
-            builder.Append(Encoding.ASCII.GetString(buffer, 0, bytesRead));
-        }
-
-        return builder.ToString();
     }
 
     private sealed class StubProcessStream(Stream standardOutput, ProcessResult exitResult) : IProcessStreamHandle
@@ -263,24 +202,12 @@ public sealed class CameraLiveStreamServiceTests
         public ValueTask DisposeAsync() => StandardOutput.DisposeAsync();
     }
 
-    private sealed class TimeoutProcessStream : IProcessStreamHandle
+    private sealed class BlockingAppendStream : Stream
     {
-        public bool Disposed { get; private set; }
+        private readonly Queue<byte> _buffer = new();
+        private readonly SemaphoreSlim _availableBytes = new(0);
+        private bool _disposed;
 
-        public Stream StandardOutput { get; } = new TimeoutStream();
-
-        public Task<ProcessResult> WaitForExitAsync(CancellationToken cancellationToken) =>
-            Task.FromResult(new ProcessResult(1, string.Empty, "timed out"));
-
-        public async ValueTask DisposeAsync()
-        {
-            Disposed = true;
-            await StandardOutput.DisposeAsync().ConfigureAwait(false);
-        }
-    }
-
-    private sealed class TimeoutStream : Stream
-    {
         public override bool CanRead => true;
 
         public override bool CanSeek => false;
@@ -295,58 +222,64 @@ public sealed class CameraLiveStreamServiceTests
             set => throw new NotSupportedException();
         }
 
+        public Task AppendAsync(string value) => AppendAsync(Encoding.ASCII.GetBytes(value));
+
+        public Task AppendAsync(byte[] bytes)
+        {
+            lock (_buffer)
+            {
+                foreach (var value in bytes)
+                {
+                    _buffer.Enqueue(value);
+                    _availableBytes.Release();
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
         public override void Flush()
         {
         }
 
-        public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+        public override int Read(byte[] buffer, int offset, int count) =>
+            ReadAsync(buffer.AsMemory(offset, count), CancellationToken.None).AsTask().GetAwaiter().GetResult();
 
-        public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        public override async ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken = default)
         {
-            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken).ConfigureAwait(false);
-            return 0;
+            if (_disposed)
+            {
+                return 0;
+            }
+
+            await _availableBytes.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+            var written = 0;
+            lock (_buffer)
+            {
+                while (written < destination.Length && _buffer.Count > 0)
+                {
+                    destination.Span[written++] = _buffer.Dequeue();
+                }
+            }
+
+            return written;
         }
 
-        public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
-        {
-            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken).ConfigureAwait(false);
-            return 0;
-        }
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) =>
+            ReadAsync(buffer.AsMemory(offset, count), cancellationToken).AsTask();
 
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
 
         public override void SetLength(long value) => throw new NotSupportedException();
 
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
-    }
 
-    private sealed class ListLogger<T> : ILogger<T>
-    {
-        public List<(LogLevel LogLevel, string Message)> Entries { get; } = [];
-
-        public IDisposable BeginScope<TState>(TState state)
-            where TState : notnull =>
-            NullScope.Instance;
-
-        public bool IsEnabled(LogLevel logLevel) => true;
-
-        public void Log<TState>(
-            LogLevel logLevel,
-            EventId eventId,
-            TState state,
-            Exception? exception,
-            Func<TState, Exception?, string> formatter)
+        protected override void Dispose(bool disposing)
         {
-            Entries.Add((logLevel, formatter(state, exception)));
-        }
-
-        private sealed class NullScope : IDisposable
-        {
-            public static NullScope Instance { get; } = new();
-
-            public void Dispose()
-            {
-            }
+            _disposed = true;
+            _availableBytes.Release();
+            base.Dispose(disposing);
         }
     }
 }

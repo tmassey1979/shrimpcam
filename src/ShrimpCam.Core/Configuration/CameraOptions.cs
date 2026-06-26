@@ -32,4 +32,6 @@ public sealed class CameraOptions
 
     [Range(1, 60)]
     public int ReconnectBackoffSeconds { get; init; } = 1;
+
+    public bool AlwaysOnStreamEnabled { get; init; }
 }

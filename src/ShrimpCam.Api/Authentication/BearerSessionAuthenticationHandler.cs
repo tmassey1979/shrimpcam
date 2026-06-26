@@ -17,20 +17,14 @@ internal sealed class BearerSessionAuthenticationHandler(
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     public const string SchemeName = "SessionBearer";
+    public const string SessionCookieName = "shrimpcam-session";
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var authorizationHeader = Request.Headers.Authorization.ToString();
-        if (string.IsNullOrWhiteSpace(authorizationHeader) ||
-            !authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-        {
-            return AuthenticateResult.NoResult();
-        }
-
-        var token = authorizationHeader["Bearer ".Length..].Trim();
+        var token = GetBearerToken() ?? GetSessionCookieToken();
         if (string.IsNullOrWhiteSpace(token))
         {
-            return AuthenticateResult.Fail("A bearer token is required.");
+            return AuthenticateResult.NoResult();
         }
 
         var authenticationResult = await sessionAuthenticationService.AuthenticateAsync(token, Context.RequestAborted).ConfigureAwait(false);
@@ -53,6 +47,23 @@ internal sealed class BearerSessionAuthenticationHandler(
         var ticket = new AuthenticationTicket(principal, SchemeName);
         return AuthenticateResult.Success(ticket);
     }
+
+    private string? GetBearerToken()
+    {
+        var authorizationHeader = Request.Headers.Authorization.ToString();
+        if (string.IsNullOrWhiteSpace(authorizationHeader) ||
+            !authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        return authorizationHeader["Bearer ".Length..].Trim();
+    }
+
+    private string? GetSessionCookieToken() =>
+        Request.Cookies.TryGetValue(SessionCookieName, out var token)
+            ? token
+            : null;
 
     protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
     {

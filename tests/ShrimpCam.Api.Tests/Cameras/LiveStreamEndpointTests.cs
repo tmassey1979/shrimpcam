@@ -82,6 +82,33 @@ public sealed class LiveStreamEndpointTests
 
     [Fact]
     [Trait("Category", "Api")]
+    public async Task Live_stream_endpoint_accepts_session_cookie_for_browser_image_streams()
+    {
+        var rootPath = CreateTempRoot();
+
+        try
+        {
+            await SeedUserAsync(rootPath, "shrimp-viewer", "ViewerPass123", "Viewer").ConfigureAwait(true);
+            await using var factory = new LiveStreamWebApplicationFactory(rootPath, shouldFail: false);
+            using var client = factory.CreateClient();
+
+            var loginResponse = await client.PostAsJsonAsync("/auth/login", new LoginRequest("shrimp-viewer", "ViewerPass123")).ConfigureAwait(true);
+            loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+            client.DefaultRequestHeaders.Authorization.Should().BeNull();
+
+            var response = await client.GetAsync("/stream/live", HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(true);
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.Content.Headers.ContentType?.MediaType.Should().Be("multipart/x-mixed-replace");
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
     public async Task Live_stream_endpoint_returns_unauthorized_for_anonymous_callers()
     {
         var rootPath = CreateTempRoot();
@@ -105,6 +132,19 @@ public sealed class LiveStreamEndpointTests
 
     private static async Task<string> SeedUserAndLoginAsync(string rootPath, string userName, string password, string roleName)
     {
+        await SeedUserAsync(rootPath, userName, password, roleName).ConfigureAwait(true);
+
+        await using var factory = new LiveStreamWebApplicationFactory(rootPath, shouldFail: false);
+        using var client = factory.CreateClient();
+        var loginResponse = await client.PostAsJsonAsync("/auth/login", new LoginRequest(userName, password)).ConfigureAwait(true);
+        loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await loginResponse.Content.ReadFromJsonAsync<LoginSuccessResponse>().ConfigureAwait(true);
+        payload.Should().NotBeNull();
+        return payload!.Token;
+    }
+
+    private static async Task SeedUserAsync(string rootPath, string userName, string password, string roleName)
+    {
         var createdAtUtc = new DateTimeOffset(2026, 06, 25, 04, 00, 00, TimeSpan.Zero);
         using var provider = BuildProvider(rootPath);
         var initializer = provider.GetRequiredService<IApplicationDataInitializer>();
@@ -119,14 +159,6 @@ public sealed class LiveStreamEndpointTests
                 CancellationToken.None)
             .ConfigureAwait(true);
         await roleRepository.AssignAsync(new UserRoleRecord(userId, roleName, createdAtUtc), CancellationToken.None).ConfigureAwait(true);
-
-        await using var factory = new LiveStreamWebApplicationFactory(rootPath, shouldFail: false);
-        using var client = factory.CreateClient();
-        var loginResponse = await client.PostAsJsonAsync("/auth/login", new LoginRequest(userName, password)).ConfigureAwait(true);
-        loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var payload = await loginResponse.Content.ReadFromJsonAsync<LoginSuccessResponse>().ConfigureAwait(true);
-        payload.Should().NotBeNull();
-        return payload!.Token;
     }
 
     private static ServiceProvider BuildProvider(string rootPath)
