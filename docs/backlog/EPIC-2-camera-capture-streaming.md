@@ -511,3 +511,133 @@ Scenario: Scheduler moves forward after a failed interval
   And it does not backfill the older failed interval
   And it records the current interval as captured
 ```
+
+### SC-CAM-21 - Define Shared Camera Frame Source Strategy
+
+**User Story**  
+As a Shrimp Cam developer, I want Windows and Linux camera integrations to converge behind a shared frame-source contract so that live streaming, scheduled timelapse, manual capture, and diagnostics can use the same frame pipeline while each operating system keeps the best native adapter.
+
+**Implementation Notes**  
+The shared contract should expose camera discovery, provider selection, lifecycle, frame delivery, health, restart, and settings-change behavior. Platform-specific implementations should be selected by host OS and settings, but downstream capture and stream code should consume the same frame bus or latest-frame cache.
+
+**Dependencies**
+- SC-CC-06
+- SC-CAM-16
+- SC-CAM-20
+
+**Test Expectations**
+- Unit tests verify provider selection chooses Windows Media Foundation on Windows and V4L2/FFmpeg on Linux when configured.
+- Unit tests verify live stream and timelapse consumers can read from the shared frame contract without owning the camera device directly.
+- Integration tests verify settings changes stop the current provider and start the newly selected provider without requiring an app restart.
+- Failure tests verify provider startup failures produce actionable health diagnostics and do not block unrelated API endpoints.
+
+**Acceptance Criteria**
+
+```gherkin
+Scenario: Select the Windows frame provider
+  Given Shrimp Cam is running on a Windows host
+  And the camera backend mode is set to automatic
+  When the camera frame source is initialized
+  Then the system selects the Windows Media Foundation provider
+  And live stream and timelapse workflows consume frames through the shared contract
+
+Scenario: Select the Linux frame provider
+  Given Shrimp Cam is running on a Linux host
+  And the camera backend mode is set to automatic
+  When the camera frame source is initialized
+  Then the system selects the Linux V4L2/FFmpeg provider
+  And live stream and timelapse workflows consume frames through the shared contract
+
+Scenario: Restart provider after camera settings change
+  Given a camera frame provider is running
+  When an administrator changes camera source, resolution, frame rate, or backend settings
+  Then the current provider is stopped safely
+  And the new provider starts with the saved settings
+  And active health diagnostics report the transition without requiring application restart
+```
+
+### SC-CAM-22 - Implement Windows Media Foundation Frame Source
+
+**User Story**  
+As a Shrimp Cam operator running Windows, I want the application to capture webcam frames through Windows Media Foundation so that Logitech USB webcams can stream and feed timelapse capture reliably without depending on an external `ffmpeg.exe` process for primary camera access.
+
+**Implementation Notes**  
+The Windows adapter may use a thin native interop layer, a maintained .NET wrapper, or a dedicated isolated adapter process, but the application boundary should expose the shared frame-source contract from `SC-CAM-21`. FFmpeg may remain as a fallback or diagnostic backend, not the preferred Windows path.
+
+**Dependencies**
+- SC-CC-02
+- SC-CAM-21
+
+**Test Expectations**
+- Unit tests verify Media Foundation device descriptors map into the shared camera descriptor model.
+- Unit tests verify adapter lifecycle handles start, frame delivery, stop, restart, and disposal idempotently.
+- Integration tests with a mocked Media Foundation boundary verify frames are published to the shared frame bus and latest-frame cache.
+- Failure tests verify missing devices, busy devices, unsupported formats, and adapter startup failures surface actionable diagnostics.
+- Host-marked smoke tests verify a Logitech USB webcam can provide frames on a Windows PC.
+
+**Acceptance Criteria**
+
+```gherkin
+Scenario: Start the Windows Media Foundation provider
+  Given Shrimp Cam is running on Windows
+  And a configured Logitech webcam is available
+  When the Windows camera provider starts
+  Then it opens the configured Media Foundation device
+  And it publishes camera frames through the shared frame-source contract
+  And camera health reports the provider as online
+
+Scenario: Keep timelapse evaluation active while viewers connect
+  Given the Windows Media Foundation provider is running
+  And no user is watching the live stream
+  When the scheduled timelapse evaluator reaches a due interval
+  Then it can use the latest available frame without starting a second camera owner
+  And later live stream viewers receive frames from the same provider
+
+Scenario: Surface unsupported Windows camera format
+  Given the configured Windows camera cannot provide a supported frame format
+  When the provider attempts to start
+  Then startup fails with an actionable unsupported-format diagnostic
+  And the application remains available in degraded camera mode
+```
+
+### SC-CAM-23 - Implement Linux V4L2/FFmpeg Logitech UVC Adapter
+
+**User Story**  
+As a Shrimp Cam operator running Raspberry Pi or Linux with a Logitech USB webcam, I want the application to capture frames through a V4L2/FFmpeg adapter so that UVC webcams work reliably on headless Linux deployments while sharing the same downstream live stream and timelapse pipeline.
+
+**Implementation Notes**  
+The Linux adapter should target V4L2 device paths such as `/dev/video0` and use FFmpeg as the adapter process for UVC Logitech webcams unless a later native V4L2 frame reader is added. The adapter must never assume Raspberry Pi camera-module behavior for the Logitech webcam path.
+
+**Dependencies**
+- SC-CC-01
+- SC-CAM-21
+
+**Test Expectations**
+- Unit tests verify V4L2/FFmpeg command generation for device path, input format, resolution, frame rate, MJPEG output, and quoting.
+- Integration tests with a mocked process runner verify stdout frames are parsed and published to the shared frame-source contract.
+- Failure tests verify missing `/dev/video*` devices, process exit, unsupported resolution, and permission failures degrade camera health cleanly.
+- Host-marked smoke tests verify a Logitech UVC webcam provides frames on Raspberry Pi OS Lite or Linux.
+
+**Acceptance Criteria**
+
+```gherkin
+Scenario: Start the Linux V4L2/FFmpeg provider
+  Given Shrimp Cam is running on Linux
+  And a Logitech UVC webcam is configured at a valid V4L2 device path
+  When the Linux camera provider starts
+  Then it launches the FFmpeg V4L2 adapter with the configured device, resolution, and frame rate
+  And it publishes frames through the shared frame-source contract
+  And camera health reports the provider as online
+
+Scenario: Recover after Linux adapter process exits
+  Given the Linux V4L2/FFmpeg provider is running
+  When the FFmpeg adapter process exits unexpectedly
+  Then the provider marks camera health degraded with the exit reason
+  And it follows the configured reconnect policy without spawning duplicate camera owners
+
+Scenario: Preserve storage safety during Linux camera failure
+  Given the Linux camera provider cannot read from the configured V4L2 device
+  When a scheduled timelapse interval becomes due
+  Then no empty or corrupt capture file is persisted
+  And the failed interval is recorded according to scheduled retry semantics
+```
