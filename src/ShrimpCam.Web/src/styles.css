@@ -5477,6 +5477,175 @@ body,
   display: none !important;
 }
 
+/* Shared reference parity: compact the brand header and deepen the aquarium color field. */
+.app-shell-authenticated {
+  background:
+    radial-gradient(circle at 50% 3%, rgba(105, 245, 231, 0.2), transparent 30rem),
+    radial-gradient(circle at 14% 24%, rgba(45, 209, 199, 0.16), transparent 18rem),
+    linear-gradient(180deg, #079794 0%, #034f5c 28%, #012f3e 62%, #001f2d 100%) !important;
+}
+
+.app-shell-authenticated .reference-screen-header {
+  min-height: clamp(6.2rem, 18vw, 8rem) !important;
+  padding-top: clamp(1.05rem, 3.2vw, 1.45rem) !important;
+  padding-bottom: clamp(0.8rem, 2.5vw, 1.1rem) !important;
+}
+
+.screen-live .reference-screen-header,
+.screen-gallery .reference-screen-header,
+.screen-timeline .reference-screen-header,
+.screen-settings .reference-screen-header {
+  grid-template-columns: clamp(2.85rem, 8.5vw, 3.5rem) minmax(0, 1fr) clamp(3.25rem, 9vw, 3.85rem) !important;
+}
+
+.screen-live .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2,
+.screen-timeline .reference-brand-copy h2,
+.screen-settings .reference-brand-copy h2 {
+  font-size: clamp(2.05rem, 6.2vw, 2.8rem) !important;
+  letter-spacing: -0.045em !important;
+}
+
+.screen-live .reference-brand-copy p,
+.screen-gallery .reference-brand-copy p,
+.screen-timeline .reference-brand-copy p,
+.screen-settings .reference-brand-copy p {
+  font-size: clamp(0.94rem, 2.8vw, 1.14rem) !important;
+  line-height: 1.05 !important;
+}
+
+.screen-live .reference-shrimp-mark,
+.screen-gallery .reference-shrimp-mark,
+.screen-timeline .reference-shrimp-mark,
+.screen-settings .reference-shrimp-mark {
+  width: clamp(2.55rem, 7.5vw, 3.25rem) !important;
+  height: clamp(1.9rem, 5.6vw, 2.35rem) !important;
+}
+
+.app-shell-authenticated .reference-header-action {
+  width: clamp(3.1rem, 9vw, 3.75rem) !important;
+  height: clamp(3.1rem, 9vw, 3.75rem) !important;
+  border-color: rgba(158, 246, 239, 0.38) !important;
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.22), transparent 42%),
+    rgba(66, 215, 211, 0.22) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0.75rem 1.6rem rgba(0, 29, 39, 0.24) !important;
+}
+
+.screen-dashboard .dashboard-overview {
+  gap: clamp(0.8rem, 2.5vw, 1rem) !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card,
+.screen-dashboard .storage-usage-card,
+.screen-dashboard .snapshot-card {
+  background:
+    linear-gradient(145deg, rgba(14, 83, 96, 0.84), rgba(3, 46, 61, 0.86)) !important;
+  border-color: rgba(135, 224, 222, 0.3) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.11),
+    0 1.15rem 2.1rem rgba(0, 22, 34, 0.2) !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card {
+  min-height: clamp(7.7rem, 22vw, 9.1rem) !important;
+  padding: clamp(1rem, 3vw, 1.35rem) clamp(1.05rem, 3.2vw, 1.45rem) clamp(1rem, 3vw, 1.2rem) clamp(6.6rem, 18vw, 7.6rem) !important;
+  overflow: hidden !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card::after {
+  top: 50% !important;
+  left: clamp(1.6rem, 4.6vw, 2rem) !important;
+  width: clamp(3.25rem, 9.2vw, 3.85rem) !important;
+  height: clamp(3.25rem, 9.2vw, 3.85rem) !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background:
+    radial-gradient(circle at 62% 42%, rgba(255, 255, 255, 0.92) 0 0.52rem, transparent 0.55rem),
+    linear-gradient(135deg, #45ead7, #1aa9c3) !important;
+  box-shadow: 0 0.85rem 1.5rem rgba(0, 31, 43, 0.22) !important;
+  content: "" !important;
+  transform: translateY(-50%) !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card:nth-child(2)::after {
+  background:
+    radial-gradient(circle, transparent 0 0.94rem, rgba(255, 255, 255, 0.92) 0.98rem 1.17rem, transparent 1.2rem),
+    linear-gradient(135deg, #49e7dc, #1aa7c6) !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card strong {
+  font-size: clamp(1.85rem, 5.6vw, 2.35rem) !important;
+}
+
+.screen-dashboard .storage-usage-card {
+  min-height: clamp(8rem, 23vw, 9.45rem) !important;
+  padding: clamp(1.1rem, 3.2vw, 1.45rem) !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card::before {
+  position: absolute !important;
+  top: 50% !important;
+  left: clamp(1.58rem, 4.5vw, 1.95rem) !important;
+  width: clamp(3.25rem, 9.1vw, 3.85rem) !important;
+  height: clamp(3.25rem, 9.1vw, 3.85rem) !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #45ead7, #1aa9c3) !important;
+  box-shadow: 0 0.85rem 1.5rem rgba(0, 31, 43, 0.22) !important;
+  content: "" !important;
+  opacity: 1 !important;
+  transform: translateY(-50%) !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card::after {
+  position: absolute !important;
+  top: 50% !important;
+  left: clamp(2.18rem, 6.15vw, 2.62rem) !important;
+  width: clamp(1.65rem, 4.6vw, 2rem) !important;
+  height: clamp(1.25rem, 3.6vw, 1.55rem) !important;
+  border: 0.18rem solid rgba(255, 255, 255, 0.95) !important;
+  border-radius: 0.32rem !important;
+  background: transparent !important;
+  box-shadow: 1.15rem 0.16rem 0 -0.52rem rgba(255, 255, 255, 0.95) !important;
+  content: "" !important;
+  transform: translateY(-50%) !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card:nth-child(2)::after {
+  left: clamp(2.02rem, 5.75vw, 2.45rem) !important;
+  width: clamp(2.15rem, 6vw, 2.55rem) !important;
+  height: clamp(2.15rem, 6vw, 2.55rem) !important;
+  border: 0.22rem solid rgba(255, 255, 255, 0.95) !important;
+  border-radius: 999px !important;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)) 50% 50% / 0.18rem 0.8rem no-repeat,
+    linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)) 58% 56% / 0.72rem 0.18rem no-repeat !important;
+  box-shadow: none !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card .eyebrow,
+.screen-dashboard .dashboard-overview .stat-card strong,
+.screen-dashboard .dashboard-overview .stat-card span {
+  margin-left: clamp(1.55rem, 4.4vw, 2rem) !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card .eyebrow {
+  font-size: clamp(0.66rem, 1.9vw, 0.78rem) !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card strong {
+  font-size: clamp(1.55rem, 4.55vw, 1.95rem) !important;
+  line-height: 0.98 !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card span {
+  font-size: clamp(0.76rem, 2.2vw, 0.9rem) !important;
+  line-height: 1.1 !important;
+}
+
 .screen-dashboard .quick-action-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 0.78rem !important;
