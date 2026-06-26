@@ -5477,6 +5477,522 @@ body,
   display: none !important;
 }
 
+/* Final reference lock: this must stay last so the render matches the supplied images. */
+.app-shell-authenticated {
+  width: min(100%, 45rem) !important;
+  max-width: none !important;
+  padding-top: max(0.8rem, env(safe-area-inset-top)) !important;
+  padding-right: clamp(1rem, 3vw, 1.6rem) !important;
+  padding-bottom: calc(7.2rem + env(safe-area-inset-bottom)) !important;
+  padding-left: clamp(1rem, 3vw, 1.6rem) !important;
+}
+
+.app-shell-authenticated .reference-screen-header {
+  min-height: auto !important;
+  padding-top: clamp(2.4rem, 8vw, 4.2rem) !important;
+  padding-bottom: 0.2rem !important;
+  margin-bottom: clamp(1.2rem, 3vw, 1.9rem) !important;
+}
+
+.app-shell-authenticated .reference-brand-copy h2,
+.screen-dashboard .reference-brand-copy h2,
+.screen-live .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2,
+.screen-timeline .reference-brand-copy h2,
+.screen-settings .reference-brand-copy h2 {
+  color: #fff !important;
+  text-shadow: 0 0.85rem 1.8rem rgba(0, 0, 0, 0.34) !important;
+}
+
+.screen-live .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2,
+.screen-settings .reference-brand-copy h2 {
+  font-family: "Aptos Display", "Trebuchet MS", sans-serif !important;
+  font-size: clamp(1.95rem, 6.2vw, 2.65rem) !important;
+}
+
+.reference-shrimp-mark {
+  background: url("./assets/ref-shrimp-mark.svg") center / contain no-repeat !important;
+  filter: drop-shadow(0 0.4rem 0.7rem rgba(0, 0, 0, 0.28)) !important;
+  transform: none !important;
+}
+
+.reference-shrimp-mark::before,
+.reference-shrimp-mark::after,
+.app-shell-authenticated .reference-brand-copy h2::before,
+.app-shell-authenticated .reference-brand-copy h2::after {
+  display: none !important;
+  content: "" !important;
+}
+
+.app-shell-authenticated .bottom-nav,
+.app-shell:has(.screen-settings) .bottom-nav,
+.app-shell:has(.screen-live) .bottom-nav {
+  display: flex !important;
+  position: fixed !important;
+  right: max(1rem, calc((100vw - min(45rem, 100vw)) / 2 + 1rem)) !important;
+  bottom: calc(0.85rem + env(safe-area-inset-bottom)) !important;
+  left: max(1rem, calc((100vw - min(45rem, 100vw)) / 2 + 1rem)) !important;
+  min-height: 4.8rem !important;
+  padding: 0.5rem !important;
+  border: 1px solid rgba(126, 244, 241, 0.24) !important;
+  border-radius: 1.7rem !important;
+  background: linear-gradient(180deg, rgba(4, 71, 84, 0.86), rgba(2, 32, 47, 0.92)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.11), 0 1.2rem 2.8rem rgba(0, 0, 0, 0.42) !important;
+  backdrop-filter: blur(20px) saturate(145%) !important;
+}
+
+.screen-settings .reference-screen-header {
+  grid-template-columns: auto minmax(0, 1fr) minmax(8.5rem, 12.5rem) !important;
+}
+
+.screen-settings .reference-header-action,
+.screen-settings .reference-header-action.settings {
+  width: clamp(8.5rem, 30vw, 12.5rem) !important;
+  height: clamp(5rem, 18vw, 7.2rem) !important;
+  border-radius: 1.05rem !important;
+  background:
+    linear-gradient(180deg, transparent 55%, rgba(2, 24, 35, 0.46)),
+    url("./assets/ref-settings-camera.png") center / cover no-repeat !important;
+}
+
+@media (min-width: 900px) {
+  .app-shell-authenticated {
+    width: min(100%, 76rem) !important;
+    padding-right: clamp(1.5rem, 3.8vw, 3rem) !important;
+    padding-left: clamp(1.5rem, 3.8vw, 3rem) !important;
+  }
+
+  .app-shell-authenticated .bottom-nav {
+    right: max(1.5rem, calc((100vw - min(76rem, 100vw)) / 2 + 1.5rem)) !important;
+    left: max(1.5rem, calc((100vw - min(76rem, 100vw)) / 2 + 1.5rem)) !important;
+  }
+
+  .screen-dashboard .dashboard-grid,
+  .screen-live .live-layout,
+  .screen-gallery .gallery-layout,
+  .screen-settings .settings-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.18fr) minmax(20rem, 0.82fr) !important;
+    gap: 1.35rem !important;
+    align-items: start !important;
+  }
+}
+
+/* Final reference lock: this must stay last so the render matches the supplied images. */
+.app-shell-authenticated {
+  width: min(100%, 45rem) !important;
+  max-width: none !important;
+  padding-top: max(0.8rem, env(safe-area-inset-top)) !important;
+  padding-right: clamp(1rem, 3vw, 1.6rem) !important;
+  padding-bottom: calc(7.2rem + env(safe-area-inset-bottom)) !important;
+  padding-left: clamp(1rem, 3vw, 1.6rem) !important;
+}
+
+.app-shell-authenticated .reference-screen-header {
+  min-height: auto !important;
+  padding-top: clamp(2.4rem, 8vw, 4.2rem) !important;
+  padding-bottom: 0.2rem !important;
+  margin-bottom: clamp(1.2rem, 3vw, 1.9rem) !important;
+}
+
+.app-shell-authenticated .reference-brand-copy h2,
+.screen-dashboard .reference-brand-copy h2,
+.screen-live .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2,
+.screen-timeline .reference-brand-copy h2,
+.screen-settings .reference-brand-copy h2 {
+  color: #fff !important;
+  text-shadow: 0 0.85rem 1.8rem rgba(0, 0, 0, 0.34) !important;
+}
+
+.screen-live .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2,
+.screen-settings .reference-brand-copy h2 {
+  font-family: "Aptos Display", "Trebuchet MS", sans-serif !important;
+  font-size: clamp(1.95rem, 6.2vw, 2.65rem) !important;
+}
+
+.reference-shrimp-mark {
+  background: url("./assets/ref-shrimp-mark.svg") center / contain no-repeat !important;
+  filter: drop-shadow(0 0.4rem 0.7rem rgba(0, 0, 0, 0.28)) !important;
+  transform: none !important;
+}
+
+.reference-shrimp-mark::before,
+.reference-shrimp-mark::after,
+.app-shell-authenticated .reference-brand-copy h2::before,
+.app-shell-authenticated .reference-brand-copy h2::after {
+  display: none !important;
+  content: "" !important;
+}
+
+.app-shell-authenticated .bottom-nav,
+.app-shell:has(.screen-settings) .bottom-nav,
+.app-shell:has(.screen-live) .bottom-nav {
+  display: flex !important;
+  position: fixed !important;
+  right: max(1rem, calc((100vw - min(45rem, 100vw)) / 2 + 1rem)) !important;
+  bottom: calc(0.85rem + env(safe-area-inset-bottom)) !important;
+  left: max(1rem, calc((100vw - min(45rem, 100vw)) / 2 + 1rem)) !important;
+  min-height: 4.8rem !important;
+  padding: 0.5rem !important;
+  border: 1px solid rgba(126, 244, 241, 0.24) !important;
+  border-radius: 1.7rem !important;
+  background: linear-gradient(180deg, rgba(4, 71, 84, 0.86), rgba(2, 32, 47, 0.92)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.11), 0 1.2rem 2.8rem rgba(0, 0, 0, 0.42) !important;
+  backdrop-filter: blur(20px) saturate(145%) !important;
+}
+
+.screen-settings .reference-screen-header {
+  grid-template-columns: auto minmax(0, 1fr) minmax(8.5rem, 12.5rem) !important;
+}
+
+.screen-settings .reference-header-action,
+.screen-settings .reference-header-action.settings {
+  width: clamp(8.5rem, 30vw, 12.5rem) !important;
+  height: clamp(5rem, 18vw, 7.2rem) !important;
+  border-radius: 1.05rem !important;
+  background:
+    linear-gradient(180deg, transparent 55%, rgba(2, 24, 35, 0.46)),
+    url("./assets/ref-settings-camera.png") center / cover no-repeat !important;
+}
+
+@media (min-width: 900px) {
+  .app-shell-authenticated {
+    width: min(100%, 76rem) !important;
+    padding-right: clamp(1.5rem, 3.8vw, 3rem) !important;
+    padding-left: clamp(1.5rem, 3.8vw, 3rem) !important;
+  }
+
+  .app-shell-authenticated .bottom-nav {
+    right: max(1.5rem, calc((100vw - min(76rem, 100vw)) / 2 + 1.5rem)) !important;
+    left: max(1.5rem, calc((100vw - min(76rem, 100vw)) / 2 + 1.5rem)) !important;
+  }
+
+  .screen-dashboard .dashboard-grid,
+  .screen-live .live-layout,
+  .screen-gallery .gallery-layout,
+  .screen-settings .settings-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.18fr) minmax(20rem, 0.82fr) !important;
+    gap: 1.35rem !important;
+    align-items: start !important;
+  }
+}
+
+/* Reference fidelity pass: scale the generated mobile renders into a usable web/PWA layout. */
+:root {
+  --ref-bg-top: #058b99;
+  --ref-bg-mid: #044b58;
+  --ref-bg-deep: #021521;
+  --ref-glass: rgba(5, 55, 68, 0.66);
+  --ref-glass-strong: rgba(4, 37, 50, 0.78);
+  --ref-glass-line: rgba(166, 255, 247, 0.28);
+  --ref-cyan: #39f0df;
+  --ref-coral: #ff6f5c;
+}
+
+body {
+  background:
+    radial-gradient(circle at 50% -8%, rgba(100, 255, 244, 0.38), transparent 18rem),
+    linear-gradient(180deg, rgba(4, 148, 158, 0.86), rgba(3, 57, 70, 0.94) 40%, rgba(1, 16, 28, 0.98)),
+    var(--ref-bg-deep) !important;
+}
+
+body::after {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: -1;
+  height: min(32vh, 22rem);
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent, rgba(1, 16, 28, 0.12) 16%, rgba(1, 16, 28, 0.76)),
+    url("./assets/ref-bottom-reef.png") center bottom / cover no-repeat;
+  content: "";
+}
+
+.app-shell-authenticated {
+  width: min(100%, 45rem) !important;
+  max-width: none !important;
+  padding: max(0.8rem, env(safe-area-inset-top)) clamp(1rem, 3vw, 1.6rem) calc(7.2rem + env(safe-area-inset-bottom)) !important;
+}
+
+.app-shell-authenticated .content {
+  width: 100% !important;
+}
+
+.app-shell:has(.screen-settings),
+.app-shell:has(.screen-live) {
+  --bottom-nav-clearance: calc(7.2rem + env(safe-area-inset-bottom)) !important;
+  padding-bottom: var(--bottom-nav-clearance) !important;
+}
+
+.app-shell-authenticated .bottom-nav,
+.app-shell:has(.screen-settings) .bottom-nav,
+.app-shell:has(.screen-live) .bottom-nav {
+  display: flex !important;
+  position: fixed !important;
+  right: max(1rem, calc((100vw - min(45rem, 100vw)) / 2 + 1rem)) !important;
+  bottom: calc(0.85rem + env(safe-area-inset-bottom)) !important;
+  left: max(1rem, calc((100vw - min(45rem, 100vw)) / 2 + 1rem)) !important;
+  min-height: 4.8rem !important;
+  padding: 0.5rem !important;
+  border: 1px solid rgba(126, 244, 241, 0.24) !important;
+  border-radius: 1.7rem !important;
+  background:
+    linear-gradient(180deg, rgba(4, 71, 84, 0.86), rgba(2, 32, 47, 0.92)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.11), 0 1.2rem 2.8rem rgba(0, 0, 0, 0.42) !important;
+  backdrop-filter: blur(20px) saturate(145%) !important;
+}
+
+.app-shell-authenticated .nav-link {
+  min-height: 3.7rem !important;
+  border-radius: 1.25rem !important;
+  color: rgba(233, 252, 251, 0.72) !important;
+  font-size: 0.78rem !important;
+}
+
+.app-shell-authenticated .nav-link.active {
+  background: linear-gradient(180deg, rgba(33, 210, 202, 0.28), rgba(8, 116, 128, 0.44)) !important;
+  color: #55fff0 !important;
+}
+
+.app-shell-authenticated .reference-screen-header {
+  min-height: auto !important;
+  margin: 0 0 clamp(1.2rem, 3vw, 1.9rem) !important;
+  padding: clamp(2.4rem, 8vw, 4.2rem) 0.18rem 0.2rem !important;
+  column-gap: clamp(0.7rem, 2.4vw, 1.1rem) !important;
+}
+
+.app-shell-authenticated .reference-screen-header::after {
+  border-color: rgba(157, 255, 250, 0.24) !important;
+  background: rgba(78, 225, 225, 0.2) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 0.85rem 1.8rem rgba(0, 0, 0, 0.25) !important;
+}
+
+.screen-dashboard .reference-screen-header::after {
+  width: clamp(3rem, 9vw, 3.7rem) !important;
+  height: clamp(3rem, 9vw, 3.7rem) !important;
+  content: "" !important;
+  background:
+    linear-gradient(#fff, #fff) 50% 54% / 1.25rem 1rem no-repeat,
+    radial-gradient(circle at 62% 45%, transparent 0 0.16rem, #fff 0.18rem 0.3rem, transparent 0.32rem),
+    rgba(78, 225, 225, 0.2) !important;
+}
+
+.screen-live .reference-screen-header::after,
+.screen-settings .reference-screen-header::after {
+  content: "" !important;
+}
+
+.reference-shrimp-mark {
+  background: url("./assets/ref-shrimp-mark.svg") center / contain no-repeat !important;
+  filter: drop-shadow(0 0.4rem 0.7rem rgba(0, 0, 0, 0.28)) !important;
+}
+
+.reference-shrimp-mark::before,
+.reference-shrimp-mark::after,
+.app-shell-authenticated .reference-brand-copy h2::before,
+.app-shell-authenticated .reference-brand-copy h2::after {
+  display: none !important;
+  content: "" !important;
+}
+
+.app-shell-authenticated .reference-brand-copy h2,
+.screen-dashboard .reference-brand-copy h2,
+.screen-live .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2,
+.screen-timeline .reference-brand-copy h2,
+.screen-settings .reference-brand-copy h2 {
+  color: #fff !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-size: clamp(2.2rem, 8vw, 3.25rem) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.045em !important;
+  text-shadow: 0 0.85rem 1.8rem rgba(0, 0, 0, 0.34) !important;
+}
+
+.screen-live .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2,
+.screen-settings .reference-brand-copy h2 {
+  font-family: "Aptos Display", "Trebuchet MS", sans-serif !important;
+  font-size: clamp(1.95rem, 6.2vw, 2.65rem) !important;
+  letter-spacing: -0.035em !important;
+}
+
+.app-shell-authenticated .reference-brand-copy p {
+  color: rgba(234, 252, 251, 0.82) !important;
+  font-size: clamp(0.98rem, 3.2vw, 1.22rem) !important;
+  line-height: 1.18 !important;
+}
+
+.stat-card,
+.panel,
+.snapshot-card,
+.storage-usage-card,
+.quick-actions-card,
+.gallery-browser,
+.viewer-card,
+.settings-form,
+.status-panel,
+.live-status-panel,
+.screen-settings .settings-form fieldset,
+.screen-settings .status-panel .stat-card {
+  border: 1px solid var(--ref-glass-line) !important;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.035)),
+    var(--ref-glass) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1.2rem 2.7rem rgba(0, 0, 0, 0.26) !important;
+  backdrop-filter: blur(20px) saturate(140%) !important;
+}
+
+.screen-settings .settings-form fieldset > label,
+.screen-settings .settings-form .settings-grid > label,
+.screen-settings .schedule-window-card {
+  min-height: 4.85rem !important;
+  border: 1px solid rgba(162, 255, 248, 0.22) !important;
+  border-radius: 1.2rem !important;
+  background: linear-gradient(90deg, rgba(19, 110, 121, 0.62), rgba(7, 68, 83, 0.58)) !important;
+}
+
+.screen-settings .reference-screen-header {
+  grid-template-columns: auto minmax(0, 1fr) minmax(8.5rem, 12.5rem) !important;
+}
+
+.screen-settings .reference-header-action,
+.screen-settings .reference-header-action.settings {
+  width: clamp(8.5rem, 30vw, 12.5rem) !important;
+  height: clamp(5rem, 18vw, 7.2rem) !important;
+  border-radius: 1.05rem !important;
+  background:
+    linear-gradient(180deg, transparent 55%, rgba(2, 24, 35, 0.46)),
+    url("./assets/ref-settings-camera.png") center / cover no-repeat !important;
+}
+
+.screen-settings .reference-header-action::after {
+  display: block !important;
+  right: 0.55rem !important;
+  bottom: -0.7rem !important;
+  left: auto !important;
+  width: auto !important;
+  min-width: 5.5rem !important;
+  height: auto !important;
+  padding: 0.34rem 0.7rem 0.38rem 1.4rem !important;
+  border: 1px solid rgba(129, 255, 234, 0.28) !important;
+  border-radius: 999px !important;
+  background: rgba(5, 55, 68, 0.72) !important;
+  color: rgba(237, 252, 250, 0.9) !important;
+  content: "Camera 1" !important;
+  font-size: 0.8rem !important;
+  font-weight: 800 !important;
+  text-align: right !important;
+  transform: none !important;
+}
+
+.screen-settings .reference-header-action::before {
+  display: block !important;
+  right: auto !important;
+  bottom: -0.36rem !important;
+  left: calc(100% - 5rem) !important;
+  width: 0.72rem !important;
+  height: 0.72rem !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: #5ef188 !important;
+  content: "" !important;
+  transform: none !important;
+}
+
+.screen-settings .settings-form-header {
+  display: grid !important;
+  gap: 1rem !important;
+  justify-items: center !important;
+  margin-top: 1.5rem !important;
+}
+
+.screen-settings .settings-form-header .primary-button {
+  width: min(100%, 31rem) !important;
+  min-height: 4.2rem !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #ff746e, #ff4f3e) !important;
+  box-shadow: 0 1.15rem 2.4rem rgba(255, 82, 65, 0.26) !important;
+}
+
+@media (min-width: 900px) {
+  .app-shell-authenticated {
+    width: min(100%, 76rem) !important;
+    padding-inline: clamp(1.5rem, 3.8vw, 3rem) !important;
+  }
+
+  .app-shell-authenticated .bottom-nav {
+    right: max(1.5rem, calc((100vw - min(76rem, 100vw)) / 2 + 1.5rem)) !important;
+    left: max(1.5rem, calc((100vw - min(76rem, 100vw)) / 2 + 1.5rem)) !important;
+  }
+
+  .screen-dashboard .dashboard-grid,
+  .screen-live .live-layout,
+  .screen-gallery .gallery-layout,
+  .screen-settings .settings-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.18fr) minmax(20rem, 0.82fr) !important;
+    gap: 1.35rem !important;
+    align-items: start !important;
+  }
+
+  .screen-dashboard .snapshot-card,
+  .screen-live .stream-panel,
+  .screen-gallery .viewer-card,
+  .screen-settings .settings-form {
+    grid-column: 1 !important;
+  }
+
+  .screen-dashboard .quick-actions-card,
+  .screen-live .live-status-panel,
+  .screen-gallery .gallery-browser,
+  .screen-settings .status-panel {
+    grid-column: 2 !important;
+    position: sticky !important;
+    top: 1rem !important;
+  }
+
+  .screen-dashboard .dashboard-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .screen-dashboard .snapshot-card {
+    min-height: 0 !important;
+  }
+
+  .screen-dashboard .snapshot-preview,
+  .screen-dashboard .snapshot-preview-empty {
+    min-height: clamp(18rem, 30vw, 25rem) !important;
+  }
+
+  .screen-settings .reference-screen-header {
+    grid-template-columns: auto minmax(0, 1fr) 14rem !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .app-shell-authenticated {
+    width: 100% !important;
+    padding-inline: 1rem !important;
+  }
+
+  .screen-settings .reference-screen-header {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+  }
+
+  .screen-settings .reference-header-action,
+  .screen-settings .reference-header-action.settings {
+    grid-column: 1 / -1 !important;
+    justify-self: end !important;
+    width: min(58vw, 12rem) !important;
+    margin-top: 0.4rem !important;
+  }
+}
+
 /* Shared reference parity: compact the brand header and deepen the aquarium color field. */
 .app-shell-authenticated {
   background:
@@ -9034,4 +9550,106 @@ body,
 
 .screen-dashboard .quick-actions-header span {
   display: none !important;
+}
+
+/* Final reference lock: this must stay last so the render matches the supplied images. */
+.app-shell-authenticated {
+  width: min(100%, 45rem) !important;
+  max-width: none !important;
+  padding-top: max(0.8rem, env(safe-area-inset-top)) !important;
+  padding-right: clamp(1rem, 3vw, 1.6rem) !important;
+  padding-bottom: calc(7.2rem + env(safe-area-inset-bottom)) !important;
+  padding-left: clamp(1rem, 3vw, 1.6rem) !important;
+}
+
+.app-shell-authenticated .reference-screen-header {
+  min-height: auto !important;
+  padding-top: clamp(2.4rem, 8vw, 4.2rem) !important;
+  padding-bottom: 0.2rem !important;
+  margin-bottom: clamp(1.2rem, 3vw, 1.9rem) !important;
+}
+
+.app-shell-authenticated .reference-brand-copy h2,
+.screen-dashboard .reference-brand-copy h2,
+.screen-live .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2,
+.screen-timeline .reference-brand-copy h2,
+.screen-settings .reference-brand-copy h2 {
+  color: #fff !important;
+  text-shadow: 0 0.85rem 1.8rem rgba(0, 0, 0, 0.34) !important;
+}
+
+.screen-live .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2,
+.screen-settings .reference-brand-copy h2 {
+  font-family: "Aptos Display", "Trebuchet MS", sans-serif !important;
+  font-size: clamp(1.95rem, 6.2vw, 2.65rem) !important;
+}
+
+.reference-shrimp-mark {
+  background: url("./assets/ref-shrimp-mark.svg") center / contain no-repeat !important;
+  filter: drop-shadow(0 0.4rem 0.7rem rgba(0, 0, 0, 0.28)) !important;
+  transform: none !important;
+}
+
+.reference-shrimp-mark::before,
+.reference-shrimp-mark::after,
+.app-shell-authenticated .reference-brand-copy h2::before,
+.app-shell-authenticated .reference-brand-copy h2::after {
+  display: none !important;
+  content: "" !important;
+}
+
+.app-shell-authenticated .bottom-nav,
+.app-shell:has(.screen-settings) .bottom-nav,
+.app-shell:has(.screen-live) .bottom-nav {
+  display: flex !important;
+  position: fixed !important;
+  right: max(1rem, calc((100vw - min(45rem, 100vw)) / 2 + 1rem)) !important;
+  bottom: calc(0.85rem + env(safe-area-inset-bottom)) !important;
+  left: max(1rem, calc((100vw - min(45rem, 100vw)) / 2 + 1rem)) !important;
+  min-height: 4.8rem !important;
+  padding: 0.5rem !important;
+  border: 1px solid rgba(126, 244, 241, 0.24) !important;
+  border-radius: 1.7rem !important;
+  background: linear-gradient(180deg, rgba(4, 71, 84, 0.86), rgba(2, 32, 47, 0.92)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.11), 0 1.2rem 2.8rem rgba(0, 0, 0, 0.42) !important;
+  backdrop-filter: blur(20px) saturate(145%) !important;
+}
+
+.screen-settings .reference-screen-header {
+  grid-template-columns: auto minmax(0, 1fr) minmax(8.5rem, 12.5rem) !important;
+}
+
+.screen-settings .reference-header-action,
+.screen-settings .reference-header-action.settings {
+  width: clamp(8.5rem, 30vw, 12.5rem) !important;
+  height: clamp(5rem, 18vw, 7.2rem) !important;
+  border-radius: 1.05rem !important;
+  background:
+    linear-gradient(180deg, transparent 55%, rgba(2, 24, 35, 0.46)),
+    url("./assets/ref-settings-camera.png") center / cover no-repeat !important;
+}
+
+@media (min-width: 900px) {
+  .app-shell-authenticated {
+    width: min(100%, 76rem) !important;
+    padding-right: clamp(1.5rem, 3.8vw, 3rem) !important;
+    padding-left: clamp(1.5rem, 3.8vw, 3rem) !important;
+  }
+
+  .app-shell-authenticated .bottom-nav {
+    right: max(1.5rem, calc((100vw - min(76rem, 100vw)) / 2 + 1.5rem)) !important;
+    left: max(1.5rem, calc((100vw - min(76rem, 100vw)) / 2 + 1.5rem)) !important;
+  }
+
+  .screen-dashboard .dashboard-grid,
+  .screen-live .live-layout,
+  .screen-gallery .gallery-layout,
+  .screen-settings .settings-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.18fr) minmax(20rem, 0.82fr) !important;
+    gap: 1.35rem !important;
+    align-items: start !important;
+  }
 }
