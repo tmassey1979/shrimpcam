@@ -909,7 +909,10 @@ function DashboardScreen({
               </NavLink>
             </>
           ) : (
-            <p>No snapshot is available yet. Take a manual capture from Live View or wait for the next scheduled run.</p>
+            <div className="snapshot-preview snapshot-preview-empty" role="status">
+              <strong>No snapshot yet</strong>
+              <span>Take a manual capture from Live View or wait for the next scheduled run.</span>
+            </div>
           )}
         </article>
 
