@@ -3785,3 +3785,82 @@ body {
     min-height: 9.7rem !important;
   }
 }
+
+/* Header lockup correction: keep title and subtitle together as one brand block. */
+.app-shell-authenticated .reference-screen-header .reference-brand-copy {
+  display: block !important;
+  min-width: 0;
+}
+
+.app-shell-authenticated .reference-brand-copy h2,
+.screen-dashboard .reference-brand-copy h2,
+.screen-live .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2,
+.screen-settings .reference-brand-copy h2 {
+  white-space: nowrap !important;
+  font-size: clamp(2rem, 8.4vw, 2.72rem) !important;
+}
+
+.app-shell-authenticated .reference-brand-copy p {
+  max-width: 17rem !important;
+  margin-top: 0.35rem !important;
+}
+
+.screen-dashboard .reference-screen-header,
+.screen-gallery .reference-screen-header {
+  grid-template-columns: 4.1rem minmax(0, 1fr) 3.5rem !important;
+}
+
+.screen-live .reference-screen-header {
+  grid-template-columns: 4.1rem minmax(0, 1fr) 3.5rem !important;
+}
+
+.screen-settings .reference-screen-header {
+  grid-template-columns: 3.4rem minmax(0, 1fr) 6.7rem !important;
+}
+
+.screen-settings .reference-brand-copy h2,
+.screen-live .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2 {
+  font-size: clamp(1.9rem, 7.6vw, 2.35rem) !important;
+}
+
+.screen-dashboard .reference-header-action,
+.screen-live .reference-header-action {
+  justify-self: end;
+}
+
+.screen-dashboard .stat-card span,
+.screen-dashboard .storage-copy p,
+.screen-dashboard .storage-copy small {
+  font-size: 0.95rem;
+  line-height: 1.18;
+}
+
+.screen-dashboard .storage-usage-card {
+  grid-template-columns: 6.2rem minmax(0, 1fr) !important;
+}
+
+.screen-dashboard .storage-ring {
+  width: 6.2rem !important;
+  height: 6.2rem !important;
+}
+
+@media (max-width: 420px) {
+  .app-shell-authenticated .reference-brand-copy h2,
+  .screen-dashboard .reference-brand-copy h2,
+  .screen-live .reference-brand-copy h2,
+  .screen-gallery .reference-brand-copy h2,
+  .screen-settings .reference-brand-copy h2 {
+    font-size: clamp(1.82rem, 7.8vw, 2.3rem) !important;
+  }
+
+  .app-shell-authenticated .reference-brand-copy p {
+    font-size: 0.86rem !important;
+    max-width: 13.5rem !important;
+  }
+
+  .screen-settings .reference-screen-header {
+    grid-template-columns: 3.2rem minmax(0, 1fr) 5.8rem !important;
+  }
+}
