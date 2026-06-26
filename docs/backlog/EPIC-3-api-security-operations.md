@@ -663,6 +663,27 @@ Scenario: Runtime metadata matches release artifact metadata
   And the web package/build metadata is consistent with the release tag
 ```
 
+### SC-OPS-323 - Pin And Verify Raspberry Pi OS Base Image Provenance
+
+**User story**  
+As a Shrimp Cam operator, I want Raspberry Pi image builds to verify the downloaded OS image by digest or signature so that release artifacts are reproducible and auditable.
+
+**Dependencies**  
+SC-OPS-321, SC-OPS-322
+
+**Test expectations**  
+Workflow and script tests reject missing or malformed digests, verify the downloaded Raspberry Pi OS archive before extraction, and include base image provenance metadata in uploaded and released artifacts.
+
+**Acceptance criteria**
+
+```gherkin
+Scenario: Base image integrity is verified
+  Given the Pi image workflow downloads Raspberry Pi OS Lite
+  When the download completes
+  Then the workflow verifies the expected digest or signature before modifying the image
+  And release metadata records the base image URL and verified digest
+```
+
 ## Delivery Notes
 
 - Recommended implementation order: `SC-ASO-301` through `SC-ASO-316` in sequence, with `SC-ASO-306` to `SC-ASO-311` parallelizable after authentication foundations land.

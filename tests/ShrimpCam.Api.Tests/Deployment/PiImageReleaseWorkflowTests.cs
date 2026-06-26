@@ -52,6 +52,38 @@ public sealed class PiImageReleaseWorkflowTests
 
     [Fact]
     [Trait("Category", "Api")]
+    public void Pi_image_workflow_requires_and_publishes_base_image_provenance()
+    {
+        var workflow = ReadRepositoryFile(".github", "workflows", "build-pi-image.yml");
+
+        workflow.Should().Contain("image_sha256:");
+        workflow.Should().Contain("RASPIOS_LITE_ARM64_SHA256");
+        workflow.Should().Contain("Missing Raspberry Pi OS image SHA-256 digest");
+        workflow.Should().Contain("Invalid Raspberry Pi OS image SHA-256 digest");
+        workflow.Should().Contain("\"${BASE_IMAGE_SHA256}\"");
+        workflow.Should().Contain("Base image provenance is attached");
+        workflow.Should().Contain("base-image-provenance.json");
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
+    public void Pi_image_builder_verifies_downloaded_archive_before_extraction()
+    {
+        var script = ReadRepositoryFile("scripts", "pi-image", "build-pi-image.sh");
+
+        script.Should().Contain("usage: build-pi-image.sh <image-url> <image-sha256> <api-publish-dir> <web-dist-dir> <output-dir>");
+        script.Should().Contain("sha256sum --check --status");
+        script.Should().Contain("base-image-provenance.json");
+        script.Should().Contain("\"imageUrl\": \"${IMAGE_URL}\"");
+        script.Should().Contain("\"sha256\": \"${IMAGE_SHA256}\"");
+        script.Should().Contain("if file \"${ARCHIVE_PATH}\"");
+        script.IndexOf("sha256sum --check --status", StringComparison.Ordinal)
+            .Should()
+            .BeLessThan(script.IndexOf("if file \"${ARCHIVE_PATH}\"", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
     public void Firstboot_service_runs_before_network_online_to_apply_headless_wifi()
     {
         var service = ReadRepositoryFile("deploy", "raspberry-pi", "shrimpcam-firstboot.service");

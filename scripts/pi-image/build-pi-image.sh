@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -ne 4 ]]; then
-  echo "usage: build-pi-image.sh <image-url> <api-publish-dir> <web-dist-dir> <output-dir>" >&2
+if [[ $# -ne 5 ]]; then
+  echo "usage: build-pi-image.sh <image-url> <image-sha256> <api-publish-dir> <web-dist-dir> <output-dir>" >&2
   exit 1
 fi
 
 IMAGE_URL="$1"
-API_DIR="$(realpath "$2")"
-WEB_DIR="$(realpath "$3")"
-OUTPUT_DIR="$(realpath -m "$4")"
+IMAGE_SHA256="$2"
+API_DIR="$(realpath "$3")"
+WEB_DIR="$(realpath "$4")"
+OUTPUT_DIR="$(realpath -m "$5")"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 DEPLOY_DIR="${REPO_ROOT}/deploy/raspberry-pi"
@@ -38,6 +39,15 @@ trap cleanup EXIT
 mkdir -p "${OUTPUT_DIR}" "${BOOT_MNT}" "${ROOT_MNT}"
 
 curl -L "${IMAGE_URL}" -o "${ARCHIVE_PATH}"
+printf '%s  %s\n' "${IMAGE_SHA256}" "${ARCHIVE_PATH}" | sha256sum --check --status
+
+cat > "${OUTPUT_DIR}/base-image-provenance.json" <<EOF
+{
+  "imageUrl": "${IMAGE_URL}",
+  "sha256": "${IMAGE_SHA256}",
+  "verifiedAtUtc": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+}
+EOF
 
 if file "${ARCHIVE_PATH}" | grep -qi "Zip archive"; then
   unzip -q "${ARCHIVE_PATH}" -d "${WORK_DIR}/unzipped"

@@ -18,6 +18,9 @@ on:
         description: Raspberry Pi OS Lite image URL
         required: true
         default: https://downloads.raspberrypi.com/raspios_lite_arm64_latest
+      image_sha256:
+        description: Expected SHA-256 digest for the downloaded Raspberry Pi OS archive
+        required: true
 
 jobs:
   build-image:
@@ -29,6 +32,7 @@ jobs:
     env:
       DEFAULT_IMAGE_URL: https://downloads.raspberrypi.com/raspios_lite_arm64_latest
       DEFAULT_HOSTNAME: shrimpcam
+      BASE_IMAGE_SHA256: ${{ inputs.image_sha256 || vars.RASPIOS_LITE_ARM64_SHA256 }}
 
     steps:
       - name: Checkout
@@ -76,6 +80,14 @@ jobs:
               exit 1
               ;;
           esac
+          if [[ -z "${BASE_IMAGE_SHA256}" ]]; then
+            echo "Missing Raspberry Pi OS image SHA-256 digest. Set workflow input image_sha256 or repository variable RASPIOS_LITE_ARM64_SHA256." >&2
+            exit 1
+          fi
+          if [[ ! "${BASE_IMAGE_SHA256}" =~ ^[0-9a-fA-F]{64}$ ]]; then
+            echo "Invalid Raspberry Pi OS image SHA-256 digest: ${BASE_IMAGE_SHA256}" >&2
+            exit 1
+          fi
 
       - name: Publish Shrimp Cam for Raspberry Pi
         shell: pwsh
@@ -97,6 +109,7 @@ jobs:
           chmod +x scripts/pi-image/build-pi-image.sh deploy/raspberry-pi/firstboot-provision.sh
           ./scripts/pi-image/build-pi-image.sh \
             "${IMAGE_URL}" \
+            "${BASE_IMAGE_SHA256}" \
             "artifacts/publish/pi/api" \
             "artifacts/publish/pi/web" \
             "artifacts/pi-image"
@@ -125,7 +138,10 @@ jobs:
             Alpha release generated from `${{ env.SOURCE_SHA }}` on `main` after the `ci` workflow completed successfully.
 
             This release includes a Raspberry Pi OS Lite image with Shrimp Cam installed as headless startup services. Configure Wi-Fi before first boot by editing `shrimpcam-device.env` on the boot partition, or provide `PI_WIFI_SSID`, `PI_WIFI_PSK`, and `PI_WIFI_COUNTRY` repository secrets for workflow-built images.
+
+            Base image provenance is attached in `base-image-provenance.json` with the verified Raspberry Pi OS URL and SHA-256 digest.
           files: |
             artifacts/pi-image/shrimpcam-pi-${{ env.RELEASE_VERSION }}.img.xz
             artifacts/pi-image/shrimpcam-pi-${{ env.RELEASE_VERSION }}.sha256
+            artifacts/pi-image/base-image-provenance.json
             artifacts/pi-image/README.md
