@@ -6144,3 +6144,19 @@ body,
   border-radius: 999px;
   box-shadow: inset 0 0 0 0.16rem rgba(255, 255, 255, 0.94);
 }
+
+/* Reference parity pass: keep the Settings save CTA vivid like the render. */
+.screen-settings .settings-form-header .primary-button,
+.screen-settings .settings-form-header .primary-button:disabled {
+  opacity: 1 !important;
+  background: linear-gradient(135deg, #ff8177 0%, #ff5d52 52%, #f04c40 100%) !important;
+  color: #fff !important;
+  box-shadow:
+    0 1.25rem 2.5rem rgba(255, 92, 78, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+}
+
+.screen-settings .settings-form-header .primary-button:disabled {
+  cursor: not-allowed;
+  filter: saturate(0.92) brightness(0.92);
+}
