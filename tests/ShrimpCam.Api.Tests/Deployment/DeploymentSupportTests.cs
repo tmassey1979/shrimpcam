@@ -63,6 +63,17 @@ public sealed class DeploymentSupportTests
         script.Should().Contain("Start-Service -Name $ServiceName");
     }
 
+    [Fact]
+    [Trait("Category", "Api")]
+    public void Publish_script_validates_versions_and_stamps_source_revision()
+    {
+        var script = File.ReadAllText(Path.Combine(ResolveRepositoryRoot(), "scripts", "publish-shrimpcam.ps1"));
+
+        script.Should().Contain("validate-version-consistency.ps1");
+        script.Should().Contain("git -C $repoRoot rev-parse --short HEAD");
+        script.Should().Contain("/p:ShrimpCamSourceRevision=$SourceRevision");
+    }
+
     private static string ResolveRepositoryRoot()
     {
         var current = AppContext.BaseDirectory;

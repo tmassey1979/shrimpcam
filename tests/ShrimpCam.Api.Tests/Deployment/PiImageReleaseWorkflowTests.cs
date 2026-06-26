@@ -4,6 +4,29 @@ public sealed class PiImageReleaseWorkflowTests
 {
     [Fact]
     [Trait("Category", "Api")]
+    public void Release_version_source_is_shared_by_backend_web_ci_and_pi_artifacts()
+    {
+        var version = ReadRepositoryFile("VERSION").Trim();
+        var directoryProps = ReadRepositoryFile("Directory.Build.props");
+        var packageJson = ReadRepositoryFile("src", "ShrimpCam.Web", "package.json");
+        var packageLock = ReadRepositoryFile("src", "ShrimpCam.Web", "package-lock.json");
+        var ciWorkflow = ReadRepositoryFile(".github", "workflows", "ci.yml");
+        var piWorkflow = ReadRepositoryFile(".github", "workflows", "build-pi-image.yml");
+
+        version.Should().Be("0.0.1-alpha");
+        directoryProps.Should().Contain("VERSION");
+        directoryProps.Should().Contain("<Version Condition=\"'$(Version)' == ''\">$(ShrimpCamProductVersion)</Version>");
+        packageJson.Should().Contain($"\"version\": \"{version}\"");
+        packageLock.Should().Contain($"\"version\": \"{version}\"");
+        ciWorkflow.Should().Contain("./scripts/validate-version-consistency.ps1");
+        piWorkflow.Should().Contain("base_version=\"$(tr -d '[:space:]' < VERSION)\"");
+        piWorkflow.Should().Contain("-SourceRevision $env:SOURCE_SHA");
+        piWorkflow.Should().Contain("shrimpcam-pi-${RELEASE_VERSION}.img.xz");
+        piWorkflow.Should().Contain("tag_name: ${{ env.TAG_NAME }}");
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
     public void Pi_image_workflow_publishes_release_only_after_successful_ci()
     {
         var workflow = ReadRepositoryFile(".github", "workflows", "build-pi-image.yml");

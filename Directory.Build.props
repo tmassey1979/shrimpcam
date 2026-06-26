@@ -5,9 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latestMajor</LangVersion>
     <Deterministic>true</Deterministic>
-    <Version Condition="'$(Version)' == ''">0.1.0</Version>
-    <AssemblyVersion Condition="'$(AssemblyVersion)' == ''">0.1.0.0</AssemblyVersion>
-    <FileVersion Condition="'$(FileVersion)' == ''">0.1.0.0</FileVersion>
+    <ShrimpCamVersionFile Condition="'$(ShrimpCamVersionFile)' == ''">$(MSBuildThisFileDirectory)VERSION</ShrimpCamVersionFile>
+    <ShrimpCamProductVersion Condition="'$(ShrimpCamProductVersion)' == ''">$([System.IO.File]::ReadAllText('$(ShrimpCamVersionFile)').Trim())</ShrimpCamProductVersion>
+    <Version Condition="'$(Version)' == ''">$(ShrimpCamProductVersion)</Version>
+    <AssemblyVersion Condition="'$(AssemblyVersion)' == ''">0.0.1.0</AssemblyVersion>
+    <FileVersion Condition="'$(FileVersion)' == ''">0.0.1.0</FileVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <ShrimpCamSourceRevision Condition="'$(ShrimpCamSourceRevision)' == '' and '$(SHRIMPCAM_SOURCE_REVISION)' != ''">$(SHRIMPCAM_SOURCE_REVISION)</ShrimpCamSourceRevision>
     <ShrimpCamSourceRevision Condition="'$(ShrimpCamSourceRevision)' == ''">local</ShrimpCamSourceRevision>

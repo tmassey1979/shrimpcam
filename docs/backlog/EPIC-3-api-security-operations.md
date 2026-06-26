@@ -642,6 +642,27 @@ Scenario: Headless first boot can configure Wi-Fi before network-online
   Then Wi-Fi configuration is applied before waiting on network-online
 ```
 
+### SC-OPS-322 - Unify Release, Assembly, Web, And Image Version Stamping
+
+**User story**  
+As a Shrimp Cam operator, I want release tags, API runtime metadata, web package metadata, and Raspberry Pi image metadata to use the same version and source revision so that support diagnostics can identify exactly what is running.
+
+**Dependencies**  
+SC-PF-010, SC-OPS-321
+
+**Test expectations**  
+Build and deployment tests verify publish scripts pass version/source revision into `dotnet publish`, health/build metadata tests verify the configured version is surfaced, and CI validates backend, PWA, lockfile, release tag, and Raspberry Pi image artifact version consistency.
+
+**Acceptance criteria**
+
+```gherkin
+Scenario: Runtime metadata matches release artifact metadata
+  Given a release image is built from a main commit
+  When the API health endpoint and image release metadata are inspected
+  Then they report the same semantic version and source revision
+  And the web package/build metadata is consistent with the release tag
+```
+
 ## Delivery Notes
 
 - Recommended implementation order: `SC-ASO-301` through `SC-ASO-316` in sequence, with `SC-ASO-306` to `SC-ASO-311` parallelizable after authentication foundations land.

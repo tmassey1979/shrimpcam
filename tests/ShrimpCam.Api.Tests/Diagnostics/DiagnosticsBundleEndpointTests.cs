@@ -41,7 +41,7 @@ public sealed class DiagnosticsBundleEndpointTests
 
             payload.Should().NotBeNull();
             payload!.GeneratedAtUtc.Should().NotBe(default);
-            payload.ApplicationVersion.Should().Be("0.1.0.0");
+            payload.ApplicationVersion.Should().Be("0.0.1.0");
             payload.Health.Status.Should().Be("Healthy");
             payload.Configuration.GetProperty("camera").GetProperty("source").GetString().Should().Be("/dev/video0");
             payload.Configuration.GetProperty("security").GetProperty("secrets").GetString().Should().Be("[redacted]");

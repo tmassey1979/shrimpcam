@@ -49,8 +49,8 @@ public sealed class StartupConfigurationValidationTests
             payload.Components.Should().ContainKey("storage");
             payload.Components.Should().ContainKey("camera");
             payload.Components["database"].Status.Should().Be(HealthStatusLevel.Healthy);
-            payload.ApplicationVersion.Should().Be("0.1.0.0");
-            payload.InformationalVersion.Should().Be("0.1.0+sha.local");
+            payload.ApplicationVersion.Should().Be("0.0.1.0");
+            payload.InformationalVersion.Should().Be("0.0.1-alpha+sha.local");
             payload.SourceRevision.Should().Be("local");
             payload.BuildConfiguration.Should().Be("Debug");
             File.Exists(Path.Combine(rootPath, "shrimpcam.db")).Should().BeTrue();

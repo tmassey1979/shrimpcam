@@ -1,7 +1,8 @@
 param(
     [string]$Runtime = "linux-arm64",
     [string]$Configuration = "Release",
-    [string]$OutputRoot = "artifacts/publish/pi"
+    [string]$OutputRoot = "artifacts/publish/pi",
+    [string]$SourceRevision = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -11,6 +12,18 @@ $outputRootPath = Join-Path $repoRoot $OutputRoot
 $apiOutputPath = Join-Path $outputRootPath "api"
 $webOutputPath = Join-Path $outputRootPath "web"
 $apiWebRootPath = Join-Path $repoRoot "src/ShrimpCam.Api/wwwroot"
+
+if ([string]::IsNullOrWhiteSpace($SourceRevision)) {
+    $gitRevision = git -C $repoRoot rev-parse --short HEAD 2>$null
+    if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($gitRevision)) {
+        $SourceRevision = $gitRevision.Trim()
+    }
+    else {
+        $SourceRevision = "local"
+    }
+}
+
+& (Join-Path $repoRoot "scripts/validate-version-consistency.ps1") -RepositoryRoot $repoRoot
 
 if (Test-Path -LiteralPath $outputRootPath) {
     Remove-Item -LiteralPath $outputRootPath -Recurse -Force
@@ -43,4 +56,5 @@ dotnet publish (Join-Path $repoRoot "src/ShrimpCam.Api/ShrimpCam.Api.csproj") `
     --self-contained true `
     /p:PublishSingleFile=true `
     /p:IncludeNativeLibrariesForSelfExtract=true `
+    /p:ShrimpCamSourceRevision=$SourceRevision `
     -o $apiOutputPath

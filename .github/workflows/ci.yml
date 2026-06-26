@@ -35,6 +35,10 @@ jobs:
         working-directory: src/ShrimpCam.Web
         run: npx playwright install --with-deps chromium
 
+      - name: Validate version metadata
+        shell: pwsh
+        run: ./scripts/validate-version-consistency.ps1
+
       - name: Restore and verify
         shell: pwsh
         run: |

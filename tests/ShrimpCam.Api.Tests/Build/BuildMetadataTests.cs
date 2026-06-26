@@ -17,8 +17,8 @@ public sealed class BuildMetadataTests
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
             .InformationalVersion;
 
-        informationalVersion.Should().Be("0.1.0+sha.local");
-        assembly.GetName().Version?.ToString().Should().Be("0.1.0.0");
+        informationalVersion.Should().Be("0.0.1-alpha+sha.local");
+        assembly.GetName().Version?.ToString().Should().Be("0.0.1.0");
 
         var assemblyMetadata = assembly
             .GetCustomAttributes<AssemblyMetadataAttribute>()

@@ -83,7 +83,8 @@ jobs:
           ./scripts/publish-shrimpcam.ps1 `
             -Runtime linux-arm64 `
             -Configuration Release `
-            -OutputRoot artifacts/publish/pi
+            -OutputRoot artifacts/publish/pi `
+            -SourceRevision $env:SOURCE_SHA
 
       - name: Build Raspberry Pi image
         env:

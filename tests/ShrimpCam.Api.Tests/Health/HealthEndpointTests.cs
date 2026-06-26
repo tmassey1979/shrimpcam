@@ -45,7 +45,7 @@ public sealed class HealthEndpointTests
             payload.Components["database"].Status.Should().Be("Healthy");
             payload.Components["storage"].Status.Should().Be("Healthy");
             payload.Components["camera"].Status.Should().Be("Healthy");
-            payload.ApplicationVersion.Should().Be("0.1.0.0");
+            payload.ApplicationVersion.Should().Be("0.0.1.0");
         }
         finally
         {

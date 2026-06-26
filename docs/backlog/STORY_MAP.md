@@ -67,6 +67,7 @@ These stories should land before most feature work begins:
 - `SC-ASO-319` Redact authentication secrets from audit logs
 - `SC-ASO-320` Harden default administrator initialization for internet exposure
 - `SC-OPS-321` Gate release image publishing and first-boot networking
+- `SC-OPS-322` Unify release, assembly, web, and image version stamping
 - `SC-PWA-07` Offline shell and cached core experience
 - `SC-PWA-08` Installable PWA behavior
 - `SC-PWA-09` Loading, error, and reconnect states
@@ -96,7 +97,7 @@ These stories should land before most feature work begins:
 
 ## Priority guidance
 
-- `P0`: `SC-PF-001` through `SC-PF-009`, `SC-PF-011`, `SC-PF-012`, `SC-ASO-301` through `SC-ASO-320`, `SC-OPS-321`, `SC-CC-01` through `SC-CC-09`, `SC-CAM-16` through `SC-CAM-20`, `SC-PWA-01` through `SC-PWA-21`
+- `P0`: `SC-PF-001` through `SC-PF-009`, `SC-PF-011`, `SC-PF-012`, `SC-ASO-301` through `SC-ASO-320`, `SC-OPS-321` through `SC-OPS-322`, `SC-CC-01` through `SC-CC-09`, `SC-CAM-16` through `SC-CAM-20`, `SC-PWA-01` through `SC-PWA-21`
 - `P1`: `SC-ASO-313`, `SC-ASO-314`, `SC-CC-10`
 - `P2`: `SC-CC-11`, `SC-PF-010`
 

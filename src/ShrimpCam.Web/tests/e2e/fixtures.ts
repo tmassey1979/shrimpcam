@@ -14,8 +14,8 @@ export const healthResponse = {
     storage: { status: "Healthy", detail: "2 captures currently indexed." },
     database: { status: "Healthy", detail: null }
   },
-  applicationVersion: "0.1.0.0",
-  informationalVersion: "0.1.0+e2e",
+  applicationVersion: "0.0.1.0",
+  informationalVersion: "0.0.1-alpha+e2e",
   sourceRevision: "e2e",
   buildConfiguration: "Release"
 };
