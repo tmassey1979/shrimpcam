@@ -78,6 +78,87 @@ test("expires protected session on unauthorized API response and renders unknown
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
 });
 
+test("restores a valid saved session without requiring sign-in", async ({ page }) => {
+  await mockShrimpCamApi(page);
+  await page.addInitScript(() => {
+    window.localStorage.setItem(
+      "shrimpcam.session",
+      JSON.stringify({
+        sessionId: "stored-session",
+        userId: "stored-user",
+        userName: "admin",
+        token: "stored-token",
+        expiresAtUtc: "2099-06-26T19:50:00Z"
+      })
+    );
+  });
+
+  const captureAuthorizations: string[] = [];
+  await page.route(/\/captures(?:\?.*)?$/, async (route) => {
+    if (route.request().resourceType() === "document") {
+      await route.fallback();
+      return;
+    }
+
+    captureAuthorizations.push(route.request().headers().authorization ?? "");
+    await route.fallback();
+  });
+
+  await page.goto("/dashboard");
+
+  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+  await expect(page.getByLabel("Session and install status")).toContainText("Signed in as admin.");
+  expect(captureAuthorizations).toContain("Bearer stored-token");
+  await expect(page.getByRole("heading", { name: "Sign in to Shrimp Cam" })).toHaveCount(0);
+});
+
+test("clears expired and corrupt saved sessions before protected routes render", async ({ page }) => {
+  await mockShrimpCamApi(page);
+  await page.addInitScript(() => {
+    window.localStorage.setItem(
+      "shrimpcam.session",
+      JSON.stringify({
+        sessionId: "expired-session",
+        userId: "expired-user",
+        userName: "admin",
+        token: "expired-token",
+        expiresAtUtc: "2000-01-01T00:00:00Z"
+      })
+    );
+  });
+
+  await page.goto("/dashboard");
+
+  await expect(page.getByRole("heading", { name: "Sign in to Shrimp Cam" })).toBeVisible();
+  await expect(page.getByText("Sign in to continue.")).toBeVisible();
+  await expect(page.evaluate(() => window.localStorage.getItem("shrimpcam.session"))).resolves.toBeNull();
+
+  await page.evaluate(() => window.localStorage.setItem("shrimpcam.session", "{not-json"));
+  await page.goto("/gallery");
+
+  await expect(page.getByRole("heading", { name: "Sign in to Shrimp Cam" })).toBeVisible();
+  await expect(page.evaluate(() => window.localStorage.getItem("shrimpcam.session"))).resolves.toBeNull();
+});
+
+test("signs out with the active bearer token and clears the saved session", async ({ page }) => {
+  await mockShrimpCamApi(page);
+
+  const logoutAuthorizations: string[] = [];
+  await page.route("/auth/logout", async (route) => {
+    logoutAuthorizations.push(route.request().headers().authorization ?? "");
+    await route.fulfill({ status: 200, contentType: "application/json", body: "{}" });
+  });
+
+  await signIn(page);
+  await page.getByRole("button", { name: "Sign out" }).click();
+
+  await expect(page.getByRole("heading", { name: "Sign in to Shrimp Cam" })).toBeVisible();
+  await expect(page.getByText("You have signed out.")).toBeVisible();
+  expect(logoutAuthorizations).toEqual(["Bearer e2e-token"]);
+  await expect(page.evaluate(() => window.localStorage.getItem("shrimpcam.session"))).resolves.toBeNull();
+  await expect(page.getByRole("navigation", { name: "Primary" })).toHaveCount(0);
+});
+
 test("shows actionable dashboard failures without stale success messaging", async ({ page }) => {
   await mockShrimpCamApi(page, { healthStatus: 503, captureListStatus: 503 });
   await signIn(page);

@@ -572,6 +572,40 @@ Scenario: Production bundle includes a service worker
   And it precaches the app shell, manifest, and install icon assets
 ```
 
+### SC-PWA-20 Auth Session Restore, Expiry, And Sign-Out Edge Coverage
+
+**User story:** As a Shrimp Cam operator, I want automated coverage for saved sessions, expired sessions, corrupt session storage, and sign-out so that users do not get stuck in unsafe or confusing authentication states.
+
+**Dependencies:** SC-PWA-02, SC-PWA-16, SC-PWA-17
+
+**Test expectations:**
+- Samsung S26 Playwright tests restore a valid saved session without requiring another sign-in and verify authenticated requests use the stored bearer token.
+- Playwright verifies expired and corrupt saved sessions are cleared before protected content renders.
+- Playwright verifies sign-out calls the backend with the active bearer token, removes local session state, hides protected navigation, and returns the user to sign-in with clear feedback.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: Valid saved session is restored
+  Given the browser has a saved unexpired Shrimp Cam session
+  When the user opens a protected route
+  Then the protected screen renders without another sign-in
+  And authenticated API requests use the saved bearer token
+
+Scenario: Invalid saved sessions are cleared
+  Given the browser has an expired or corrupt saved session
+  When the user opens a protected route
+  Then the saved session is removed
+  And the user is returned to sign-in before protected content is shown
+
+Scenario: User signs out
+  Given the user is signed in
+  When the user chooses Sign out
+  Then the backend logout endpoint receives the active bearer token
+  And the saved session is cleared
+  And protected navigation is hidden until the user signs in again
+```
+
 ## Delivery Notes
 
 - Story sequencing should start with shell and routing, then move through authentication, core screens, resilience behavior, and final accessibility hardening.
