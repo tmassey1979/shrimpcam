@@ -6007,3 +6007,51 @@ body,
 .screen-settings .settings-form select {
   min-width: 0 !important;
 }
+
+/* Reference parity pass: Timeline thumbnails should be compact and not leak filenames. */
+.screen-timeline .capture-list,
+.screen-gallery .capture-list {
+  gap: 0.62rem !important;
+  padding-bottom: 0.65rem !important;
+}
+
+.screen-timeline .capture-list-item,
+.screen-gallery .capture-list-item {
+  display: grid !important;
+  align-content: end !important;
+  gap: 0.22rem !important;
+  min-height: 5.9rem !important;
+  padding: 0.72rem !important;
+  overflow: hidden !important;
+  background:
+    linear-gradient(180deg, rgba(4, 35, 45, 0.08), rgba(0, 0, 0, 0.62)),
+    url("./assets/ref-settings-camera.png") center / cover no-repeat !important;
+}
+
+.screen-timeline .capture-list-item strong,
+.screen-gallery .capture-list-item strong {
+  display: none !important;
+}
+
+.screen-timeline .capture-list-item span,
+.screen-gallery .capture-list-item span {
+  color: #fff !important;
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+  text-shadow: 0 0.2rem 0.55rem rgba(0, 0, 0, 0.75);
+}
+
+.screen-timeline .capture-list-item small,
+.screen-gallery .capture-list-item small {
+  width: max-content;
+  max-width: 100%;
+  padding: 0.18rem 0.42rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.42);
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-size: 0.62rem !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
