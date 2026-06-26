@@ -3,7 +3,9 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting.WindowsServices;
+using Microsoft.Extensions.Logging.EventLog;
 using Microsoft.Extensions.Options;
 using ShrimpCam.Api.Authentication;
 using ShrimpCam.Api.Build;
@@ -32,6 +34,7 @@ builder.Host.UseWindowsService(
 
 if (OperatingSystem.IsWindows() && !WindowsServiceHelpers.IsWindowsService())
 {
+    builder.Services.RemoveAll<EventLogLoggerProvider>();
     builder.Logging.AddFilter("Microsoft.Extensions.Logging.EventLog.EventLogLoggerProvider", LogLevel.None);
 }
 

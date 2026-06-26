@@ -36,6 +36,7 @@ public sealed class DeploymentSupportTests
         var program = File.ReadAllText(Path.Combine(ResolveRepositoryRoot(), "src", "ShrimpCam.Api", "Program.cs"));
 
         program.Should().Contain("!WindowsServiceHelpers.IsWindowsService()");
+        program.Should().Contain("RemoveAll<EventLogLoggerProvider>");
         program.Should().Contain("Microsoft.Extensions.Logging.EventLog.EventLogLoggerProvider");
         program.Should().Contain("LogLevel.None");
     }
