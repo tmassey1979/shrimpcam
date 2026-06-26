@@ -5812,3 +5812,22 @@ body,
     font-size: 0.62rem !important;
   }
 }
+
+/* Reference parity pass: bottom navigation should dock after content, not cover cards. */
+.app-shell-authenticated .bottom-nav {
+  position: sticky !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: max(0.65rem, env(safe-area-inset-bottom)) !important;
+  width: 100% !important;
+  margin: 1rem auto 0 !important;
+  transform: none !important;
+}
+
+.screen-dashboard .quick-actions-card {
+  margin-bottom: 0 !important;
+}
+
+.app-shell-authenticated {
+  --bottom-nav-clearance: calc(1.5rem + env(safe-area-inset-bottom)) !important;
+}
