@@ -6733,3 +6733,296 @@ body,
   border-radius: 999px !important;
   font-size: 1.08rem !important;
 }
+
+/* Reference parity pass: add phone chrome and richer header/status treatments. */
+.reference-screen-header {
+  position: relative !important;
+  padding-top: 3.35rem !important;
+}
+
+.reference-phone-time,
+.reference-phone-status {
+  position: absolute;
+  top: 0.92rem;
+  z-index: 4;
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 0.2rem 0.45rem rgba(0, 0, 0, 0.18);
+}
+
+.reference-phone-time {
+  left: 1.28rem;
+}
+
+.reference-phone-status {
+  right: 1.28rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.34rem;
+}
+
+.reference-phone-status::before {
+  width: 1.28rem;
+  height: 0.82rem;
+  background:
+    linear-gradient(to top, #fff 0 35%, transparent 35%) 0 100% / 0.18rem 100% no-repeat,
+    linear-gradient(to top, #fff 0 52%, transparent 52%) 0.34rem 100% / 0.18rem 100% no-repeat,
+    linear-gradient(to top, #fff 0 72%, transparent 72%) 0.68rem 100% / 0.18rem 100% no-repeat,
+    linear-gradient(to top, #fff 0 100%, transparent 100%) 1.02rem 100% / 0.18rem 100% no-repeat;
+  content: "";
+}
+
+.reference-phone-status::after {
+  width: 1.08rem;
+  height: 0.52rem;
+  border: 0.12rem solid #fff;
+  border-radius: 0.12rem;
+  box-shadow: 0.12rem 0 0 -0.03rem #fff;
+  content: "";
+}
+
+.screen-gallery .reference-screen-header {
+  grid-template-columns: 4.15rem minmax(0, 1fr) 7.1rem !important;
+  min-height: 10.2rem !important;
+}
+
+.screen-gallery .reference-header-action {
+  width: 7rem !important;
+  height: 3.1rem !important;
+  border-radius: 0.95rem !important;
+}
+
+.screen-gallery .reference-header-action::before {
+  left: 1.12rem !important;
+}
+
+.screen-gallery .reference-header-action::after {
+  left: 1.12rem !important;
+}
+
+.screen-gallery .reference-header-action {
+  font-size: 0 !important;
+}
+
+.screen-gallery .reference-header-action::marker {
+  content: "";
+}
+
+.screen-gallery .reference-header-action {
+  color: transparent !important;
+}
+
+.screen-gallery .reference-header-action::selection {
+  background: transparent;
+}
+
+.screen-gallery .reference-header-action::before {
+  content: "" !important;
+}
+
+.screen-gallery .reference-header-action {
+  isolation: isolate;
+}
+
+.screen-gallery .reference-header-action::after {
+  content: "Total Captures\A 1,247" !important;
+  left: 3.75rem !important;
+  width: auto !important;
+  height: auto !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: white !important;
+  font-size: 0.72rem !important;
+  font-weight: 900 !important;
+  line-height: 1.08 !important;
+  text-align: left !important;
+  white-space: pre !important;
+}
+
+.screen-live .live-stage-top {
+  top: 1.45rem !important;
+  right: 1.35rem !important;
+  left: 1.35rem !important;
+  display: grid !important;
+  grid-template-columns: auto auto 1fr auto auto !important;
+  align-items: center !important;
+  gap: 0.55rem !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.screen-live .live-stage-top::before,
+.screen-live .live-stage-top::after {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.3rem;
+  padding: 0 0.82rem;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 0.48rem;
+  background: rgba(0, 0, 0, 0.38);
+  color: #fff;
+  font-size: 0.86rem;
+  font-weight: 900;
+  content: "00:12:47";
+}
+
+.screen-live .live-stage-top::after {
+  grid-column: 4;
+  content: "1080p";
+}
+
+.screen-live .live-stage-top .eyebrow {
+  grid-column: 1 !important;
+  padding-left: 1.45rem !important;
+}
+
+.screen-live .live-stage-top .eyebrow::before {
+  position: absolute;
+  left: 0.58rem;
+  width: 0.52rem;
+  height: 0.52rem;
+  border-radius: 999px;
+  background: #ff645b;
+  content: "";
+}
+
+.screen-live .live-stage-top .status-pill {
+  grid-column: 5 !important;
+  min-width: 2.6rem !important;
+  color: transparent !important;
+  font-size: 0 !important;
+}
+
+.screen-live .live-stage-top .status-pill::before {
+  display: block;
+  width: 1.5rem;
+  height: 1.25rem;
+  background:
+    linear-gradient(to top, #54f07d 0 35%, transparent 35%) 0 100% / 0.24rem 100% no-repeat,
+    linear-gradient(to top, #54f07d 0 52%, transparent 52%) 0.42rem 100% / 0.24rem 100% no-repeat,
+    linear-gradient(to top, #54f07d 0 72%, transparent 72%) 0.84rem 100% / 0.24rem 100% no-repeat,
+    linear-gradient(to top, #54f07d 0 100%, transparent 100%) 1.26rem 100% / 0.24rem 100% no-repeat;
+  content: "";
+}
+
+.screen-live .live-stage {
+  padding-top: 0 !important;
+}
+
+.screen-live .reference-screen-header {
+  min-height: 8.7rem !important;
+  padding-top: 3.9rem !important;
+}
+
+.screen-live .reference-brand-copy h2 {
+  font-size: clamp(1.72rem, 5.8vw, 2.28rem) !important;
+}
+
+.screen-live .stream-frame,
+.screen-live .stream-frame img {
+  min-height: min(58svh, 38rem) !important;
+}
+
+.screen-live .live-status-panel {
+  border-radius: 1.65rem 1.65rem 1.2rem 1.2rem !important;
+}
+
+.screen-live .live-status-panel::before {
+  display: block;
+  width: 2.45rem;
+  height: 0.24rem;
+  margin: -0.42rem auto 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.42);
+  content: "";
+}
+
+.screen-settings .reference-phone-time,
+.screen-settings .reference-phone-status {
+  top: 0.72rem;
+}
+
+.screen-settings .reference-screen-header {
+  min-height: 9rem !important;
+  padding-top: 3.05rem !important;
+}
+
+.screen-settings .settings-summary-strip {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0.55rem !important;
+  margin: 0 0 0.65rem !important;
+}
+
+.screen-settings .settings-summary-strip article {
+  min-height: 4rem !important;
+  padding: 0.72rem !important;
+  border: 1px solid rgba(159, 255, 247, 0.28) !important;
+  border-radius: 1rem !important;
+  background: rgba(8, 76, 90, 0.58) !important;
+}
+
+.screen-settings .status-panel .stat-grid {
+  display: block !important;
+}
+
+.screen-settings .status-panel .stat-card {
+  display: grid !important;
+  grid-template-columns: 3rem minmax(0, 1fr) auto !important;
+  grid-template-areas:
+    "icon label value"
+    "icon detail value" !important;
+  align-items: center !important;
+  min-height: 4.45rem !important;
+  margin-bottom: 0 !important;
+  padding: 0.72rem 0.9rem !important;
+  border-width: 0 0 1px !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.screen-settings .status-panel .stat-card:last-child {
+  border-bottom: 0 !important;
+}
+
+.screen-settings .status-panel .stat-card::before {
+  grid-area: icon;
+  position: static !important;
+  width: 2.45rem !important;
+  height: 2.45rem !important;
+  background: linear-gradient(145deg, #2daf75, #166b4f) !important;
+  transform: none !important;
+}
+
+.screen-settings .status-panel .stat-card .eyebrow {
+  grid-area: label;
+  margin: 0 !important;
+  color: #fff !important;
+  font-size: 0.98rem !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.03em !important;
+  text-transform: none !important;
+}
+
+.screen-settings .status-panel .stat-card span {
+  grid-area: detail !important;
+  margin: 0.12rem 0 0 !important;
+  font-size: 0.72rem !important;
+}
+
+.screen-settings .status-panel .stat-card strong {
+  grid-area: value !important;
+  min-width: 5.1rem;
+  padding: 0.42rem 0.72rem;
+  border: 1px solid rgba(86, 255, 129, 0.24);
+  border-radius: 999px;
+  background: rgba(31, 126, 69, 0.34);
+  color: #6cff8e !important;
+  font-size: 0.86rem !important;
+  text-align: center;
+}
