@@ -1,22 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 112" role="img" aria-label="Shrimp mark">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 118" role="img" aria-label="Shrimp mark">
   <defs>
-    <linearGradient id="body" x1="30" y1="84" x2="120" y2="22" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#e83b2d"/>
-      <stop offset="0.5" stop-color="#ff704d"/>
-      <stop offset="1" stop-color="#ffa260"/>
+    <linearGradient id="shrimpBody" x1="20" y1="88" x2="130" y2="22" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ef432f"/>
+      <stop offset="0.55" stop-color="#ff714d"/>
+      <stop offset="1" stop-color="#ffa45f"/>
     </linearGradient>
-    <filter id="shadow" x="-18%" y="-24%" width="145%" height="160%">
-      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#032935" flood-opacity="0.28"/>
+    <filter id="softShadow" x="-18%" y="-24%" width="150%" height="165%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#032936" flood-opacity="0.28"/>
     </filter>
   </defs>
-  <g filter="url(#shadow)" fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M26 67c10-31 42-52 76-48 26 3 45 17 50 37 4 17-6 31-27 38-29 10-66-1-99-27Z" fill="url(#body)"/>
-    <path d="M34 68 9 56l18-15 27 16-13 23-29 8 22-20Z" fill="#ef4b31"/>
-    <path d="M43 50c10-14 25-23 43-27M61 69c3-19 14-34 31-43M84 81c-3-21 4-38 19-51M108 83c-7-18-4-34 8-47" stroke="#ffe8cc" stroke-width="6"/>
-    <path d="M129 43c14-12 29-16 43-12M130 54c16-3 28 2 37 13M118 34c12-17 27-27 44-30" stroke="#ff9b60" stroke-width="5"/>
-    <path d="M122 88c9 3 17 10 22 19M101 92c4 7 6 13 5 19M78 85c-1 9-5 17-13 23M56 75c-6 10-14 17-25 21" stroke="#ff7650" stroke-width="5"/>
-    <path d="M121 34c7-4 16-2 23 4" stroke="#173642" stroke-width="4"/>
-    <circle cx="125" cy="37" r="4.4" fill="#173642"/>
-    <path d="M107 25c10-11 23-17 39-19" stroke="#ffa260" stroke-width="5"/>
+  <g filter="url(#softShadow)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M26 67c11-31 43-52 77-48 30 4 51 23 49 45-2 24-29 39-61 31-22-6-42-15-65-28Z" fill="url(#shrimpBody)"/>
+    <path d="M29 67 8 54l18-14 25 17-12 23-26 7 16-20Z" fill="#f04e33"/>
+    <path d="M50 31c15-7 33-9 54-4" stroke="#ff9b62" stroke-width="4" opacity="0.55"/>
+    <path d="M130 43c15-12 31-16 45-10M132 54c17-3 30 2 40 14M119 34c13-18 29-27 47-29" stroke="#ffa45f" stroke-width="5"/>
+    <path d="M122 89c10 3 18 10 24 20M101 93c5 7 7 14 6 21M78 86c-1 9-6 17-14 24M56 76c-7 10-16 17-28 21" stroke="#ff7d55" stroke-width="5"/>
+    <path d="M119 34c8-4 18-2 25 5" stroke="#173642" stroke-width="4"/>
+    <circle cx="124" cy="37" r="4.5" fill="#173642"/>
+    <path d="M101 24c12-11 26-17 42-18" stroke="#ffa45f" stroke-width="5"/>
   </g>
 </svg>
