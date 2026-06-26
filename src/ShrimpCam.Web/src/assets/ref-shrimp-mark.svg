@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 92" role="img" aria-label="Shrimp mark">
+  <defs>
+    <linearGradient id="shell" x1="20" y1="72" x2="108" y2="18" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ec3f2d"/>
+      <stop offset="0.58" stop-color="#ff704d"/>
+      <stop offset="1" stop-color="#ff9a62"/>
+    </linearGradient>
+    <filter id="shadow" x="-18%" y="-22%" width="140%" height="155%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#052c35" flood-opacity="0.24"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="rotate(-18 69 45)">
+      <path d="M22 51 4 38l17-9 17 15-9 18-19 4 12-15Z" fill="#f04a31"/>
+      <ellipse cx="43" cy="45" rx="18" ry="24" fill="url(#shell)"/>
+      <ellipse cx="61" cy="41" rx="17" ry="23" fill="url(#shell)"/>
+      <ellipse cx="80" cy="40" rx="17" ry="22" fill="url(#shell)"/>
+      <ellipse cx="99" cy="44" rx="18" ry="21" fill="url(#shell)"/>
+      <path d="M31 29c12 11 13 30 1 43M50 21c12 13 13 35 0 48M70 19c11 14 12 36-1 50M90 23c10 12 11 31 0 43" stroke="#ffe8cf" stroke-width="5"/>
+      <path d="M112 38c11-8 22-10 32-6M114 47c12-1 22 3 29 11M108 30c8-13 19-21 33-24" stroke="#ff9c62" stroke-width="4"/>
+      <path d="M106 62c8 3 14 8 18 16M87 66c4 6 6 12 5 19M67 64c-1 8-5 14-12 20M47 58c-6 7-12 12-21 15" stroke="#ff784e" stroke-width="5"/>
+      <path d="M107 28c7-3 16-1 21 5" stroke="#163641" stroke-width="3"/>
+      <circle cx="111" cy="31" r="4" fill="#163641"/>
+    </g>
+  </g>
+</svg>

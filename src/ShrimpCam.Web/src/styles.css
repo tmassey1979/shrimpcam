@@ -7906,3 +7906,62 @@ body,
 .screen-gallery .reference-brand-copy p {
   font-size: clamp(0.72rem, 2.3vw, 0.9rem) !important;
 }
+
+/* Reference parity pass: replace blocky CSS mark with a shrimp illustration asset. */
+.reference-shrimp-mark {
+  width: 4.55rem !important;
+  height: 3.05rem !important;
+  background: url("./assets/ref-shrimp-mark.svg") center / contain no-repeat !important;
+  filter: drop-shadow(0 0.32rem 0.7rem rgba(0, 0, 0, 0.22));
+  transform: none !important;
+}
+
+.reference-shrimp-mark::before,
+.reference-shrimp-mark::after {
+  display: none !important;
+}
+
+.screen-dashboard .reference-shrimp-mark {
+  width: 4.75rem !important;
+  height: 3.15rem !important;
+}
+
+.screen-live .reference-shrimp-mark,
+.screen-gallery .reference-shrimp-mark,
+.screen-timeline .reference-shrimp-mark,
+.screen-settings .reference-shrimp-mark {
+  width: 3.85rem !important;
+  height: 2.65rem !important;
+}
+
+/* Header lockup parity: keep the shrimp as a small illustration beside the title. */
+.app-shell-authenticated .reference-screen-header {
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  column-gap: 0.85rem !important;
+  align-items: center !important;
+}
+
+.app-shell-authenticated .reference-shrimp-mark {
+  width: clamp(3.25rem, 10.8vw, 4.45rem) !important;
+  height: clamp(2.15rem, 7.4vw, 2.9rem) !important;
+}
+
+.screen-dashboard .reference-shrimp-mark {
+  width: clamp(3.55rem, 12.5vw, 4.7rem) !important;
+  height: clamp(2.35rem, 8.2vw, 3.05rem) !important;
+}
+
+.app-shell-authenticated .reference-brand-copy h2 {
+  font-size: clamp(2.45rem, 8.2vw, 3.6rem) !important;
+  line-height: 0.98 !important;
+  letter-spacing: -0.055em !important;
+}
+
+.screen-dashboard .reference-brand-copy h2 {
+  font-size: clamp(2.75rem, 8.8vw, 3.95rem) !important;
+}
+
+.app-shell-authenticated .reference-brand-copy p {
+  margin-top: 0.22rem !important;
+  font-size: clamp(1.02rem, 3.25vw, 1.28rem) !important;
+}
