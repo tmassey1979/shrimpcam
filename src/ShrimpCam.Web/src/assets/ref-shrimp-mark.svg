@@ -1,26 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 92" role="img" aria-label="Shrimp mark">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 112" role="img" aria-label="Shrimp mark">
   <defs>
-    <linearGradient id="shell" x1="20" y1="72" x2="108" y2="18" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#ec3f2d"/>
-      <stop offset="0.58" stop-color="#ff704d"/>
-      <stop offset="1" stop-color="#ff9a62"/>
+    <linearGradient id="body" x1="30" y1="84" x2="120" y2="22" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e83b2d"/>
+      <stop offset="0.5" stop-color="#ff704d"/>
+      <stop offset="1" stop-color="#ffa260"/>
     </linearGradient>
-    <filter id="shadow" x="-18%" y="-22%" width="140%" height="155%">
-      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#052c35" flood-opacity="0.24"/>
+    <filter id="shadow" x="-18%" y="-24%" width="145%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#032935" flood-opacity="0.28"/>
     </filter>
   </defs>
   <g filter="url(#shadow)" fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <g transform="rotate(-18 69 45)">
-      <path d="M22 51 4 38l17-9 17 15-9 18-19 4 12-15Z" fill="#f04a31"/>
-      <ellipse cx="43" cy="45" rx="18" ry="24" fill="url(#shell)"/>
-      <ellipse cx="61" cy="41" rx="17" ry="23" fill="url(#shell)"/>
-      <ellipse cx="80" cy="40" rx="17" ry="22" fill="url(#shell)"/>
-      <ellipse cx="99" cy="44" rx="18" ry="21" fill="url(#shell)"/>
-      <path d="M31 29c12 11 13 30 1 43M50 21c12 13 13 35 0 48M70 19c11 14 12 36-1 50M90 23c10 12 11 31 0 43" stroke="#ffe8cf" stroke-width="5"/>
-      <path d="M112 38c11-8 22-10 32-6M114 47c12-1 22 3 29 11M108 30c8-13 19-21 33-24" stroke="#ff9c62" stroke-width="4"/>
-      <path d="M106 62c8 3 14 8 18 16M87 66c4 6 6 12 5 19M67 64c-1 8-5 14-12 20M47 58c-6 7-12 12-21 15" stroke="#ff784e" stroke-width="5"/>
-      <path d="M107 28c7-3 16-1 21 5" stroke="#163641" stroke-width="3"/>
-      <circle cx="111" cy="31" r="4" fill="#163641"/>
-    </g>
+    <path d="M26 67c10-31 42-52 76-48 26 3 45 17 50 37 4 17-6 31-27 38-29 10-66-1-99-27Z" fill="url(#body)"/>
+    <path d="M34 68 9 56l18-15 27 16-13 23-29 8 22-20Z" fill="#ef4b31"/>
+    <path d="M43 50c10-14 25-23 43-27M61 69c3-19 14-34 31-43M84 81c-3-21 4-38 19-51M108 83c-7-18-4-34 8-47" stroke="#ffe8cc" stroke-width="6"/>
+    <path d="M129 43c14-12 29-16 43-12M130 54c16-3 28 2 37 13M118 34c12-17 27-27 44-30" stroke="#ff9b60" stroke-width="5"/>
+    <path d="M122 88c9 3 17 10 22 19M101 92c4 7 6 13 5 19M78 85c-1 9-5 17-13 23M56 75c-6 10-14 17-25 21" stroke="#ff7650" stroke-width="5"/>
+    <path d="M121 34c7-4 16-2 23 4" stroke="#173642" stroke-width="4"/>
+    <circle cx="125" cy="37" r="4.4" fill="#173642"/>
+    <path d="M107 25c10-11 23-17 39-19" stroke="#ffa260" stroke-width="5"/>
   </g>
 </svg>
