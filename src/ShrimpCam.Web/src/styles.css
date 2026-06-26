@@ -6122,3 +6122,25 @@ body,
   pointer-events: none;
   transform: translate(-50%, -50%);
 }
+
+/* Reference parity pass: restore meaningful dashboard stat pictograms. */
+.screen-dashboard .dashboard-overview .stat-card::after {
+  grid-area: icon;
+  z-index: 1;
+  display: block !important;
+  place-self: center;
+  width: 1.28rem;
+  height: 0.92rem;
+  border: 0.16rem solid rgba(255, 255, 255, 0.94);
+  border-radius: 0.22rem;
+  box-shadow: 0.85rem 0.08rem 0 -0.32rem rgba(255, 255, 255, 0.94);
+  content: "" !important;
+  pointer-events: none;
+}
+
+.screen-dashboard .dashboard-overview .stat-card:nth-child(2)::after {
+  width: 1.18rem;
+  height: 1.18rem;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 0.16rem rgba(255, 255, 255, 0.94);
+}
