@@ -5795,6 +5795,311 @@ body,
   font-size: clamp(1.45rem, 4.4vw, 1.8rem) !important;
 }
 
+/* Gallery reference parity: compact controls and make captures feel like a timeline filmstrip. */
+.screen-timeline,
+.screen-gallery {
+  gap: clamp(0.8rem, 2.4vw, 1.1rem) !important;
+}
+
+.screen-timeline .gallery-layout,
+.screen-gallery .gallery-layout {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: clamp(0.9rem, 2.8vw, 1.25rem) !important;
+}
+
+.screen-timeline .gallery-browser,
+.screen-gallery .gallery-browser {
+  display: contents !important;
+}
+
+.screen-timeline .gallery-toolbar,
+.screen-gallery .gallery-toolbar {
+  order: 1 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) clamp(4.9rem, 15vw, 6.1rem) !important;
+  gap: 0.72rem !important;
+  margin-top: 0.1rem !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.screen-timeline .gallery-toolbar label:first-child,
+.screen-gallery .gallery-toolbar label:first-child {
+  min-height: clamp(3.55rem, 10vw, 4.15rem) !important;
+  padding: 0 1rem 0 3.35rem !important;
+  border: 1px solid rgba(133, 229, 225, 0.31) !important;
+  border-radius: 999px !important;
+  background:
+    radial-gradient(circle at 1.72rem 50%, transparent 0 0.48rem, rgba(255, 255, 255, 0.92) 0.5rem 0.66rem, transparent 0.68rem),
+    linear-gradient(45deg, transparent calc(50% - 0.08rem), rgba(255, 255, 255, 0.92) 0 calc(50% + 0.08rem), transparent 0) 2.25rem 2.28rem / 0.72rem 0.72rem no-repeat,
+    rgba(2, 50, 64, 0.58) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09) !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+.screen-timeline .gallery-toolbar label:first-child::before,
+.screen-gallery .gallery-toolbar label:first-child::before {
+  display: none !important;
+}
+
+.screen-timeline .gallery-toolbar label:first-child::after,
+.screen-gallery .gallery-toolbar label:first-child::after {
+  display: none !important;
+}
+
+.screen-timeline .gallery-toolbar label:first-child input,
+.screen-gallery .gallery-toolbar label:first-child input {
+  height: 100% !important;
+  padding: 0 !important;
+  color: rgba(244, 255, 254, 0.95) !important;
+  font-size: clamp(1rem, 3.1vw, 1.2rem) !important;
+  font-weight: 750 !important;
+}
+
+.screen-timeline .gallery-toolbar label:nth-child(2),
+.screen-gallery .gallery-toolbar label:nth-child(2) {
+  min-height: clamp(3.55rem, 10vw, 4.15rem) !important;
+  padding: 0 !important;
+  border: 1px solid rgba(133, 229, 225, 0.31) !important;
+  border-radius: 999px !important;
+  background: rgba(2, 50, 64, 0.58) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09) !important;
+}
+
+.screen-timeline .gallery-toolbar label:nth-child(2)::after,
+.screen-gallery .gallery-toolbar label:nth-child(2)::after {
+  display: none !important;
+}
+
+.screen-timeline .gallery-toolbar input[type="date"],
+.screen-gallery .gallery-toolbar input[type="date"] {
+  min-width: 0 !important;
+  height: 100% !important;
+  padding: 0.2rem 0.45rem !important;
+  color: transparent !important;
+}
+
+.screen-timeline .gallery-toolbar input[type="date"]::-webkit-calendar-picker-indicator,
+.screen-gallery .gallery-toolbar input[type="date"]::-webkit-calendar-picker-indicator {
+  width: 1.65rem !important;
+  height: 1.65rem !important;
+  margin: auto !important;
+  opacity: 1 !important;
+  filter: invert(1) brightness(1.35) !important;
+}
+
+.screen-timeline .gallery-toolbar .secondary-button,
+.screen-gallery .gallery-toolbar .secondary-button {
+  display: none !important;
+}
+
+.screen-timeline .timeline-chip-row,
+.screen-gallery .timeline-chip-row {
+  order: 2 !important;
+  display: flex !important;
+  gap: 0.62rem !important;
+  margin: 0.05rem 0 0 !important;
+  padding: 0 0 0.2rem !important;
+  overflow-x: auto !important;
+}
+
+.screen-timeline .timeline-chip,
+.screen-gallery .timeline-chip {
+  min-width: max-content !important;
+  padding: 0.72rem 0.9rem !important;
+  border-radius: 0.72rem !important;
+  background: rgba(9, 75, 88, 0.68) !important;
+}
+
+.screen-timeline .source-chip-row,
+.screen-gallery .source-chip-row {
+  order: 3 !important;
+  display: flex !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0.28rem !important;
+  gap: 0.24rem !important;
+  overflow: auto hidden !important;
+  border: 1px solid rgba(122, 220, 216, 0.25) !important;
+  border-radius: 999px !important;
+  background: rgba(2, 46, 60, 0.52) !important;
+}
+
+.screen-timeline .source-chip-row:nth-of-type(2),
+.screen-gallery .source-chip-row:nth-of-type(2) {
+  margin-top: -0.35rem !important;
+}
+
+.screen-timeline .source-chip,
+.screen-gallery .source-chip {
+  flex: 0 0 auto !important;
+  padding: 0.55rem 0.82rem !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: rgba(231, 251, 249, 0.78) !important;
+}
+
+.screen-timeline .source-chip.active,
+.screen-gallery .source-chip.active {
+  background: rgba(66, 216, 210, 0.38) !important;
+  color: #fff !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+.screen-timeline .gallery-timeline-header,
+.screen-gallery .gallery-timeline-header {
+  order: 4 !important;
+  margin-top: 0.45rem !important;
+  padding-bottom: 0.1rem !important;
+  border-bottom: 1px solid rgba(120, 222, 218, 0.36) !important;
+}
+
+.screen-timeline .gallery-timeline-header .eyebrow,
+.screen-gallery .gallery-timeline-header .eyebrow,
+.screen-timeline .gallery-timeline-header .eyebrow,
+.screen-gallery .gallery-timeline-header .eyebrow {
+  display: none !important;
+}
+
+.screen-timeline .gallery-timeline-header h3,
+.screen-gallery .gallery-timeline-header h3 {
+  font-size: clamp(1.6rem, 4.8vw, 2rem) !important;
+  letter-spacing: -0.04em !important;
+}
+
+.screen-timeline .gallery-timeline-header h3 {
+  color: transparent !important;
+  font-size: 0 !important;
+}
+
+.screen-gallery .gallery-timeline-header h3 {
+  color: transparent !important;
+  font-size: 0 !important;
+}
+
+.screen-timeline .gallery-timeline-header h3::before,
+.screen-gallery .gallery-timeline-header h3::before {
+  display: inline !important;
+  color: #fff !important;
+  content: "Today" !important;
+  font-size: clamp(1.6rem, 4.8vw, 2rem) !important;
+  letter-spacing: -0.04em !important;
+}
+
+.screen-timeline .gallery-timeline-header > span,
+.screen-gallery .gallery-timeline-header > span {
+  padding: 0.35rem 0.78rem !important;
+  border-radius: 999px !important;
+  background: rgba(8, 70, 84, 0.64) !important;
+  color: rgba(230, 251, 249, 0.86) !important;
+  font-weight: 850 !important;
+}
+
+.screen-timeline .gallery-summary,
+.screen-gallery .gallery-summary {
+  order: 5 !important;
+  align-self: flex-end !important;
+  margin-top: -0.72rem !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  color: rgba(226, 247, 245, 0.78) !important;
+  font-weight: 850 !important;
+}
+
+.screen-timeline .viewer-card,
+.screen-gallery .viewer-card {
+  position: relative !important;
+  order: 6 !important;
+  padding: 0.9rem !important;
+  overflow: hidden !important;
+  border-radius: clamp(1.05rem, 3vw, 1.45rem) !important;
+  background: rgba(3, 46, 60, 0.48) !important;
+  border-color: rgba(75, 237, 228, 0.62) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.11),
+    0 1rem 2rem rgba(0, 18, 27, 0.24) !important;
+}
+
+.screen-timeline .viewer-hero-header,
+.screen-gallery .viewer-hero-header {
+  position: absolute !important;
+  z-index: 3 !important;
+  left: 1.35rem !important;
+  right: 1.35rem !important;
+  bottom: 1.35rem !important;
+  align-items: end !important;
+  color: #fff !important;
+  pointer-events: none !important;
+}
+
+.screen-timeline .viewer-hero-header .eyebrow,
+.screen-gallery .viewer-hero-header .eyebrow {
+  display: none !important;
+}
+
+.screen-timeline .viewer-hero-header h3,
+.screen-gallery .viewer-hero-header h3 {
+  max-width: 16rem !important;
+  color: #fff !important;
+  font-size: clamp(1.15rem, 3.4vw, 1.45rem) !important;
+  line-height: 1.05 !important;
+  text-shadow: 0 0.24rem 0.75rem rgba(0, 0, 0, 0.75) !important;
+}
+
+.screen-timeline .viewer-frame,
+.screen-gallery .viewer-frame {
+  min-height: clamp(18.2rem, 52vw, 24rem) !important;
+  border-radius: clamp(0.88rem, 2.6vw, 1.18rem) !important;
+  border-color: rgba(65, 241, 230, 0.84) !important;
+  box-shadow: 0 0 0 1px rgba(65, 241, 230, 0.24) !important;
+}
+
+.screen-timeline .viewer-frame::after,
+.screen-gallery .viewer-frame::after {
+  position: absolute !important;
+  inset: auto 0 0 !important;
+  height: 45% !important;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.62)) !important;
+  content: "" !important;
+  pointer-events: none !important;
+}
+
+.screen-timeline .viewer-details,
+.screen-gallery .viewer-details,
+.screen-timeline .viewer-card .gallery-action-bar,
+.screen-gallery .viewer-card .gallery-action-bar {
+  display: none !important;
+}
+
+.screen-timeline .capture-list,
+.screen-gallery .capture-list {
+  order: 7 !important;
+  display: flex !important;
+  gap: 0.58rem !important;
+  margin-top: -0.45rem !important;
+  padding: 0 0 0.35rem !important;
+  overflow-x: auto !important;
+}
+
+.screen-timeline .capture-list-item,
+.screen-gallery .capture-list-item {
+  flex: 0 0 clamp(7.2rem, 26vw, 9.1rem) !important;
+  min-height: clamp(5.7rem, 18vw, 7.2rem) !important;
+  border-radius: 0.82rem !important;
+  border-color: rgba(255, 255, 255, 0.42) !important;
+}
+
+.screen-timeline .capture-list-item.active,
+.screen-gallery .capture-list-item.active {
+  border-color: #39f4e8 !important;
+  box-shadow: 0 0 0 2px rgba(57, 244, 232, 0.28) !important;
+}
+
 .screen-dashboard .quick-action-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 0.78rem !important;
