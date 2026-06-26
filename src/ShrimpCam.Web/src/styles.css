@@ -5647,3 +5647,168 @@ body,
 .app-shell:has(.screen-live) {
   --bottom-nav-clearance: calc(2rem + env(safe-area-inset-bottom)) !important;
 }
+
+/* Reference parity pass: make the Timeline/Gallery shell read like the render. */
+.screen-timeline .reference-screen-header,
+.screen-gallery .reference-screen-header {
+  grid-template-columns: 3.3rem minmax(0, 1fr) 7.3rem !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.screen-timeline .reference-shrimp-mark,
+.screen-gallery .reference-shrimp-mark {
+  width: 3rem !important;
+  height: 2.15rem !important;
+}
+
+.screen-timeline .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2 {
+  font-size: clamp(2.15rem, 8vw, 3rem) !important;
+  line-height: 0.94 !important;
+}
+
+.screen-timeline .reference-brand-copy p,
+.screen-gallery .reference-brand-copy p {
+  font-size: clamp(0.9rem, 3.2vw, 1.05rem) !important;
+}
+
+.screen-timeline .reference-header-action,
+.screen-gallery .reference-header-action {
+  width: 6.4rem !important;
+  height: 3.6rem !important;
+  border-radius: 1.05rem !important;
+}
+
+.screen-timeline .reference-header-action::before,
+.screen-gallery .reference-header-action::before {
+  font-size: 0.7rem !important;
+}
+
+.screen-timeline .gallery-browser,
+.screen-gallery .gallery-browser {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.75rem !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.screen-timeline .gallery-timeline-header,
+.screen-gallery .gallery-timeline-header {
+  display: none !important;
+}
+
+.screen-timeline .gallery-toolbar,
+.screen-gallery .gallery-toolbar {
+  order: 1 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0.6rem !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.screen-timeline .gallery-toolbar label,
+.screen-gallery .gallery-toolbar label {
+  margin: 0 !important;
+}
+
+.screen-timeline .gallery-toolbar label span,
+.screen-gallery .gallery-toolbar label span,
+.screen-timeline .gallery-toolbar .secondary-button,
+.screen-gallery .gallery-toolbar .secondary-button {
+  display: none !important;
+}
+
+.screen-timeline .gallery-toolbar input,
+.screen-gallery .gallery-toolbar input {
+  min-height: 3.55rem !important;
+  padding: 0 1rem !important;
+  border: 1px solid rgba(125, 255, 246, 0.28) !important;
+  border-radius: 999px !important;
+  background: rgba(5, 54, 68, 0.52) !important;
+  color: #fff !important;
+  font-size: 1rem !important;
+}
+
+.screen-timeline .timeline-chip-row,
+.screen-gallery .timeline-chip-row {
+  order: 2 !important;
+}
+
+.screen-timeline .source-chip-row,
+.screen-gallery .source-chip-row {
+  order: 3 !important;
+}
+
+.screen-timeline .gallery-summary,
+.screen-gallery .gallery-summary {
+  order: 4 !important;
+  align-self: flex-end !important;
+  margin: 0.2rem 0 0 !important;
+  color: var(--ref-muted) !important;
+  font-size: 0.92rem !important;
+}
+
+.screen-timeline .empty-state,
+.screen-gallery .empty-state {
+  order: 5 !important;
+  padding: 1rem !important;
+  border-style: solid !important;
+  border-radius: 1.25rem !important;
+  background: rgba(6, 55, 70, 0.42) !important;
+}
+
+.screen-timeline .empty-state strong,
+.screen-gallery .empty-state strong {
+  font-size: 1.15rem !important;
+}
+
+.screen-timeline .empty-state span,
+.screen-gallery .empty-state span {
+  font-size: 0.96rem !important;
+  line-height: 1.25 !important;
+}
+
+.screen-timeline .empty-state .secondary-button,
+.screen-gallery .empty-state .secondary-button {
+  min-height: 2.9rem !important;
+}
+
+.screen-timeline .capture-list,
+.screen-gallery .capture-list {
+  order: 6 !important;
+}
+
+.screen-timeline .viewer-card,
+.screen-gallery .viewer-card {
+  margin-top: 0.6rem !important;
+}
+
+@media (max-width: 520px) {
+  .screen-timeline .reference-screen-header,
+  .screen-gallery .reference-screen-header {
+    grid-template-columns: 3rem minmax(0, 1fr) 5.5rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .screen-timeline .reference-brand-copy h2,
+  .screen-gallery .reference-brand-copy h2 {
+    font-size: clamp(1.8rem, 10vw, 2.45rem) !important;
+  }
+
+  .screen-timeline .reference-header-action,
+  .screen-gallery .reference-header-action {
+    width: 5.25rem !important;
+    height: 3.05rem !important;
+  }
+
+  .screen-timeline .reference-header-action::before,
+  .screen-gallery .reference-header-action::before {
+    font-size: 0.62rem !important;
+  }
+}
