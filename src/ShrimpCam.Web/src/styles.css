@@ -5579,6 +5579,33 @@ body,
   }
 }
 
+/* Real-device PWA header cleanup: the phone already provides status chrome. */
+.reference-phone-time,
+.reference-phone-status,
+.reference-header-action {
+  display: none !important;
+}
+
+.app-shell-authenticated .reference-screen-header,
+.screen-dashboard .reference-screen-header,
+.screen-live .reference-screen-header,
+.screen-gallery .reference-screen-header,
+.screen-timeline .reference-screen-header,
+.screen-settings .reference-screen-header {
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  min-height: auto !important;
+  padding-top: clamp(1.2rem, 4.5vw, 2.2rem) !important;
+}
+
+.screen-settings .reference-screen-header {
+  display: grid !important;
+  padding-right: 0 !important;
+}
+
+.screen-settings .reference-brand-copy {
+  padding-left: 0 !important;
+}
+
 /* Final nav clearance pass: compact the floating tab bar and keep content readable underneath. */
 .app-shell-authenticated .bottom-nav,
 .app-shell:has(.screen-settings) .bottom-nav,

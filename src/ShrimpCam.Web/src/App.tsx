@@ -2051,12 +2051,6 @@ function ScreenFrame({ title, description, children }: ScreenFrameProps) {
   return (
     <section className={screenClassName}>
       <div className="screen-header reference-screen-header">
-        <span className="reference-phone-time" aria-hidden="true">
-          {title === "Live" || title === "Settings" ? "10:42" : "9:41"}
-        </span>
-        <span className="reference-phone-status" aria-hidden="true">
-          100%
-        </span>
         <span className="reference-shrimp-mark" aria-hidden="true" />
         <div className="reference-brand-copy">
           <h2>Shrimp Cam</h2>
