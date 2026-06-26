@@ -1,9 +1,7 @@
+import { readFileSync } from "node:fs";
 import { expect, type Page } from "@playwright/test";
 
-const pixel = Buffer.from(
-  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=",
-  "base64"
-);
+const aquariumImage = readFileSync(new URL("../../src/assets/ref-settings-camera.png", import.meta.url));
 
 export const healthResponse = {
   status: "Healthy",
@@ -198,7 +196,7 @@ export async function mockShrimpCamApi(page: Page, options: MockShrimpCamApiOpti
       return;
     }
 
-    await route.fulfill({ status: 200, contentType: "image/png", body: pixel });
+    await route.fulfill({ status: 200, contentType: "image/png", body: aquariumImage });
   });
 
   await page.route(/\/captures\/[^/]+\/metadata$/, async (route) => {
@@ -216,7 +214,7 @@ export async function mockShrimpCamApi(page: Page, options: MockShrimpCamApiOpti
       return;
     }
 
-    await route.fulfill({ status: 200, contentType: "image/png", body: pixel });
+    await route.fulfill({ status: 200, contentType: "image/png", body: aquariumImage });
   });
 
   await page.route("/settings", async (route) => {
