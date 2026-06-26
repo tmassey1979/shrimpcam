@@ -1441,3 +1441,577 @@ button.source-chip {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* Reference-led aquarium polish: these overrides intentionally push the PWA
+   toward the approved mobile renders without changing the product flows. */
+:root {
+  --aqua-deep: #021923;
+  --aqua-mid: #004e5a;
+  --aqua-glass: rgba(8, 77, 87, 0.42);
+  --aqua-glass-strong: rgba(3, 39, 50, 0.74);
+  --aqua-border: rgba(139, 246, 255, 0.28);
+  --aqua-border-hot: rgba(67, 244, 232, 0.72);
+  --aqua-glow: 0 0 2rem rgba(49, 231, 219, 0.22), 0 1.4rem 4.5rem rgba(0, 0, 0, 0.38);
+  --coral: #ff684f;
+  --coral-hot: #ff8f56;
+  --mint: #49efc9;
+}
+
+body {
+  background:
+    radial-gradient(circle at 50% -8%, rgba(76, 229, 241, 0.44), transparent 16rem),
+    radial-gradient(circle at 15% 28%, rgba(23, 153, 132, 0.4), transparent 15rem),
+    radial-gradient(circle at 85% 58%, rgba(91, 158, 81, 0.3), transparent 16rem),
+    linear-gradient(180deg, #017184 0%, #044453 27%, #031a25 64%, #010911 100%);
+}
+
+body::before {
+  background:
+    radial-gradient(circle at 30% 8%, rgba(255, 255, 255, 0.22) 0 0.08rem, transparent 0.16rem),
+    radial-gradient(circle at 64% 12%, rgba(255, 255, 255, 0.16) 0 0.07rem, transparent 0.15rem),
+    radial-gradient(circle at 78% 34%, rgba(255, 255, 255, 0.12) 0 0.06rem, transparent 0.14rem),
+    linear-gradient(106deg, transparent 0 18%, rgba(172, 252, 255, 0.13) 22%, transparent 36%),
+    linear-gradient(132deg, transparent 0 45%, rgba(172, 252, 255, 0.09) 48%, transparent 66%);
+  background-size: auto, auto, auto, 30rem 100%, 38rem 100%;
+}
+
+body::after {
+  background:
+    radial-gradient(ellipse at 8% 100%, rgba(38, 128, 72, 0.9), transparent 16rem),
+    radial-gradient(ellipse at 84% 105%, rgba(45, 108, 57, 0.88), transparent 18rem),
+    radial-gradient(ellipse at 54% 112%, rgba(25, 70, 47, 0.78), transparent 14rem),
+    linear-gradient(0deg, rgba(1, 11, 17, 0.88), transparent 24rem);
+}
+
+.app-shell {
+  max-width: 43rem;
+  margin: 0 auto;
+  padding-inline: 1rem;
+}
+
+.app-header {
+  position: relative;
+  min-height: 8.8rem;
+  align-items: center;
+  padding-top: max(1.25rem, env(safe-area-inset-top));
+}
+
+.app-header::after {
+  position: absolute;
+  right: 0.2rem;
+  top: 1.35rem;
+  display: grid;
+  place-items: center;
+  width: 3.95rem;
+  height: 3.95rem;
+  border: 1px solid rgba(139, 246, 255, 0.38);
+  border-radius: 999px;
+  background: linear-gradient(145deg, rgba(74, 236, 229, 0.28), rgba(255, 255, 255, 0.08));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.26), 0 1rem 2.8rem rgba(0, 0, 0, 0.3);
+  color: #f7ffff;
+  content: "Tune";
+  font-size: 0.66rem;
+  font-weight: 1000;
+  letter-spacing: -0.05em;
+}
+
+.brand-lockup {
+  gap: 1rem;
+}
+
+.brand-mark {
+  width: 5.1rem;
+  height: 4rem;
+  filter: drop-shadow(0 1rem 1.8rem rgba(255, 100, 76, 0.36));
+}
+
+.shrimp-mark-body {
+  width: 3.75rem;
+  height: 1.95rem;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 0.52rem, rgba(255, 246, 229, 0.92) 0.52rem 0.76rem),
+    linear-gradient(135deg, #ff563f 0%, #ff8d4f 58%, #ffbd67 100%);
+}
+
+.shrimp-mark-tail {
+  width: 1.45rem;
+  height: 1.45rem;
+  margin-left: -2.85rem;
+}
+
+.app-header h1 {
+  max-width: none;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3rem, 12vw, 4.55rem);
+  letter-spacing: -0.06em;
+}
+
+.brand-subtitle {
+  max-width: 24ch;
+  color: rgba(236, 255, 255, 0.8);
+  font-size: 1.02rem;
+}
+
+.topbar-actions {
+  align-self: start;
+  padding-right: 4.25rem;
+}
+
+.topbar-actions .ghost-button {
+  min-height: 2.5rem;
+  border-radius: 999px;
+  background: rgba(3, 35, 45, 0.48);
+}
+
+.shell-status-card {
+  border-color: rgba(139, 246, 255, 0.2);
+  background: linear-gradient(145deg, rgba(8, 78, 88, 0.42), rgba(3, 26, 37, 0.56));
+  box-shadow: var(--aqua-glow);
+}
+
+.screen {
+  position: relative;
+  overflow: hidden;
+  border-color: var(--aqua-border);
+  border-radius: 2.1rem;
+  background:
+    radial-gradient(circle at 22% 0%, rgba(71, 241, 228, 0.2), transparent 16rem),
+    linear-gradient(180deg, rgba(6, 83, 92, 0.64), rgba(2, 22, 32, 0.78)),
+    var(--aqua-glass-strong);
+  box-shadow: var(--aqua-glow);
+}
+
+.screen::before,
+.screen::after {
+  position: absolute;
+  pointer-events: none;
+  content: "";
+}
+
+.screen::before {
+  inset: 0;
+  background:
+    linear-gradient(112deg, transparent 0 18%, rgba(255, 255, 255, 0.08) 24%, transparent 32%),
+    radial-gradient(circle at 18% 22%, rgba(255, 255, 255, 0.18) 0 0.08rem, transparent 0.16rem),
+    radial-gradient(circle at 76% 30%, rgba(255, 255, 255, 0.12) 0 0.07rem, transparent 0.16rem);
+  opacity: 0.8;
+}
+
+.screen::after {
+  inset: auto -10% -2rem -10%;
+  height: 11rem;
+  background:
+    radial-gradient(ellipse at 12% 100%, rgba(50, 140, 72, 0.7), transparent 8rem),
+    radial-gradient(ellipse at 82% 100%, rgba(75, 137, 65, 0.62), transparent 9rem),
+    linear-gradient(0deg, rgba(1, 13, 20, 0.64), transparent);
+  opacity: 0.72;
+}
+
+.screen > * {
+  position: relative;
+  z-index: 1;
+}
+
+.screen-header {
+  min-height: 5.5rem;
+  align-items: end;
+}
+
+.screen-header .eyebrow {
+  color: #67fff2;
+}
+
+.screen h2 {
+  font-size: clamp(2rem, 9vw, 3.1rem);
+  letter-spacing: -0.045em;
+  text-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.38);
+}
+
+.screen-copy {
+  color: rgba(229, 255, 255, 0.74);
+}
+
+.stat-card,
+.panel,
+.list-card,
+.storage-usage-card,
+.quick-actions-card,
+.snapshot-card,
+.gallery-browser,
+.viewer-card,
+.settings-form,
+.status-panel {
+  border-color: var(--aqua-border);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.035)),
+    rgba(5, 51, 63, 0.58);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1.2rem 3.4rem rgba(0, 0, 0, 0.26);
+}
+
+.dashboard-overview .stat-card {
+  min-height: 8.95rem;
+  padding-left: 5.15rem;
+}
+
+.dashboard-overview .stat-card::before,
+.storage-usage-card::after,
+.settings-form fieldset::before {
+  display: grid;
+  place-items: center;
+  width: 3.7rem;
+  height: 3.7rem;
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 32% 22%, rgba(255, 255, 255, 0.34), transparent 24%),
+    linear-gradient(145deg, rgba(74, 239, 218, 0.95), rgba(17, 139, 157, 0.82));
+  box-shadow: 0 0 1.8rem rgba(73, 239, 201, 0.32);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 1000;
+}
+
+.dashboard-overview .stat-card::before {
+  position: absolute;
+  left: 1rem;
+  top: 1.15rem;
+  content: "Cam";
+}
+
+.dashboard-overview .stat-card:nth-child(2)::before {
+  content: "Clock";
+}
+
+.dashboard-overview .stat-card strong {
+  color: var(--mint);
+  font-size: 1.85rem;
+}
+
+.storage-usage-card {
+  grid-template-columns: auto minmax(0, 1fr);
+  border-radius: 1.7rem;
+}
+
+.storage-usage-card::after {
+  content: "Disk";
+  justify-self: end;
+}
+
+.storage-ring {
+  width: 7.4rem;
+  height: 7.4rem;
+  background:
+    radial-gradient(circle, rgba(3, 28, 39, 0.98) 0 50%, transparent 51%),
+    conic-gradient(var(--mint) var(--storage-progress), rgba(255, 255, 255, 0.14) 0);
+}
+
+.snapshot-card {
+  border-radius: 1.85rem;
+}
+
+.snapshot-preview {
+  min-height: 18rem;
+  padding: 0;
+  border-color: rgba(80, 255, 238, 0.34);
+  border-radius: 1.4rem;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(75, 230, 108, 0.34), transparent 34%),
+    linear-gradient(145deg, #0a3b42, #03131b);
+}
+
+.snapshot-preview img {
+  min-height: 18rem;
+  border-radius: 1.25rem;
+}
+
+.quick-action-tile {
+  min-height: 10.5rem;
+  border-radius: 1.55rem;
+  border-color: rgba(175, 255, 250, 0.32);
+}
+
+.quick-action-tile span {
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 1.15rem;
+  font-size: 0.68rem;
+}
+
+.quick-action-tile.capture {
+  background: linear-gradient(150deg, #ff9063, #ff583f 72%);
+}
+
+.screen-live {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.screen-live::before,
+.screen-live::after {
+  display: none;
+}
+
+.screen-live .screen-header {
+  margin: 0 0 0.85rem;
+  padding: 1rem;
+  border: 1px solid var(--aqua-border);
+  border-radius: 1.75rem;
+  background: linear-gradient(145deg, rgba(8, 78, 88, 0.48), rgba(3, 26, 37, 0.58));
+  box-shadow: var(--aqua-glow);
+}
+
+.live-stage {
+  min-height: calc(100svh - 10rem);
+  border-radius: 2.25rem;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.62)),
+    radial-gradient(circle at 50% 18%, rgba(61, 233, 217, 0.22), transparent 18rem),
+    linear-gradient(145deg, rgba(3, 56, 60, 0.82), rgba(1, 11, 17, 0.96));
+}
+
+.stream-frame {
+  min-height: 32rem;
+  border-radius: 1.9rem;
+}
+
+.stream-frame img {
+  min-height: 32rem;
+  max-height: 68vh;
+}
+
+.live-control-tray {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-radius: 1.8rem;
+  background: rgba(2, 20, 26, 0.52);
+}
+
+.live-control-tray button {
+  min-height: 4rem;
+  border-radius: 999px;
+}
+
+.live-status-panel {
+  border-radius: 1.8rem;
+}
+
+.screen-gallery .screen-header {
+  grid-template-columns: 1fr auto;
+}
+
+.screen-gallery .gallery-layout {
+  gap: 1rem;
+}
+
+.gallery-browser {
+  background:
+    radial-gradient(circle at 50% -6%, rgba(75, 240, 226, 0.18), transparent 12rem),
+    rgba(3, 42, 52, 0.58);
+}
+
+.timeline-chip,
+.source-chip {
+  min-height: 3rem;
+  border-radius: 1rem;
+}
+
+.timeline-chip.active,
+.source-chip.active {
+  border-color: var(--aqua-border-hot);
+  background: linear-gradient(145deg, rgba(48, 232, 224, 0.7), rgba(16, 109, 126, 0.72));
+  box-shadow: 0 0 1.4rem rgba(48, 232, 224, 0.28);
+}
+
+.viewer-card {
+  border-color: var(--aqua-border-hot);
+}
+
+.viewer-frame {
+  min-height: 24rem;
+  border-color: var(--aqua-border-hot);
+  border-radius: 1.5rem;
+  box-shadow: 0 0 0 2px rgba(48, 232, 224, 0.1), 0 1.4rem 3rem rgba(0, 0, 0, 0.34);
+}
+
+.viewer-frame img {
+  min-height: 24rem;
+  object-fit: cover;
+}
+
+.capture-list {
+  grid-auto-columns: minmax(8.3rem, 34%);
+}
+
+.capture-list-item {
+  min-width: 8.3rem;
+  min-height: 7.8rem;
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 32% 20%, rgba(54, 214, 198, 0.22), transparent 5rem),
+    rgba(1, 20, 28, 0.62);
+}
+
+.capture-list-item.active {
+  border-color: var(--aqua-border-hot);
+  box-shadow: 0 0 1.4rem rgba(48, 232, 224, 0.24);
+}
+
+.screen-settings {
+  background:
+    radial-gradient(circle at 78% 10%, rgba(86, 242, 229, 0.2), transparent 14rem),
+    linear-gradient(180deg, rgba(8, 94, 105, 0.62), rgba(1, 19, 29, 0.82));
+}
+
+.settings-form {
+  gap: 1rem;
+}
+
+.settings-form-header {
+  align-items: center;
+}
+
+.settings-form fieldset {
+  position: relative;
+  padding-left: 5.4rem;
+  border-radius: 1.25rem;
+  background: rgba(4, 56, 67, 0.42);
+}
+
+.settings-form fieldset::before {
+  position: absolute;
+  left: 1rem;
+  top: 1.15rem;
+  content: "Set";
+}
+
+.settings-form fieldset:nth-of-type(2)::before {
+  background: linear-gradient(145deg, rgba(49, 170, 236, 0.95), rgba(21, 91, 151, 0.88));
+  content: "Cam";
+}
+
+.settings-form fieldset:nth-of-type(3)::before {
+  background: linear-gradient(145deg, rgba(255, 157, 82, 0.95), rgba(195, 92, 52, 0.9));
+  content: "Bell";
+}
+
+.settings-form input,
+.settings-form select,
+.gallery-toolbar input {
+  border-radius: 999px;
+  background: rgba(1, 19, 29, 0.58);
+}
+
+.settings-form input[type="checkbox"] {
+  border-radius: 0.5rem;
+}
+
+.settings-summary-strip article {
+  border-radius: 1.25rem;
+}
+
+.status-panel .stat-card {
+  border-radius: 1.2rem;
+}
+
+.primary-button {
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff7568, #ff5444);
+  color: white;
+  box-shadow: 0 1.1rem 2.8rem rgba(255, 84, 68, 0.28);
+}
+
+.secondary-button,
+.ghost-button {
+  border-color: rgba(139, 246, 255, 0.34);
+  border-radius: 999px;
+  background: rgba(9, 68, 78, 0.44);
+}
+
+.bottom-nav {
+  left: 50%;
+  width: min(calc(100svw - 2rem), 41rem);
+  transform: translateX(-50%);
+  border-radius: 2rem;
+  border-color: rgba(139, 246, 255, 0.22);
+  background:
+    linear-gradient(145deg, rgba(16, 112, 123, 0.36), rgba(2, 24, 34, 0.92)),
+    rgba(3, 24, 34, 0.92);
+  box-shadow: 0 -1rem 3.4rem rgba(0, 0, 0, 0.3);
+}
+
+.nav-link.active {
+  background: linear-gradient(145deg, rgba(44, 222, 216, 0.42), rgba(12, 86, 100, 0.72));
+  color: #f7ffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 0 2rem rgba(49, 231, 219, 0.18);
+}
+
+.nav-link.active .nav-icon {
+  background: rgba(73, 239, 201, 0.22);
+}
+
+@media (max-width: 520px) {
+  .app-shell {
+    padding-inline: 0.8rem;
+  }
+
+  .app-header {
+    min-height: 9.4rem;
+  }
+
+  .topbar-actions {
+    padding-right: 3.6rem;
+  }
+
+  .shell-status-card {
+    font-size: 0.92rem;
+  }
+
+  .screen {
+    padding: 1rem;
+  }
+
+  .screen-live {
+    padding: 0;
+  }
+
+  .dashboard-overview {
+    gap: 0.75rem;
+  }
+
+  .dashboard-overview .stat-card {
+    padding-left: 1rem;
+    padding-top: 5.15rem;
+  }
+
+  .storage-usage-card {
+    grid-template-columns: auto 1fr;
+  }
+
+  .quick-action-grid {
+    gap: 0.65rem;
+  }
+
+  .quick-action-tile {
+    min-height: 9.5rem;
+    padding-inline: 0.5rem;
+  }
+
+  .quick-action-tile strong {
+    font-size: 0.92rem;
+  }
+
+  .quick-action-tile small {
+    font-size: 0.78rem;
+  }
+
+  .stream-frame,
+  .stream-frame img {
+    min-height: 30rem;
+  }
+
+  .settings-form fieldset {
+    padding-left: 1rem;
+    padding-top: 5.35rem;
+  }
+}

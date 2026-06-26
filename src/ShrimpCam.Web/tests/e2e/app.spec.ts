@@ -43,21 +43,35 @@ test("renders the reference-led aquarium shell without the old heavy header", as
 
   const shellStyles = await page.evaluate(() => {
     const body = window.getComputedStyle(document.body);
+    const header = window.getComputedStyle(document.querySelector(".app-header") as HTMLElement);
     const statusCard = window.getComputedStyle(document.querySelector(".shell-status-card") as HTMLElement);
     const nav = window.getComputedStyle(document.querySelector(".bottom-nav") as HTMLElement);
     const activeNav = window.getComputedStyle(document.querySelector(".nav-link.active") as HTMLElement);
+    const dashboard = window.getComputedStyle(document.querySelector(".screen-dashboard") as HTMLElement);
+    const snapshot = window.getComputedStyle(document.querySelector(".snapshot-preview") as HTMLElement);
+    const primaryButton = window.getComputedStyle(document.querySelector(".primary-button") as HTMLElement);
 
     return {
       bodyBackground: body.backgroundImage,
+      headerMinHeight: Number.parseFloat(header.minHeight),
       statusRadius: Number.parseFloat(statusCard.borderRadius),
       navPosition: nav.position,
-      activeNavBackground: activeNav.backgroundImage
+      navRadius: Number.parseFloat(nav.borderRadius),
+      activeNavBackground: activeNav.backgroundImage,
+      dashboardBackground: dashboard.backgroundImage,
+      snapshotMinHeight: Number.parseFloat(snapshot.minHeight),
+      primaryButtonRadius: Number.parseFloat(primaryButton.borderRadius)
     };
   });
   expect(shellStyles.bodyBackground).toContain("gradient");
+  expect(shellStyles.headerMinHeight).toBeGreaterThanOrEqual(130);
   expect(shellStyles.statusRadius).toBeGreaterThanOrEqual(20);
   expect(shellStyles.navPosition).toBe("fixed");
+  expect(shellStyles.navRadius).toBeGreaterThanOrEqual(28);
   expect(shellStyles.activeNavBackground).toContain("gradient");
+  expect(shellStyles.dashboardBackground).toContain("gradient");
+  expect(shellStyles.snapshotMinHeight).toBeGreaterThanOrEqual(280);
+  expect(shellStyles.primaryButtonRadius).toBeGreaterThanOrEqual(30);
 
   const navBox = await page.getByRole("navigation", { name: "Primary" }).boundingBox();
   expect(navBox?.y ?? 0).toBeGreaterThan(700);
@@ -106,6 +120,24 @@ test("captures a manual snapshot from live view after stream recovery", async ({
   await page.getByRole("button", { name: "Capture snapshot" }).click();
   await expect(page.getByText("Snapshot captured. Gallery history will include the new still image.")).toBeVisible();
   await expect(page.getByText("20260625T200000000Z_manual.jpg")).toBeVisible();
+
+  const liveStyles = await page.evaluate(() => {
+    const screen = window.getComputedStyle(document.querySelector(".screen-live") as HTMLElement);
+    const stage = window.getComputedStyle(document.querySelector(".live-stage") as HTMLElement);
+    const stream = window.getComputedStyle(document.querySelector(".stream-frame") as HTMLElement);
+    const tray = window.getComputedStyle(document.querySelector(".live-control-tray") as HTMLElement);
+
+    return {
+      screenBoxShadow: screen.boxShadow,
+      stageRadius: Number.parseFloat(stage.borderRadius),
+      streamMinHeight: Number.parseFloat(stream.minHeight),
+      trayRadius: Number.parseFloat(tray.borderRadius)
+    };
+  });
+  expect(liveStyles.screenBoxShadow).toBe("none");
+  expect(liveStyles.stageRadius).toBeGreaterThanOrEqual(32);
+  expect(liveStyles.streamMinHeight).toBeGreaterThanOrEqual(480);
+  expect(liveStyles.trayRadius).toBeGreaterThanOrEqual(26);
 });
 
 test("browses gallery captures and applies a day filter", async ({ page }) => {
@@ -151,6 +183,21 @@ test("browses gallery captures and applies a day filter", async ({ page }) => {
   await expect(page.getByText(/2 of 2 captures shown for/)).toBeVisible();
   await page.getByRole("button", { name: "Clear filter" }).click();
   await expect(page.getByText("2 of 2 captures shown.")).toBeVisible();
+
+  const galleryStyles = await page.evaluate(() => {
+    const timelineChip = window.getComputedStyle(document.querySelector(".timeline-chip") as HTMLElement);
+    const viewer = window.getComputedStyle(document.querySelector(".viewer-frame") as HTMLElement);
+    const captureItem = window.getComputedStyle(document.querySelector(".capture-list-item.active") as HTMLElement);
+
+    return {
+      timelineChipRadius: Number.parseFloat(timelineChip.borderRadius),
+      viewerMinHeight: Number.parseFloat(viewer.minHeight),
+      captureItemShadow: captureItem.boxShadow
+    };
+  });
+  expect(galleryStyles.timelineChipRadius).toBeGreaterThanOrEqual(16);
+  expect(galleryStyles.viewerMinHeight).toBeGreaterThanOrEqual(360);
+  expect(galleryStyles.captureItemShadow).toContain("rgb");
 });
 
 test("updates settings with discovered camera options", async ({ page }) => {
@@ -173,4 +220,21 @@ test("updates settings with discovered camera options", async ({ page }) => {
 
   await expect(page.getByText("Settings saved. Refreshed values match the service response.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Save settings" })).toBeDisabled();
+
+  const settingsStyles = await page.evaluate(() => {
+    const screen = window.getComputedStyle(document.querySelector(".screen-settings") as HTMLElement);
+    const fieldset = window.getComputedStyle(document.querySelector(".settings-form fieldset") as HTMLElement);
+    const saveButton = window.getComputedStyle(document.querySelector(".settings-form .primary-button") as HTMLElement);
+
+    return {
+      screenBackground: screen.backgroundImage,
+      fieldsetPaddingLeft: Number.parseFloat(fieldset.paddingLeft),
+      saveButtonBackground: saveButton.backgroundImage,
+      saveButtonRadius: Number.parseFloat(saveButton.borderRadius)
+    };
+  });
+  expect(settingsStyles.screenBackground).toContain("gradient");
+  expect(settingsStyles.fieldsetPaddingLeft).toBeGreaterThanOrEqual(16);
+  expect(settingsStyles.saveButtonBackground).toContain("gradient");
+  expect(settingsStyles.saveButtonRadius).toBeGreaterThanOrEqual(30);
 });

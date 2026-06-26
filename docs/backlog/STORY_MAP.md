@@ -80,6 +80,7 @@ These stories should land before most feature work begins:
 - `SC-PWA-15` Settings reference cleanup
 - `SC-PWA-16` Complete PWA lifecycle Playwright coverage
 - `SC-PWA-17` Automated accessibility regression coverage
+- `SC-PWA-18` Reference-led aquarium visual fidelity pass
 
 ### Wave 4: Backup, restore, and advanced media
 
@@ -91,7 +92,7 @@ These stories should land before most feature work begins:
 
 ## Priority guidance
 
-- `P0`: `SC-PF-001` through `SC-PF-009`, `SC-PF-011`, `SC-PF-012`, `SC-ASO-301` through `SC-ASO-320`, `SC-OPS-321`, `SC-CC-01` through `SC-CC-09`, `SC-CAM-16` through `SC-CAM-19`, `SC-PWA-01` through `SC-PWA-17`
+- `P0`: `SC-PF-001` through `SC-PF-009`, `SC-PF-011`, `SC-PF-012`, `SC-ASO-301` through `SC-ASO-320`, `SC-OPS-321`, `SC-CC-01` through `SC-CC-09`, `SC-CAM-16` through `SC-CAM-19`, `SC-PWA-01` through `SC-PWA-18`
 - `P1`: `SC-ASO-313`, `SC-ASO-314`, `SC-CC-10`
 - `P2`: `SC-CC-11`, `SC-PF-010`
 

@@ -518,6 +518,33 @@ Scenario: Offline shell remains accessible
   And reconnect guidance remains available to assistive technology
 ```
 
+### SC-PWA-18 Reference-Led Aquarium Visual Fidelity Pass
+
+**User story:** As a Shrimp Cam operator, I want the dashboard, live, gallery, and settings screens to more closely match the approved aquarium reference renders so that the installed PWA feels like a polished shrimp-tank control surface instead of a generic admin app.
+
+**Dependencies:** SC-PWA-11, SC-PWA-12, SC-PWA-13, SC-PWA-14, SC-PWA-15, SC-PWA-17
+
+**Test expectations:**
+- Samsung S26 Playwright tests assert reference-led visual traits for the dashboard shell, live camera stage, gallery timeline/viewer, settings rows, bottom navigation, and primary actions.
+- Accessibility scans continue to pass after the visual refresh.
+- Existing sign-in, dashboard, live, gallery, settings, install, offline, and negative-path flows continue to pass.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: Core screens follow the aquarium reference direction
+  Given the user opens Shrimp Cam on a Samsung-class phone viewport
+  When dashboard, live, gallery, and settings render
+  Then each screen uses a deep aquarium atmosphere with glass panels, glowing teal accents, coral primary actions, rounded bottom navigation, and screen-specific layouts
+  And the UI no longer reads as a generic boxed admin dashboard
+
+Scenario: Reference styling remains covered by Playwright
+  Given the reference-led visual pass is implemented
+  When Playwright runs the UI suite
+  Then tests assert the key style traits that match the approved renders
+  And accessibility checks still report no serious or critical violations
+```
+
 ## Delivery Notes
 
 - Story sequencing should start with shell and routing, then move through authentication, core screens, resilience behavior, and final accessibility hardening.

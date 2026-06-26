@@ -1988,8 +1988,10 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
 }
 
 function ScreenFrame({ title, description, children }: ScreenFrameProps) {
+  const screenClassName = `screen screen-${title.toLowerCase().replace(/\s+/g, "-")}`;
+
   return (
-    <section className="screen">
+    <section className={screenClassName}>
       <div className="screen-header">
         <div>
           <p className="eyebrow">Route</p>
