@@ -7844,3 +7844,65 @@ body,
     inset 0 1px 0 rgba(255, 255, 255, 0.18),
     0 0.7rem 1.25rem rgba(0, 0, 0, 0.18) !important;
 }
+
+/* Reference parity pass: restore the Timeline total-captures badge treatment. */
+.screen-timeline .reference-screen-header,
+.screen-gallery .reference-screen-header {
+  grid-template-columns: 3.9rem minmax(0, 1fr) 7.2rem !important;
+}
+
+.screen-timeline .reference-header-action,
+.screen-gallery .reference-header-action {
+  width: 7.05rem !important;
+  height: 3.25rem !important;
+  border-radius: 0.92rem !important;
+  color: #fff !important;
+}
+
+.screen-timeline .reference-header-action::before,
+.screen-gallery .reference-header-action::before {
+  position: absolute !important;
+  top: 50% !important;
+  left: 1.15rem !important;
+  width: 1.35rem !important;
+  height: 1.02rem !important;
+  border: 0 !important;
+  border-radius: 0.16rem !important;
+  background:
+    radial-gradient(circle, transparent 0 0.24rem, rgba(255, 255, 255, 0.92) 0.25rem 0.36rem, transparent 0.37rem),
+    linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)) 50% -0.02rem / 0.6rem 0.22rem no-repeat,
+    rgba(255, 255, 255, 0.22) !important;
+  content: "" !important;
+  transform: translateY(-50%) !important;
+}
+
+.screen-timeline .reference-header-action::after,
+.screen-gallery .reference-header-action::after {
+  position: absolute !important;
+  top: 50% !important;
+  left: 3rem !important;
+  width: auto !important;
+  height: auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: rgba(255, 255, 255, 0.96) !important;
+  content: "Total Captures\A 1,247" !important;
+  font-size: 0.68rem !important;
+  font-weight: 900 !important;
+  line-height: 1.08 !important;
+  text-align: left !important;
+  white-space: pre !important;
+  transform: translateY(-50%) !important;
+}
+
+.screen-timeline .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2 {
+  font-size: clamp(1.72rem, 5.8vw, 2.2rem) !important;
+}
+
+.screen-timeline .reference-brand-copy p,
+.screen-gallery .reference-brand-copy p {
+  font-size: clamp(0.72rem, 2.3vw, 0.9rem) !important;
+}
