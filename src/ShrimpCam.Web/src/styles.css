@@ -4249,3 +4249,536 @@ body {
 .screen-live .live-control-tray button {
   font-size: 0.82rem !important;
 }
+
+/* Reference parity consolidation: final visual layer for the Samsung S26 renders. */
+:root {
+  --ref-ink: #f8ffff;
+  --ref-muted: rgba(218, 249, 251, 0.78);
+  --ref-aqua: #34f2dd;
+  --ref-aqua-2: #1dbed1;
+  --ref-coral: #ff684f;
+  --ref-green: #58ef90;
+  --ref-panel: rgba(7, 53, 68, 0.56);
+  --ref-panel-strong: rgba(8, 68, 82, 0.72);
+  --ref-stroke: rgba(177, 255, 250, 0.25);
+  --ref-stroke-hot: rgba(54, 248, 232, 0.72);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 50% -6%, rgba(54, 242, 221, 0.32), transparent 31rem),
+    linear-gradient(180deg, #078191 0%, #01485a 36%, #001e2e 72%, #00121e 100%) !important;
+}
+
+body {
+  color: var(--ref-ink);
+  font-family: "Trebuchet MS", "Aptos", "Segoe UI", sans-serif;
+}
+
+.app-shell {
+  position: relative;
+  min-height: 100svh;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: max(0.72rem, env(safe-area-inset-top)) clamp(0.82rem, 3vw, 1.8rem) var(--bottom-nav-clearance) !important;
+  overflow-x: hidden;
+  background:
+    linear-gradient(180deg, rgba(10, 143, 158, 0.5), rgba(0, 23, 35, 0.92)),
+    url("./assets/ref-bottom-reef.png") bottom center / min(72rem, 150vw) auto no-repeat !important;
+}
+
+.app-shell::before {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 19% 16%, rgba(111, 255, 231, 0.17), transparent 15rem),
+    radial-gradient(circle at 78% 9%, rgba(74, 179, 98, 0.13), transparent 13rem),
+    linear-gradient(180deg, rgba(10, 130, 145, 0.45), rgba(0, 18, 28, 0.94));
+  content: "";
+}
+
+.app-shell::after {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(100deg, transparent 0 46%, rgba(255, 255, 255, 0.09) 49%, transparent 54%),
+    radial-gradient(circle at 84% 18%, rgba(255, 255, 255, 0.09) 0 0.12rem, transparent 0.16rem),
+    radial-gradient(circle at 77% 24%, rgba(255, 255, 255, 0.08) 0 0.09rem, transparent 0.13rem);
+  opacity: 0.9;
+  content: "";
+}
+
+.app-header,
+.shell-status-card,
+.dashboard-toolbar {
+  display: none !important;
+}
+
+main {
+  width: min(100%, 45rem);
+  margin: 0 auto;
+}
+
+.screen {
+  display: grid;
+  gap: 1rem;
+}
+
+.app-shell-authenticated .reference-screen-header {
+  display: grid !important;
+  grid-template-columns: 3.45rem minmax(0, 1fr) 3.6rem !important;
+  align-items: center !important;
+  min-height: auto !important;
+  margin: 0.2rem 0 0.9rem !important;
+  padding: 1.55rem 0.1rem 0.95rem !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.screen-live .reference-screen-header {
+  margin-bottom: -0.25rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+.screen-gallery .reference-screen-header,
+.screen-settings .reference-screen-header {
+  grid-template-columns: 3.6rem minmax(0, 1fr) 7.1rem !important;
+}
+
+.reference-shrimp-mark {
+  width: 3.15rem !important;
+  height: 3.15rem !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.reference-shrimp-mark::before {
+  filter: drop-shadow(0 0.45rem 0.8rem rgba(255, 91, 63, 0.38));
+  font-size: 2.65rem !important;
+}
+
+.app-shell-authenticated .reference-brand-copy h2 {
+  margin: 0 !important;
+  color: var(--ref-ink) !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-size: clamp(2.2rem, 7.3vw, 3.2rem) !important;
+  font-weight: 800 !important;
+  line-height: 0.95 !important;
+  letter-spacing: -0.06em !important;
+  text-shadow: 0 0.6rem 1.5rem rgba(0, 0, 0, 0.34);
+}
+
+.screen-live .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2,
+.screen-settings .reference-brand-copy h2 {
+  font-family: "Trebuchet MS", "Aptos", "Segoe UI", sans-serif !important;
+  font-size: clamp(1.95rem, 6.6vw, 2.65rem) !important;
+  letter-spacing: -0.045em !important;
+}
+
+.app-shell-authenticated .reference-brand-copy p {
+  max-width: none !important;
+  margin: 0.34rem 0 0 !important;
+  color: var(--ref-muted) !important;
+  font-size: clamp(0.92rem, 2.6vw, 1.16rem) !important;
+  line-height: 1.16 !important;
+}
+
+.reference-header-action {
+  width: 3.35rem !important;
+  height: 3.35rem !important;
+  border: 1px solid rgba(175, 255, 251, 0.36) !important;
+  border-radius: 999px !important;
+  background: rgba(38, 180, 198, 0.42) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 0.8rem 1.7rem rgba(0, 0, 0, 0.24) !important;
+  color: #fff !important;
+  font-size: 1.4rem !important;
+}
+
+.screen-settings .reference-header-action,
+.reference-header-action.settings {
+  width: 7rem !important;
+  height: 4.4rem !important;
+  border-radius: 1rem !important;
+  background: url("./assets/ref-settings-camera.png") center / cover no-repeat !important;
+}
+
+.dashboard-overview,
+.dashboard-grid,
+.settings-layout,
+.gallery-layout {
+  display: grid !important;
+  gap: 1rem !important;
+}
+
+.dashboard-overview {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.stat-card,
+.storage-usage-card,
+.snapshot-card,
+.quick-actions-card,
+.panel,
+.gallery-browser,
+.gallery-viewer,
+.settings-form,
+.status-panel,
+.live-status-panel {
+  border: 1px solid var(--ref-stroke) !important;
+  border-radius: 1.45rem !important;
+  background: linear-gradient(145deg, rgba(19, 89, 105, 0.68), rgba(2, 29, 43, 0.56)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1.2rem 2.5rem rgba(0, 0, 0, 0.22) !important;
+  backdrop-filter: blur(18px) saturate(1.3);
+}
+
+.stat-card {
+  min-height: 8.4rem !important;
+  padding: 1.15rem !important;
+}
+
+.stat-card::before {
+  width: 3.55rem !important;
+  height: 3.55rem !important;
+  margin-bottom: 0.72rem !important;
+  border-radius: 999px !important;
+  background: linear-gradient(145deg, #40ead6, #1289a7) !important;
+}
+
+.stat-card strong {
+  color: var(--ref-green) !important;
+  font-size: clamp(1.55rem, 5.4vw, 2rem) !important;
+}
+
+.stat-card span,
+.storage-copy p,
+.snapshot-card p,
+.quick-actions-card small,
+.live-status-panel p,
+.settings-form small {
+  color: var(--ref-muted) !important;
+}
+
+.storage-usage-card {
+  grid-column: 1 / -1;
+  grid-template-columns: 6.3rem minmax(0, 1fr) !important;
+  padding: 1.1rem !important;
+}
+
+.storage-ring {
+  width: 5.9rem !important;
+  height: 5.9rem !important;
+  background: conic-gradient(var(--ref-aqua) var(--storage-progress), rgba(255, 255, 255, 0.14) 0) !important;
+}
+
+.storage-meter span {
+  background: linear-gradient(90deg, #45f1dc, #28d4c5) !important;
+}
+
+.snapshot-card {
+  padding: 1rem !important;
+}
+
+.snapshot-preview,
+.viewer-frame,
+.stream-frame {
+  border: 1px solid rgba(68, 255, 239, 0.5) !important;
+  border-radius: 1.15rem !important;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.46)),
+    url("./assets/ref-settings-camera.png") center / cover no-repeat !important;
+}
+
+.snapshot-preview img,
+.viewer-frame img,
+.stream-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover !important;
+}
+
+.quick-actions-card {
+  border: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.quick-action-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0.8rem !important;
+}
+
+.quick-action-tile {
+  min-height: 8.2rem !important;
+  border: 1px solid rgba(199, 255, 251, 0.28) !important;
+  border-radius: 1.25rem !important;
+  background: linear-gradient(145deg, rgba(49, 229, 210, 0.82), rgba(7, 95, 107, 0.84)) !important;
+}
+
+.quick-action-tile.gallery {
+  background: linear-gradient(145deg, rgba(43, 184, 220, 0.86), rgba(7, 83, 119, 0.86)) !important;
+}
+
+.quick-action-tile.capture {
+  background: linear-gradient(145deg, #ff8367, #f0442d) !important;
+}
+
+.screen-live {
+  gap: 0 !important;
+}
+
+.live-stage {
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.live-stage-top {
+  position: absolute;
+  z-index: 3;
+  top: 7rem;
+  left: 1rem;
+  right: 1rem;
+  color: white;
+}
+
+.status-pill {
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  background: rgba(0, 0, 0, 0.38) !important;
+}
+
+.stream-frame {
+  min-height: min(61svh, 42rem) !important;
+  margin: 0 calc(clamp(0.82rem, 3vw, 1.8rem) * -1) !important;
+  border-width: 0 !important;
+  border-radius: 0 0 2rem 2rem !important;
+}
+
+.stream-frame::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(0, 78, 91, 0.46), transparent 24%, rgba(0, 20, 25, 0.28) 100%);
+  content: "";
+}
+
+.stream-frame img {
+  min-height: min(61svh, 42rem) !important;
+}
+
+.live-control-tray {
+  position: relative;
+  z-index: 4;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  margin: -4.25rem 1rem 1rem !important;
+  padding: 0.72rem !important;
+  border: 1px solid rgba(202, 255, 252, 0.23) !important;
+  border-radius: 1.55rem !important;
+  background: rgba(5, 30, 39, 0.62) !important;
+  backdrop-filter: blur(18px);
+}
+
+.live-control-tray button {
+  min-height: 3.4rem !important;
+  border-radius: 999px !important;
+}
+
+.gallery-layout {
+  grid-template-columns: 1fr !important;
+}
+
+.gallery-browser {
+  border: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.gallery-timeline-header,
+.gallery-toolbar {
+  border: 1px solid var(--ref-stroke) !important;
+  border-radius: 999px !important;
+  background: rgba(6, 58, 72, 0.6) !important;
+}
+
+.gallery-toolbar {
+  display: flex !important;
+  overflow-x: auto;
+  padding: 0.45rem !important;
+}
+
+.gallery-toolbar label {
+  min-width: max-content;
+}
+
+.capture-list {
+  display: grid !important;
+  grid-auto-flow: column;
+  grid-auto-columns: 8.6rem !important;
+  overflow-x: auto;
+  padding: 0.35rem 0 0.5rem !important;
+}
+
+.capture-list-item {
+  min-height: 8rem !important;
+  border-radius: 0.9rem !important;
+}
+
+.gallery-viewer {
+  padding: 0.7rem !important;
+}
+
+.viewer-frame {
+  min-height: 21rem !important;
+}
+
+.settings-layout {
+  grid-template-columns: 1fr !important;
+}
+
+.screen-settings .status-panel {
+  order: 2;
+}
+
+.settings-form {
+  order: 1;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.settings-summary-strip {
+  display: none !important;
+}
+
+.settings-form-header {
+  border: 0 !important;
+  padding: 0 0 0.25rem !important;
+  background: transparent !important;
+}
+
+.settings-form-header h3 {
+  color: var(--ref-ink) !important;
+  font-size: 0.85rem !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase;
+}
+
+.settings-form-header .primary-button {
+  position: fixed;
+  z-index: 20;
+  left: 50%;
+  bottom: calc(5.7rem + env(safe-area-inset-bottom));
+  width: min(22rem, calc(100vw - 4rem)) !important;
+  min-height: 3.85rem !important;
+  transform: translateX(-50%);
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #ff7c75, #ff4c38) !important;
+  color: white !important;
+  font-size: 1.05rem !important;
+  box-shadow: 0 1rem 2.3rem rgba(255, 82, 61, 0.32) !important;
+}
+
+.settings-form fieldset {
+  gap: 0.48rem !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.settings-form legend {
+  margin: 0.85rem 0 0.35rem !important;
+  color: #70fbf4 !important;
+  font-size: 0.76rem !important;
+  letter-spacing: 0.22em !important;
+}
+
+.settings-form fieldset > label,
+.settings-form .settings-grid > label,
+.schedule-window-card {
+  min-height: 4.25rem !important;
+  border: 1px solid var(--ref-stroke) !important;
+  border-radius: 1rem !important;
+  background: linear-gradient(145deg, rgba(10, 86, 99, 0.7), rgba(2, 48, 63, 0.55)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.settings-form input,
+.settings-form select {
+  border-radius: 999px !important;
+  background: rgba(4, 45, 56, 0.72) !important;
+}
+
+.status-panel {
+  margin-bottom: 1.2rem;
+}
+
+.bottom-nav {
+  width: min(calc(100vw - 1.45rem), 32rem) !important;
+  padding: 0.58rem !important;
+  border: 1px solid rgba(138, 255, 247, 0.16) !important;
+  border-radius: 1.8rem !important;
+  background: rgba(3, 38, 52, 0.9) !important;
+  box-shadow: 0 -1rem 3rem rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.nav-link {
+  min-height: 3.8rem !important;
+  border-radius: 1.25rem !important;
+  color: rgba(232, 254, 255, 0.72) !important;
+}
+
+.nav-link.active {
+  background: linear-gradient(145deg, rgba(44, 234, 218, 0.28), rgba(24, 132, 151, 0.3)) !important;
+  color: var(--ref-aqua) !important;
+}
+
+@media (min-width: 820px) {
+  .app-shell {
+    padding-inline: max(2rem, calc((100vw - 46rem) / 2)) !important;
+  }
+
+  main {
+    width: min(100%, 46rem);
+  }
+}
+
+@media (max-width: 430px) {
+  .app-shell-authenticated .reference-screen-header {
+    grid-template-columns: 3rem minmax(0, 1fr) 3.2rem !important;
+  }
+
+  .screen-gallery .reference-screen-header,
+  .screen-settings .reference-screen-header {
+    grid-template-columns: 3rem minmax(0, 1fr) 5.9rem !important;
+  }
+
+  .app-shell-authenticated .reference-brand-copy h2 {
+    font-size: clamp(1.8rem, 8.5vw, 2.45rem) !important;
+  }
+
+  .reference-shrimp-mark {
+    width: 2.65rem !important;
+    height: 2.65rem !important;
+  }
+
+  .settings-form fieldset > label,
+  .settings-form .settings-grid > label {
+    grid-template-columns: minmax(6.8rem, 1fr) minmax(6.5rem, 1.1fr) !important;
+  }
+}
