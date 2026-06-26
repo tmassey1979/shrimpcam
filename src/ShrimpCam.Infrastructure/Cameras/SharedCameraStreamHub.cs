@@ -21,6 +21,11 @@ internal sealed class SharedCameraStreamHub(
             LogLevel.Warning,
             new EventId(2202, nameof(SharedPumpStopped)),
             "Shared live stream pump stopped unexpectedly.");
+    private static readonly Action<ILogger, int, TimeSpan, Exception?> SharedPumpRestarting =
+        LoggerMessage.Define<int, TimeSpan>(
+            LogLevel.Warning,
+            new EventId(2203, nameof(SharedPumpRestarting)),
+            "Shared live stream pump stopped; reconnect attempt {Attempt} will start after {Delay}.");
     private readonly object _gate = new();
     private readonly Dictionary<Guid, Channel<byte[]>> _subscribers = [];
     private CancellationTokenSource? _pumpCancellation;
@@ -141,44 +146,31 @@ internal sealed class SharedCameraStreamHub(
                 return;
             }
 
-            var command = commandFactory.BuildLiveStreamCommand(options);
-            var processStream = await processStreamRunner.StartAsync(command, cancellationToken).ConfigureAwait(false);
-            await using var configuredProcessStream = processStream.ConfigureAwait(false);
-            var buffer = new byte[16384];
-
-            using var startupCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            startupCancellation.CancelAfter(StartupTimeout);
-            var firstRead = await processStream.StandardOutput
-                .ReadAsync(buffer.AsMemory(0, buffer.Length), startupCancellation.Token)
-                .ConfigureAwait(false);
-
-            if (firstRead <= 0)
+            for (var failureCount = 0; !cancellationToken.IsCancellationRequested;)
             {
-                var failure = await processStream.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
-                SetFailure(NormalizeFailureReason(failure.StandardError));
-                cameraStatusService.ReportDegraded(GetFailureReason()!);
-                CompleteSubscribers();
-                return;
-            }
-
-            cameraStatusService.ReportOnline();
-            Broadcast(buffer.AsMemory(0, firstRead));
-            recorder.Observe(buffer.AsMemory(0, firstRead));
-
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                var bytesRead = await processStream.StandardOutput
-                    .ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken)
-                    .ConfigureAwait(false);
-
-                if (bytesRead <= 0)
+                var streamed = await RunProcessPumpAsync(options, recorder, cancellationToken).ConfigureAwait(false);
+                if (cancellationToken.IsCancellationRequested)
                 {
                     break;
                 }
 
-                var chunk = buffer.AsMemory(0, bytesRead);
-                recorder.Observe(chunk);
-                Broadcast(chunk);
+                if (streamed)
+                {
+                    failureCount = 0;
+                }
+
+                failureCount++;
+                if (!CameraRecoveryPlanner.ShouldRetry(options, failureCount))
+                {
+                    SetFailure(CameraLiveStreamFailureReasons.CameraUnavailable);
+                    cameraStatusService.ReportDegraded(GetFailureReason()!);
+                    CompleteSubscribers();
+                    return;
+                }
+
+                var delay = CameraRecoveryPlanner.GetBackoffDelay(options, failureCount);
+                SharedPumpRestarting(logger, failureCount, delay, null);
+                await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -198,6 +190,50 @@ internal sealed class SharedCameraStreamHub(
                 await cameraLease.DisposeAsync().ConfigureAwait(false);
             }
         }
+    }
+
+    private async Task<bool> RunProcessPumpAsync(
+        CameraOptions options,
+        ILiveFrameSnapshotRecorder recorder,
+        CancellationToken cancellationToken)
+    {
+        var command = commandFactory.BuildLiveStreamCommand(options);
+        var processStream = await processStreamRunner.StartAsync(command, cancellationToken).ConfigureAwait(false);
+        await using var configuredProcessStream = processStream.ConfigureAwait(false);
+        var buffer = new byte[16384];
+
+        using var startupCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        startupCancellation.CancelAfter(StartupTimeout);
+        var firstRead = await processStream.StandardOutput
+            .ReadAsync(buffer.AsMemory(0, buffer.Length), startupCancellation.Token)
+            .ConfigureAwait(false);
+
+        if (firstRead <= 0)
+        {
+            return false;
+        }
+
+        cameraStatusService.ReportOnline();
+        Broadcast(buffer.AsMemory(0, firstRead));
+        recorder.Observe(buffer.AsMemory(0, firstRead));
+
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            var bytesRead = await processStream.StandardOutput
+                .ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken)
+                .ConfigureAwait(false);
+
+            if (bytesRead <= 0)
+            {
+                return true;
+            }
+
+            var chunk = buffer.AsMemory(0, bytesRead);
+            recorder.Observe(chunk);
+            Broadcast(chunk);
+        }
+
+        return true;
     }
 
     private void Broadcast(ReadOnlyMemory<byte> chunk)

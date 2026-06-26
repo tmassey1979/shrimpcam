@@ -130,6 +130,55 @@ public sealed class CameraLiveStreamServiceTests
 
     [Fact]
     [Trait("Category", "Unit")]
+    public async Task Shared_stream_reconnects_without_closing_existing_subscribers()
+    {
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var processStreamRunner = Substitute.For<IProcessStreamRunner>();
+        var firstStream = new BlockingAppendStream();
+        var secondStream = new BlockingAppendStream();
+        var processStreams = new Queue<IProcessStreamHandle>(
+            [
+                new StubProcessStream(firstStream, new ProcessResult(0, string.Empty, string.Empty)),
+                new StubProcessStream(secondStream, new ProcessResult(0, string.Empty, string.Empty)),
+            ]);
+        var options = CreateOptions(reconnectBackoffSeconds: 0);
+        var command = new ProcessRequest("ffmpeg", "-stream");
+
+        commandFactory.BuildLiveStreamCommand(Arg.Any<CameraOptions>()).Returns(command);
+        processStreamRunner
+            .StartAsync(command, Arg.Any<CancellationToken>())
+            .Returns(_ => Task.FromResult(processStreams.Dequeue()));
+
+        var hub = CreateHub(commandFactory, cameraStatusService, processStreamRunner);
+        var service = new CameraLiveStreamService(hub);
+
+        var subscriptionTask = service.StartAsync(options, CancellationToken.None);
+        await firstStream.AppendAsync("--shrimpcam\r\nContent-Type: image/jpeg\r\n\r\nframe-01\r\n").ConfigureAwait(true);
+        var subscription = await subscriptionTask.ConfigureAwait(true);
+        subscription.Succeeded.Should().BeTrue();
+        var buffer = new byte[512];
+        var firstBytesRead = await subscription.Session!.Content.ReadAsync(buffer, CancellationToken.None).ConfigureAwait(true);
+        Encoding.ASCII.GetString(buffer, 0, firstBytesRead).Should().Contain("frame-01");
+
+        firstStream.Dispose();
+        await EventuallyAsync(async () =>
+        {
+            await processStreamRunner.Received(2).StartAsync(command, Arg.Any<CancellationToken>()).ConfigureAwait(true);
+        }).ConfigureAwait(true);
+        await secondStream.AppendAsync("--shrimpcam\r\nContent-Type: image/jpeg\r\n\r\nframe-02\r\n").ConfigureAwait(true);
+
+        var bytesRead = await subscription.Session!.Content.ReadAsync(buffer, CancellationToken.None).ConfigureAwait(true);
+        var payload = Encoding.ASCII.GetString(buffer, 0, bytesRead);
+
+        payload.Should().Contain("frame-02");
+
+        await subscription.Session!.DisposeAsync().ConfigureAwait(true);
+        await hub.DisposeAsync().ConfigureAwait(true);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
     public async Task Busy_camera_returns_failure_without_starting_process()
     {
         var commandFactory = Substitute.For<ICameraCommandFactory>();
@@ -164,7 +213,7 @@ public sealed class CameraLiveStreamServiceTests
             processStreamRunner,
             NullLogger<SharedCameraStreamHub>.Instance);
 
-    private static CameraOptions CreateOptions() =>
+    private static CameraOptions CreateOptions(int reconnectBackoffSeconds = 1) =>
         new()
         {
             Platform = CameraPlatforms.Windows,
@@ -173,7 +222,7 @@ public sealed class CameraLiveStreamServiceTests
             StreamHeight = 720,
             StreamFramesPerSecond = 15,
             ReconnectRetryAttempts = 2,
-            ReconnectBackoffSeconds = 1,
+            ReconnectBackoffSeconds = reconnectBackoffSeconds,
         };
 
     private static async Task EventuallyAsync(Action assertion)
@@ -185,6 +234,27 @@ public sealed class CameraLiveStreamServiceTests
             try
             {
                 assertion();
+                return;
+            }
+            catch (Exception exception)
+            {
+                lastException = exception;
+                await Task.Delay(50).ConfigureAwait(true);
+            }
+        }
+
+        throw lastException ?? new InvalidOperationException("Assertion did not complete.");
+    }
+
+    private static async Task EventuallyAsync(Func<Task> assertion)
+    {
+        Exception? lastException = null;
+
+        for (var attempt = 0; attempt < 20; attempt++)
+        {
+            try
+            {
+                await assertion().ConfigureAwait(true);
                 return;
             }
             catch (Exception exception)
