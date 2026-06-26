@@ -4782,3 +4782,281 @@ main {
     grid-template-columns: minmax(6.8rem, 1fr) minmax(6.5rem, 1.1fr) !important;
   }
 }
+
+/* Reference structure pass: labels, live controls, timeline cards, and settings save placement. */
+.app-shell:has(.screen-settings) {
+  --bottom-nav-clearance: calc(6.4rem + env(safe-area-inset-bottom)) !important;
+}
+
+.app-shell:has(.screen-settings) .bottom-nav {
+  display: none !important;
+}
+
+.screen-settings .settings-form-header .primary-button {
+  bottom: calc(1.35rem + env(safe-area-inset-bottom)) !important;
+}
+
+.screen-live .live-control-tray {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  margin-top: -5.1rem !important;
+  padding: 0.75rem 0.62rem !important;
+}
+
+.screen-live .live-control-tray button {
+  display: grid !important;
+  place-items: center !important;
+  gap: 0.28rem !important;
+  min-height: 5rem !important;
+  padding: 0.48rem 0.22rem !important;
+  border-radius: 999px !important;
+  color: #fff !important;
+  font-size: 0.68rem !important;
+  line-height: 1.05 !important;
+}
+
+.screen-live .live-control-tray button::before {
+  display: grid !important;
+  place-items: center;
+  width: 2.55rem;
+  height: 2.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.screen-live .live-control-tray button:nth-child(1)::before {
+  content: "CAM" !important;
+  background: linear-gradient(145deg, #42f0de, #1289a4);
+}
+
+.screen-live .live-control-tray button:nth-child(2)::before {
+  content: "M" !important;
+}
+
+.screen-live .live-control-tray button:nth-child(3)::before {
+  content: "[]" !important;
+}
+
+.screen-live .live-control-tray button:nth-child(4)::before {
+  content: "R" !important;
+}
+
+.screen-live .live-control-tray button:disabled {
+  opacity: 0.82;
+}
+
+.screen-live .live-status-panel {
+  border-radius: 1.6rem 1.6rem 0.9rem 0.9rem !important;
+}
+
+.screen-timeline .reference-header-action,
+.screen-gallery .reference-header-action {
+  width: 7rem !important;
+  height: 3.9rem !important;
+  border-radius: 1rem !important;
+  background: rgba(8, 71, 85, 0.58) !important;
+  font-size: 0 !important;
+}
+
+.screen-timeline .reference-header-action::before,
+.screen-gallery .reference-header-action::before {
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.05;
+  white-space: pre;
+  content: "Total Captures\A 1,247";
+}
+
+.screen-timeline .gallery-timeline-header,
+.screen-gallery .gallery-timeline-header {
+  display: none !important;
+}
+
+.screen-timeline .timeline-chip-row,
+.screen-gallery .timeline-chip-row,
+.screen-timeline .source-chip-row,
+.screen-gallery .source-chip-row {
+  display: flex !important;
+  overflow-x: auto;
+  gap: 0.55rem !important;
+  padding-bottom: 0.15rem;
+  scrollbar-width: none;
+}
+
+.screen-timeline .timeline-chip-row::-webkit-scrollbar,
+.screen-gallery .timeline-chip-row::-webkit-scrollbar,
+.screen-timeline .source-chip-row::-webkit-scrollbar,
+.screen-gallery .source-chip-row::-webkit-scrollbar,
+.screen-timeline .capture-list::-webkit-scrollbar,
+.screen-gallery .capture-list::-webkit-scrollbar,
+.screen-timeline .gallery-toolbar::-webkit-scrollbar,
+.screen-gallery .gallery-toolbar::-webkit-scrollbar {
+  display: none;
+}
+
+.screen-timeline .timeline-chip,
+.screen-gallery .timeline-chip,
+.screen-timeline .source-chip,
+.screen-gallery .source-chip {
+  flex: 0 0 auto;
+  min-height: 2.85rem !important;
+  border: 1px solid rgba(143, 255, 248, 0.24) !important;
+  border-radius: 0.8rem !important;
+  background: rgba(7, 70, 84, 0.54) !important;
+  color: rgba(246, 255, 255, 0.86) !important;
+}
+
+.screen-timeline .timeline-chip.active,
+.screen-gallery .timeline-chip.active,
+.screen-timeline .source-chip.active,
+.screen-gallery .source-chip.active {
+  border-color: rgba(52, 242, 221, 0.84) !important;
+  background: linear-gradient(145deg, rgba(50, 230, 219, 0.42), rgba(16, 123, 143, 0.64)) !important;
+  box-shadow: 0 0 1.2rem rgba(52, 242, 221, 0.18);
+}
+
+.screen-timeline .gallery-toolbar,
+.screen-gallery .gallery-toolbar {
+  order: -1;
+  margin-bottom: 0.28rem;
+}
+
+.screen-timeline .gallery-toolbar label:first-child,
+.screen-gallery .gallery-toolbar label:first-child {
+  flex: 1 0 13rem;
+}
+
+.screen-timeline .gallery-toolbar label:first-child span,
+.screen-gallery .gallery-toolbar label:first-child span,
+.screen-timeline .gallery-toolbar label:nth-child(2) span,
+.screen-gallery .gallery-toolbar label:nth-child(2) span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.screen-timeline .gallery-toolbar input,
+.screen-gallery .gallery-toolbar input {
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.screen-timeline .gallery-summary,
+.screen-gallery .gallery-summary {
+  margin: 0.35rem 0 0.2rem;
+  color: rgba(232, 255, 253, 0.8);
+  text-align: right;
+}
+
+.screen-timeline .viewer-card,
+.screen-gallery .viewer-card {
+  display: grid !important;
+  gap: 0.7rem;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.screen-timeline .viewer-hero-header,
+.screen-gallery .viewer-hero-header {
+  margin-bottom: -0.2rem;
+}
+
+.screen-timeline .viewer-frame,
+.screen-gallery .viewer-frame {
+  min-height: min(41svh, 27rem) !important;
+  border: 2px solid var(--ref-stroke-hot) !important;
+  border-radius: 1.25rem !important;
+  box-shadow: 0 0 1.6rem rgba(52, 242, 221, 0.16) !important;
+}
+
+.screen-timeline .viewer-details,
+.screen-gallery .viewer-details {
+  display: none !important;
+}
+
+.screen-timeline .capture-list,
+.screen-gallery .capture-list {
+  grid-auto-columns: 7.9rem !important;
+}
+
+.screen-timeline .capture-list-item,
+.screen-gallery .capture-list-item {
+  min-height: 7.4rem !important;
+  border-radius: 0.86rem !important;
+}
+
+.screen-timeline .capture-list-item.active,
+.screen-gallery .capture-list-item.active {
+  border-color: var(--ref-stroke-hot) !important;
+  box-shadow: 0 0 0 1px rgba(52, 242, 221, 0.32), 0 0.7rem 1.6rem rgba(0, 0, 0, 0.22) !important;
+}
+
+.screen-dashboard .quick-action-tile span,
+.nav-icon {
+  font-size: 0 !important;
+}
+
+.screen-dashboard .quick-action-tile span::before,
+.nav-icon::before {
+  color: currentColor;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.quick-action-tile.live span::before,
+.nav-link[href="/live"] .nav-icon::before {
+  content: "CAM";
+}
+
+.quick-action-tile.gallery span::before,
+.nav-link[href="/gallery"] .nav-icon::before {
+  content: "TIME";
+}
+
+.quick-action-tile.capture span::before {
+  content: "SHOT";
+}
+
+.nav-link[href="/dashboard"] .nav-icon::before {
+  content: "HOME";
+}
+
+.nav-link[href="/settings"] .nav-icon::before {
+  content: "SET";
+}
+
+@media (max-width: 430px) {
+  .screen-live .live-control-tray {
+    margin-left: 0.65rem !important;
+    margin-right: 0.65rem !important;
+    padding: 0.58rem 0.45rem !important;
+  }
+
+  .screen-live .live-control-tray button {
+    min-height: 4.45rem !important;
+    font-size: 0.58rem !important;
+  }
+
+  .screen-live .live-control-tray button::before {
+    width: 2.1rem;
+    height: 2.1rem;
+    font-size: 0.78rem;
+  }
+
+  .screen-timeline .reference-header-action,
+  .screen-gallery .reference-header-action {
+    width: 5.85rem !important;
+  }
+
+  .screen-timeline .reference-header-action::before,
+  .screen-gallery .reference-header-action::before {
+    font-size: 0.68rem;
+  }
+}

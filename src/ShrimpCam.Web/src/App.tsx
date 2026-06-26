@@ -207,8 +207,8 @@ const shellMetadataStorageKey = "shrimpcam.shellMetadata";
 
 const navItems: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: "Home" },
-  { to: "/live", label: "Live", icon: "Cam" },
-  { to: "/gallery", label: "Gallery", icon: "Shot" },
+  { to: "/live", label: "Cameras", icon: "Cam" },
+  { to: "/gallery", label: "Timeline", icon: "Clock" },
   { to: "/settings", label: "Settings", icon: "Tune" }
 ];
 
@@ -1133,8 +1133,8 @@ function GalleryScreen({
 
   return (
     <ScreenFrame
-      title="Gallery"
-      description="Reverse-chronological capture browsing with date filters and a focused mobile viewer."
+      title="Timeline"
+      description="Your tank. Every moment."
     >
       <div className="gallery-layout">
         <section className="gallery-browser" aria-label="Capture browser">
@@ -1430,9 +1430,6 @@ function LiveViewScreen({ auth }: { auth: AuthContext }) {
         </div>
 
         <div className="live-control-tray" aria-label="Live camera controls">
-          <button type="button" className="secondary-button" onClick={retryStream}>
-            Retry stream
-          </button>
           <button
             type="button"
             className="primary-button"
@@ -1440,6 +1437,15 @@ function LiveViewScreen({ auth }: { auth: AuthContext }) {
             onClick={() => void captureSnapshot()}
           >
             {isCapturing ? "Capturing..." : "Capture snapshot"}
+          </button>
+          <button type="button" className="secondary-button" disabled>
+            Mute
+          </button>
+          <button type="button" className="secondary-button" disabled>
+            Fullscreen
+          </button>
+          <button type="button" className="secondary-button" onClick={retryStream}>
+            Refresh
           </button>
         </div>
 
