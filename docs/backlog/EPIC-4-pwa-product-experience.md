@@ -606,6 +606,39 @@ Scenario: User signs out
   And protected navigation is hidden until the user signs in again
 ```
 
+### SC-PWA-21 Gallery And Settings Edge-State Playwright Coverage
+
+**User story:** As a Shrimp Cam operator, I want gallery and settings edge-state recovery covered by Playwright so that capture browsing and administration stay usable after transient API failures.
+
+**Dependencies:** SC-PWA-05, SC-PWA-06, SC-PWA-09, SC-PWA-17, SC-PWA-18
+
+**Test expectations:**
+- Samsung S26 Playwright tests cover capture-history load failure, visible gallery fallback messaging, and successful recovery after a subsequent reload.
+- Playwright verifies gallery recovery restores timeline chips, selected protected image loading, and capture summary text.
+- Playwright covers settings API load failure, unavailable-form presentation, missing save action while no form is loaded, and recovery through the Refresh action.
+- Existing gallery empty/filter/image-failure and settings validation/save-rejection tests continue to pass.
+
+**Acceptance criteria:**
+
+```gherkin
+Scenario: Gallery recovers after capture history is temporarily unavailable
+  Given the user is signed in
+  And capture history loading fails
+  When the user opens Gallery
+  Then the app shows actionable gallery failure messaging without a stale capture list
+  When the next gallery reload succeeds
+  Then timeline chips, capture summary, and the selected protected image render again
+
+Scenario: Settings recovers after settings loading is temporarily unavailable
+  Given the user is signed in
+  And settings loading fails
+  When the user opens Settings
+  Then the app shows a settings unavailable state
+  And no save action is available without a loaded form
+  When the user refreshes after the service recovers
+  Then the settings summary, camera discovery message, and disabled clean save action render again
+```
+
 ## Delivery Notes
 
 - Story sequencing should start with shell and routing, then move through authentication, core screens, resilience behavior, and final accessibility hardening.
