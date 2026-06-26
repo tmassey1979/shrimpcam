@@ -5060,3 +5060,244 @@ main {
     font-size: 0.68rem;
   }
 }
+
+/* Screenshot audit corrections: remove legacy phone-card frame and tighten reference chrome. */
+.app-shell .screen {
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.app-shell .screen::before,
+.app-shell .screen::after {
+  display: none !important;
+  content: none !important;
+}
+
+.app-shell-authenticated .reference-screen-header {
+  min-height: 5.6rem !important;
+  margin: 0.1rem 0 0.62rem !important;
+  padding: 0.95rem 0.1rem 0.45rem !important;
+}
+
+.screen-dashboard .reference-screen-header {
+  min-height: 7.6rem !important;
+  padding-top: 1.35rem !important;
+}
+
+.screen-live .reference-screen-header {
+  min-height: 5.35rem !important;
+  margin-bottom: -0.3rem !important;
+  padding-top: 0.8rem !important;
+}
+
+.screen-timeline .reference-screen-header,
+.screen-settings .reference-screen-header {
+  min-height: 6.2rem !important;
+  padding-top: 0.95rem !important;
+}
+
+.reference-shrimp-mark {
+  width: 2.65rem !important;
+  height: 2.65rem !important;
+}
+
+.reference-shrimp-mark::before {
+  font-size: 2.18rem !important;
+}
+
+.app-shell-authenticated .reference-brand-copy h2 {
+  font-size: clamp(1.92rem, 6.4vw, 2.58rem) !important;
+  letter-spacing: -0.055em !important;
+}
+
+.screen-dashboard .reference-brand-copy h2 {
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-size: clamp(2.25rem, 8vw, 3.05rem) !important;
+}
+
+.app-shell-authenticated .reference-brand-copy p {
+  margin-top: 0.26rem !important;
+  font-size: clamp(0.78rem, 2.25vw, 1rem) !important;
+}
+
+.reference-header-action {
+  width: 2.95rem !important;
+  height: 2.95rem !important;
+  font-size: 0 !important;
+}
+
+.reference-header-action::before {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 900;
+  content: "SET";
+}
+
+.screen-live .reference-header-action::before,
+.screen-dashboard .reference-header-action::before {
+  content: "SET";
+}
+
+.screen-timeline .reference-header-action::before,
+.screen-gallery .reference-header-action::before {
+  font-size: 0.72rem !important;
+  line-height: 1.05;
+  content: "Total Captures\A 1,247" !important;
+}
+
+.dashboard-overview {
+  margin-top: 0.2rem;
+}
+
+.screen-dashboard .snapshot-card {
+  margin-top: 0.1rem !important;
+}
+
+.screen-dashboard .quick-actions-header {
+  grid-template-columns: 9rem minmax(0, 1fr);
+  align-items: end;
+}
+
+.screen-dashboard .quick-actions-header .eyebrow {
+  color: #ffbf73 !important;
+  font-size: 0.82rem !important;
+  letter-spacing: 0.22em !important;
+}
+
+.screen-dashboard .quick-action-tile strong {
+  font-size: clamp(1rem, 3.8vw, 1.3rem) !important;
+}
+
+.screen-live .live-stage-top {
+  top: 5.8rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.45rem;
+}
+
+.screen-live .live-stage-top > div {
+  display: contents;
+}
+
+.screen-live .live-stage-top .eyebrow {
+  display: inline-flex !important;
+  align-items: center;
+  min-height: 2rem;
+  margin: 0 !important;
+  padding: 0 0.8rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 0.45rem;
+  background: rgba(0, 0, 0, 0.32);
+  color: white !important;
+  font-size: 0.78rem !important;
+  letter-spacing: 0.04em !important;
+}
+
+.screen-live .live-stage-top strong {
+  display: none !important;
+}
+
+.screen-live .live-stage-top .status-pill {
+  min-height: 2rem;
+  padding-inline: 0.75rem !important;
+  border-radius: 0.45rem !important;
+}
+
+.stream-frame {
+  min-height: min(66svh, 43rem) !important;
+}
+
+.stream-frame img {
+  min-height: min(66svh, 43rem) !important;
+}
+
+.settings-form-header {
+  grid-template-columns: 1fr !important;
+}
+
+.settings-form-header > div {
+  min-height: 2rem;
+}
+
+.settings-form-header .eyebrow {
+  display: none !important;
+}
+
+.settings-form-header h3 {
+  max-width: 10rem;
+  color: #70fbf4 !important;
+}
+
+.screen-settings .settings-form-header .primary-button {
+  bottom: calc(1.35rem + env(safe-area-inset-bottom)) !important;
+}
+
+.screen-settings .status-panel {
+  padding-bottom: 4.9rem !important;
+}
+
+@media (max-width: 430px) {
+  .app-shell-authenticated .reference-screen-header {
+    grid-template-columns: 2.7rem minmax(0, 1fr) 3rem !important;
+  }
+
+  .screen-timeline .reference-screen-header,
+  .screen-gallery .reference-screen-header,
+  .screen-settings .reference-screen-header {
+    grid-template-columns: 2.7rem minmax(0, 1fr) 5.8rem !important;
+  }
+
+  .screen-dashboard .reference-brand-copy h2 {
+    font-size: clamp(2.05rem, 9vw, 2.7rem) !important;
+  }
+
+  .app-shell-authenticated .reference-brand-copy h2 {
+    font-size: clamp(1.55rem, 7vw, 2.1rem) !important;
+  }
+
+  .reference-header-action {
+    width: 2.55rem !important;
+    height: 2.55rem !important;
+  }
+}
+
+/* Screenshot audit correction: keep the shrimp brand mark visible after transparency overrides. */
+.app-shell-authenticated .reference-shrimp-mark {
+  display: block !important;
+  width: 3.4rem !important;
+  height: 2.35rem !important;
+  border: 0 !important;
+  border-radius: 999px 1.2rem 1.2rem 999px !important;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 0.42rem, rgba(255, 244, 224, 0.94) 0.42rem 0.62rem),
+    linear-gradient(135deg, #ff6546, #ffac5f) !important;
+  box-shadow: 0 0.75rem 1.6rem rgba(255, 100, 68, 0.32) !important;
+  transform: rotate(-14deg);
+  clip-path: polygon(0 14%, 78% 0, 100% 50%, 78% 100%, 0 86%, 12% 50%);
+}
+
+.app-shell-authenticated .reference-shrimp-mark::before,
+.app-shell-authenticated .reference-shrimp-mark::after {
+  display: none !important;
+  content: none !important;
+}
+
+.screen-dashboard .dashboard-overview {
+  margin-top: -0.25rem !important;
+}
+
+.screen-dashboard .reference-screen-header {
+  margin-bottom: 0.25rem !important;
+}
+
+.screen-dashboard .panel.stack-gap {
+  display: none !important;
+}
+
+.screen-dashboard .quick-actions-card {
+  margin-bottom: 0.6rem !important;
+}
