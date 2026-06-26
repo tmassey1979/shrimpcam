@@ -2021,19 +2021,38 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
 
 function ScreenFrame({ title, description, children }: ScreenFrameProps) {
   const screenClassName = `screen screen-${title.toLowerCase().replace(/\s+/g, "-")}`;
+  const subtitle = getReferenceSubtitle(title, description);
 
   return (
     <section className={screenClassName}>
-      <div className="screen-header">
-        <div>
-          <p className="eyebrow">Route</p>
-          <h2>{title}</h2>
+      <div className="screen-header reference-screen-header">
+        <span className="reference-shrimp-mark" aria-hidden="true" />
+        <div className="reference-brand-copy">
+          <h2>Shrimp Cam</h2>
+          <p>{subtitle}</p>
         </div>
-        <p className="screen-copy">{description}</p>
+        <span className={`reference-header-action ${title.toLowerCase()}`} aria-hidden="true">
+          {title === "Gallery" ? "1,247" : title === "Live" || title === "Settings" || title === "Dashboard" ? "⚙" : ""}
+        </span>
       </div>
       {children}
     </section>
   );
+}
+
+function getReferenceSubtitle(title: string, fallback: string) {
+  switch (title) {
+    case "Dashboard":
+      return "Your tank. Always in view.";
+    case "Live":
+      return "Living Room Tank";
+    case "Gallery":
+      return "Your tank. Every moment.";
+    case "Settings":
+      return "Settings & System Status";
+    default:
+      return fallback;
+  }
 }
 
 function StatCard({ eyebrow, value, detail }: StatCardProps) {

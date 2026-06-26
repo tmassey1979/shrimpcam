@@ -3519,3 +3519,269 @@ body {
     radial-gradient(circle at 74% 34%, rgba(52, 115, 75, 0.22), transparent 30%),
     linear-gradient(180deg, rgba(6, 85, 89, 0.72), rgba(1, 12, 18, 0.96)) !important;
 }
+
+/* Structured reference header pass: real markup, no pseudo-title collisions. */
+.app-shell-authenticated .reference-screen-header {
+  display: grid !important;
+  grid-template-columns: 4.4rem minmax(0, 1fr) auto !important;
+  gap: 0.85rem !important;
+  align-items: center !important;
+  min-height: 10.8rem !important;
+  padding: 4.4rem 0.35rem 1.25rem !important;
+  margin: 0 0 0.85rem !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.app-shell-authenticated .reference-screen-header::before,
+.app-shell-authenticated .reference-screen-header h2::before,
+.app-shell-authenticated .reference-screen-header h2::after {
+  display: none !important;
+  content: none !important;
+}
+
+.reference-shrimp-mark {
+  display: block;
+  width: 4.15rem;
+  height: 2.7rem;
+  border-radius: 999px 1.35rem 1.35rem 999px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 0.54rem, rgba(255, 243, 221, 0.95) 0.54rem 0.78rem),
+    linear-gradient(135deg, #ff704d, #ffad61);
+  box-shadow: 0 1rem 2.5rem rgba(255, 109, 78, 0.34);
+  transform: rotate(-14deg);
+  clip-path: polygon(0 14%, 78% 0, 100% 50%, 78% 100%, 0 86%, 12% 50%);
+}
+
+.reference-brand-copy h2 {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  clip: auto !important;
+  clip-path: none !important;
+  color: #fff8ed;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-size: clamp(2.35rem, 10vw, 3.18rem) !important;
+  font-weight: 800;
+  letter-spacing: -0.075em !important;
+  line-height: 0.95 !important;
+  text-shadow: 0 1rem 2.4rem rgba(0, 0, 0, 0.34);
+}
+
+.reference-brand-copy p {
+  margin: 0.32rem 0 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 1.04rem;
+  line-height: 1.16;
+}
+
+.reference-header-action {
+  display: grid;
+  min-width: 3.7rem;
+  min-height: 3.7rem;
+  place-items: center;
+  border: 1px solid rgba(190, 255, 255, 0.4);
+  border-radius: 999px;
+  background: rgba(77, 221, 224, 0.24);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1rem 2rem rgba(0, 0, 0, 0.24);
+  color: #fff;
+  font-size: 1.65rem;
+  font-weight: 900;
+}
+
+.reference-header-action.gallery {
+  min-width: 6.7rem;
+  min-height: 3rem;
+  border-radius: 1rem;
+  background: rgba(15, 78, 92, 0.52);
+  font-size: 1.05rem;
+}
+
+.reference-header-action.settings {
+  width: 7.5rem;
+  height: 4.7rem;
+  border-radius: 1rem;
+  background:
+    linear-gradient(180deg, transparent, rgba(0, 18, 22, 0.18)),
+    url("./assets/ref-settings-camera.png") center / cover no-repeat !important;
+  color: transparent;
+}
+
+.screen-live .reference-screen-header {
+  min-height: 8.8rem !important;
+  padding-top: 3.3rem !important;
+  margin-bottom: -0.8rem !important;
+  z-index: 4;
+}
+
+.screen-live .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2,
+.screen-settings .reference-brand-copy h2 {
+  font-family: "Aptos Display", "Segoe UI", sans-serif !important;
+  font-size: clamp(2.05rem, 8vw, 2.55rem) !important;
+  letter-spacing: -0.055em !important;
+}
+
+.screen-dashboard .reference-screen-header {
+  min-height: 11.8rem !important;
+}
+
+.screen-dashboard .stat-card span,
+.screen-settings .stat-card span {
+  display: -webkit-box;
+  max-height: 4.5rem;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.screen-dashboard .dashboard-overview .stat-card {
+  min-height: 9.2rem;
+}
+
+.screen-dashboard .storage-usage-card {
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 520px) {
+  .app-shell-authenticated .reference-screen-header {
+    grid-template-columns: 4rem minmax(0, 1fr) auto !important;
+    gap: 0.75rem !important;
+    padding-top: 4.1rem !important;
+  }
+
+  .reference-shrimp-mark {
+    width: 3.75rem;
+    height: 2.45rem;
+  }
+
+  .reference-brand-copy h2 {
+    font-size: clamp(2.1rem, 9.6vw, 2.75rem) !important;
+  }
+
+  .reference-brand-copy p {
+    font-size: 0.95rem;
+  }
+
+  .reference-header-action:not(.gallery):not(.settings) {
+    min-width: 3.25rem;
+    min-height: 3.25rem;
+    font-size: 1.4rem;
+  }
+
+  .reference-header-action.settings {
+    width: 6.5rem;
+    height: 4rem;
+  }
+}
+
+/* Header collision cleanup: disable legacy pseudo chrome after real reference header markup. */
+.app-shell-authenticated .reference-screen-header::before,
+.app-shell-authenticated .reference-screen-header::after {
+  display: none !important;
+  content: none !important;
+}
+
+.app-shell-authenticated .reference-brand-copy h2,
+.screen-dashboard .reference-brand-copy h2,
+.screen-live .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2,
+.screen-settings .reference-brand-copy h2 {
+  position: static !important;
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  clip: auto !important;
+  clip-path: none !important;
+  white-space: normal !important;
+  color: #fff8ed !important;
+  font-size: clamp(2.15rem, 9.4vw, 2.95rem) !important;
+  line-height: 0.95 !important;
+  text-indent: 0 !important;
+}
+
+.app-shell-authenticated .reference-brand-copy h2::before,
+.app-shell-authenticated .reference-brand-copy h2::after {
+  display: none !important;
+  content: none !important;
+}
+
+.app-shell-authenticated .reference-brand-copy p {
+  display: block !important;
+  max-width: 15rem;
+  margin: 0.32rem 0 0 !important;
+  overflow: visible !important;
+  color: rgba(255, 255, 255, 0.78) !important;
+  font-size: 1rem !important;
+  line-height: 1.18 !important;
+}
+
+.app-shell-authenticated .reference-screen-header .reference-header-action {
+  display: grid !important;
+}
+
+.screen-dashboard .reference-screen-header,
+.screen-gallery .reference-screen-header,
+.screen-settings .reference-screen-header {
+  align-items: center !important;
+  min-height: 10.6rem !important;
+  padding-top: 4.2rem !important;
+}
+
+.screen-live .reference-screen-header {
+  min-height: 8.2rem !important;
+  padding-top: 3rem !important;
+}
+
+.screen-dashboard .dashboard-overview {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card {
+  min-width: 0;
+  min-height: 9rem !important;
+}
+
+.screen-dashboard .stat-card span,
+.screen-settings .stat-card span {
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.screen-dashboard .stat-card span {
+  max-height: 3.9rem !important;
+  -webkit-line-clamp: 3 !important;
+}
+
+.screen-settings .stat-card span {
+  max-height: 4.2rem !important;
+  -webkit-line-clamp: 4 !important;
+}
+
+@media (max-width: 520px) {
+  .app-shell-authenticated .reference-brand-copy h2,
+  .screen-dashboard .reference-brand-copy h2,
+  .screen-live .reference-brand-copy h2,
+  .screen-gallery .reference-brand-copy h2,
+  .screen-settings .reference-brand-copy h2 {
+    font-size: clamp(1.95rem, 8.6vw, 2.55rem) !important;
+  }
+
+  .app-shell-authenticated .reference-brand-copy p {
+    max-width: 11rem;
+    font-size: 0.9rem !important;
+  }
+
+  .screen-dashboard .reference-screen-header,
+  .screen-gallery .reference-screen-header,
+  .screen-settings .reference-screen-header {
+    min-height: 9.7rem !important;
+  }
+}
