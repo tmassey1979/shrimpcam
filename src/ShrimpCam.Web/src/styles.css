@@ -5579,6 +5579,165 @@ body,
   }
 }
 
+/* Final mobile reference corrections after screenshot comparison. */
+.app-shell-authenticated {
+  padding-bottom: calc(9rem + env(safe-area-inset-bottom)) !important;
+}
+
+.app-shell-authenticated .reference-screen-header {
+  padding-top: clamp(2.1rem, 7vw, 3.4rem) !important;
+  column-gap: 0.7rem !important;
+}
+
+.screen-dashboard .reference-brand-copy h2 {
+  font-size: clamp(2.35rem, 11vw, 3.05rem) !important;
+  letter-spacing: -0.06em !important;
+}
+
+.screen-live .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2,
+.screen-settings .reference-brand-copy h2 {
+  font-size: clamp(2rem, 8.2vw, 2.35rem) !important;
+  line-height: 0.98 !important;
+}
+
+.app-shell-authenticated .reference-brand-copy p {
+  font-size: clamp(0.94rem, 4vw, 1.08rem) !important;
+}
+
+.reference-header-action {
+  overflow: hidden !important;
+  color: transparent !important;
+  font-size: 0 !important;
+}
+
+.reference-header-action.dashboard,
+.reference-header-action.live {
+  width: 3.2rem !important;
+  height: 3.2rem !important;
+  border-radius: 999px !important;
+}
+
+.reference-header-action.dashboard::before,
+.reference-header-action.live::before {
+  position: absolute !important;
+  inset: 0.78rem !important;
+  display: block !important;
+  border: 0.24rem solid rgba(255, 255, 255, 0.95) !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  box-shadow:
+    0 -0.62rem 0 -0.46rem rgba(255, 255, 255, 0.95),
+    0 0.62rem 0 -0.46rem rgba(255, 255, 255, 0.95),
+    0.62rem 0 0 -0.46rem rgba(255, 255, 255, 0.95),
+    -0.62rem 0 0 -0.46rem rgba(255, 255, 255, 0.95) !important;
+  content: "" !important;
+  transform: none !important;
+}
+
+.screen-settings .reference-screen-header {
+  grid-template-columns: 3.1rem minmax(0, 1fr) 6.8rem !important;
+  column-gap: 0.55rem !important;
+}
+
+.screen-settings .reference-shrimp-mark {
+  width: 3.1rem !important;
+  height: 2.25rem !important;
+}
+
+.screen-settings .reference-brand-copy p {
+  max-width: none !important;
+  font-size: 0.9rem !important;
+  line-height: 1.05 !important;
+}
+
+.screen-settings .reference-header-action,
+.screen-settings .reference-header-action.settings {
+  width: 6.8rem !important;
+  height: 4.25rem !important;
+  align-self: end !important;
+}
+
+.screen-dashboard .snapshot-card,
+.screen-gallery .viewer-card,
+.screen-live .stream-panel {
+  margin-bottom: 1.2rem !important;
+}
+
+.screen-dashboard .snapshot-preview,
+.screen-dashboard .snapshot-preview-empty,
+.screen-gallery .viewer-frame,
+.screen-live .stream-frame {
+  background:
+    linear-gradient(180deg, rgba(3, 35, 45, 0.1), rgba(3, 35, 45, 0.42)),
+    rgba(214, 230, 222, 0.92) !important;
+}
+
+@media (max-width: 430px) {
+  .screen-dashboard .reference-screen-header {
+    grid-template-columns: 4.15rem minmax(0, 1fr) 3.25rem !important;
+  }
+
+  .screen-dashboard .reference-shrimp-mark {
+    width: 4.05rem !important;
+  }
+
+  .screen-dashboard .reference-brand-copy h2 {
+    font-size: clamp(2.25rem, 10.5vw, 2.85rem) !important;
+  }
+}
+
+/* Final settings/dashboard header correction from rendered Samsung screenshots. */
+@media (max-width: 520px) {
+  .screen-dashboard .reference-brand-copy h2 {
+    font-size: clamp(2.1rem, 9.8vw, 2.65rem) !important;
+  }
+
+  .screen-settings .reference-screen-header {
+    position: relative !important;
+    display: block !important;
+    min-height: 9.6rem !important;
+    padding-top: 3rem !important;
+    padding-right: 7.8rem !important;
+  }
+
+  .screen-settings .reference-shrimp-mark {
+    position: absolute !important;
+    top: 5.05rem !important;
+    left: 0 !important;
+    width: 3.25rem !important;
+    height: 2.35rem !important;
+  }
+
+  .screen-settings .reference-brand-copy {
+    display: block !important;
+    padding-left: 3.7rem !important;
+  }
+
+  .screen-settings .reference-brand-copy h2 {
+    max-width: none !important;
+    font-size: clamp(2.15rem, 9.2vw, 2.45rem) !important;
+    line-height: 0.95 !important;
+    white-space: nowrap !important;
+  }
+
+  .screen-settings .reference-brand-copy p {
+    max-width: none !important;
+    margin-top: 0.35rem !important;
+    font-size: 0.92rem !important;
+    line-height: 1.1 !important;
+  }
+
+  .screen-settings .reference-header-action,
+  .screen-settings .reference-header-action.settings {
+    position: absolute !important;
+    right: 0.2rem !important;
+    bottom: 0.55rem !important;
+    width: 7rem !important;
+    height: 4.65rem !important;
+  }
+}
+
 /* Final reference lock: this must stay last so the render matches the supplied images. */
 .app-shell-authenticated {
   width: min(100%, 45rem) !important;
