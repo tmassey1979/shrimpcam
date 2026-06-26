@@ -6487,3 +6487,249 @@ body,
 .screen-settings .reference-header-action::after {
   display: none !important;
 }
+
+/* Reference parity pass: timeline/gallery composition should read like the render. */
+.screen-gallery .panel,
+.screen-timeline .panel {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.8rem !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.screen-gallery .gallery-toolbar,
+.screen-timeline .gallery-toolbar {
+  order: 1 !important;
+  grid-template-columns: minmax(0, 1fr) 5.35rem !important;
+  margin-top: 0.1rem !important;
+}
+
+.screen-gallery .gallery-toolbar label:first-child input,
+.screen-timeline .gallery-toolbar label:first-child input {
+  min-height: 3.8rem !important;
+  padding-left: 3.25rem !important;
+  border-color: rgba(139, 255, 248, 0.32) !important;
+  border-radius: 999px !important;
+  background: rgba(3, 55, 68, 0.48) !important;
+  color: #fff !important;
+  font-size: 1rem !important;
+}
+
+.screen-gallery .gallery-toolbar label:first-child,
+.screen-timeline .gallery-toolbar label:first-child {
+  position: relative !important;
+}
+
+.screen-gallery .gallery-toolbar label:first-child::before,
+.screen-timeline .gallery-toolbar label:first-child::before {
+  position: absolute;
+  top: 50%;
+  left: 1.12rem;
+  z-index: 2;
+  width: 0.92rem;
+  height: 0.92rem;
+  border: 0.15rem solid rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  content: "";
+  pointer-events: none;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.screen-gallery .gallery-toolbar label:first-child::after,
+.screen-timeline .gallery-toolbar label:first-child::after {
+  position: absolute;
+  top: calc(50% + 0.56rem);
+  left: 1.94rem;
+  z-index: 2;
+  width: 0.58rem;
+  height: 0.15rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  content: "";
+  pointer-events: none;
+  transform: rotate(45deg);
+}
+
+.screen-gallery .gallery-toolbar input[type="date"],
+.screen-timeline .gallery-toolbar input[type="date"] {
+  width: 5.35rem !important;
+  min-width: 5.35rem !important;
+  max-width: 5.35rem !important;
+  min-height: 3.8rem !important;
+  border-color: rgba(139, 255, 248, 0.32) !important;
+  border-radius: 1.05rem !important;
+  background: rgba(3, 55, 68, 0.58) !important;
+}
+
+.screen-gallery .source-chip-row,
+.screen-timeline .source-chip-row {
+  display: flex !important;
+  order: 2 !important;
+  flex-wrap: nowrap !important;
+  gap: 0.55rem !important;
+  overflow-x: auto !important;
+  padding-bottom: 0.18rem !important;
+  scrollbar-width: none;
+}
+
+.screen-gallery .source-chip-row::-webkit-scrollbar,
+.screen-timeline .source-chip-row::-webkit-scrollbar {
+  display: none;
+}
+
+.screen-gallery .source-chip-row:nth-of-type(2),
+.screen-timeline .source-chip-row:nth-of-type(2) {
+  order: 3 !important;
+  padding: 0.34rem !important;
+  border: 1px solid rgba(139, 255, 248, 0.25) !important;
+  border-radius: 999px !important;
+  background: rgba(3, 55, 68, 0.34) !important;
+}
+
+.screen-gallery .source-chip,
+.screen-timeline .source-chip {
+  flex: 0 0 auto !important;
+  min-height: 2.72rem !important;
+  border-color: rgba(139, 255, 248, 0.28) !important;
+  border-radius: 0.85rem !important;
+  background: rgba(8, 82, 95, 0.48) !important;
+}
+
+.screen-gallery .source-chip.active,
+.screen-timeline .source-chip.active {
+  background: linear-gradient(135deg, rgba(50, 238, 224, 0.95), rgba(13, 136, 153, 0.92)) !important;
+  color: #fff !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 0.7rem 1.4rem rgba(17, 220, 209, 0.18) !important;
+}
+
+.screen-gallery .gallery-summary,
+.screen-timeline .gallery-summary {
+  order: 4 !important;
+  align-self: flex-end !important;
+  margin: 0.3rem 0 -0.1rem !important;
+  color: rgba(235, 255, 252, 0.76) !important;
+  font-size: 0.92rem !important;
+  font-weight: 800 !important;
+}
+
+.screen-gallery .capture-list,
+.screen-timeline .capture-list {
+  order: 5 !important;
+  display: flex !important;
+  gap: 0.58rem !important;
+  overflow-x: auto !important;
+  padding: 0.18rem 0 0.42rem !important;
+  scrollbar-width: none;
+}
+
+.screen-gallery .capture-list::-webkit-scrollbar,
+.screen-timeline .capture-list::-webkit-scrollbar {
+  display: none;
+}
+
+.screen-gallery .capture-list-item,
+.screen-timeline .capture-list-item {
+  flex: 0 0 7.25rem !important;
+  min-height: 5.4rem !important;
+  border-width: 0.12rem !important;
+  border-color: rgba(255, 255, 255, 0.36) !important;
+  border-radius: 0.72rem !important;
+}
+
+.screen-gallery .capture-list-item.active,
+.screen-timeline .capture-list-item.active {
+  border-color: var(--ref-aqua) !important;
+  box-shadow: 0 0 0 1px rgba(60, 244, 232, 0.5), 0 0.6rem 1.25rem rgba(25, 214, 204, 0.2) !important;
+}
+
+.screen-gallery .viewer-card,
+.screen-timeline .viewer-card {
+  margin-top: 0.9rem !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.screen-gallery .viewer-hero-header,
+.screen-timeline .viewer-hero-header {
+  align-items: end !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.screen-gallery .viewer-hero-header h3,
+.screen-timeline .viewer-hero-header h3 {
+  font-size: clamp(1.45rem, 5vw, 2rem) !important;
+}
+
+.screen-gallery .viewer-frame,
+.screen-timeline .viewer-frame {
+  border: 0.18rem solid var(--ref-aqua) !important;
+  border-radius: 1.2rem !important;
+  box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.22) !important;
+}
+
+.screen-gallery .viewer-details,
+.screen-timeline .viewer-details,
+.screen-gallery .gallery-toolbar .secondary-button,
+.screen-timeline .gallery-toolbar .secondary-button {
+  display: none !important;
+}
+
+/* Reference parity pass: settings should look like rich controls, not raw form rows. */
+.screen-settings .settings-form fieldset {
+  gap: 0.45rem !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.screen-settings .settings-form fieldset > label,
+.screen-settings .settings-form .settings-grid > label,
+.screen-settings .schedule-window-card {
+  min-height: 4.25rem !important;
+  border-color: rgba(159, 255, 247, 0.28) !important;
+  border-radius: 1.05rem !important;
+  background: linear-gradient(135deg, rgba(10, 88, 101, 0.66), rgba(4, 57, 70, 0.72)) !important;
+}
+
+.screen-settings .settings-form input,
+.screen-settings .settings-form select {
+  min-height: 2.58rem !important;
+  border-radius: 999px !important;
+  background: rgba(0, 29, 40, 0.62) !important;
+  text-align: center !important;
+}
+
+.screen-settings .settings-form input[type="checkbox"] {
+  width: 1.38rem !important;
+  height: 1.38rem !important;
+  min-height: 1.38rem !important;
+  border-radius: 0.18rem !important;
+  accent-color: #ff9f55;
+}
+
+.screen-settings .settings-form fieldset:nth-of-type(1) > label:nth-of-type(2) {
+  grid-template-columns: minmax(0, 1fr) minmax(8.2rem, 1fr) !important;
+}
+
+.screen-settings .status-panel {
+  border-color: rgba(159, 255, 247, 0.28) !important;
+  background: linear-gradient(135deg, rgba(12, 84, 98, 0.78), rgba(5, 49, 65, 0.88)) !important;
+}
+
+.screen-settings .status-panel .stat-card {
+  border-color: rgba(159, 255, 247, 0.28) !important;
+  background: rgba(9, 72, 87, 0.56) !important;
+}
+
+.screen-settings .settings-form-header .primary-button {
+  min-height: 4.05rem !important;
+  margin-top: 0.35rem !important;
+  border-radius: 999px !important;
+  font-size: 1.08rem !important;
+}
