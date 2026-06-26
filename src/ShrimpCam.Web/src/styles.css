@@ -7681,3 +7681,166 @@ body,
 .screen-gallery .gallery-toolbar input[type="date"] {
   min-height: 3.35rem !important;
 }
+
+/* Reference parity pass: unify bottom navigation and primary action iconography. */
+.app-shell-authenticated .bottom-nav {
+  left: 1.35rem !important;
+  right: 1.35rem !important;
+  bottom: max(0.72rem, env(safe-area-inset-bottom)) !important;
+  width: auto !important;
+  min-height: 4.9rem !important;
+  padding: 0.54rem 0.62rem !important;
+  border: 1px solid rgba(122, 255, 246, 0.24) !important;
+  border-radius: 1.45rem !important;
+  background:
+    linear-gradient(180deg, rgba(5, 65, 78, 0.9), rgba(2, 37, 52, 0.94)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 1.2rem 2.4rem rgba(0, 0, 0, 0.28) !important;
+  transform: none !important;
+}
+
+.app-shell-authenticated .nav-link {
+  gap: 0.28rem !important;
+  min-height: 3.8rem !important;
+  padding: 0.34rem 0.22rem !important;
+  border: 0 !important;
+  color: rgba(233, 255, 252, 0.76) !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+}
+
+.app-shell-authenticated .nav-link.active {
+  border-radius: 1.05rem !important;
+  background: linear-gradient(180deg, rgba(27, 151, 151, 0.72), rgba(10, 105, 115, 0.72)) !important;
+  color: #42f3df !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+
+.app-shell-authenticated .nav-icon {
+  position: relative !important;
+  width: 2.15rem !important;
+  height: 2.15rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: inset 0 0 0 0.12rem rgba(255, 255, 255, 0.08) !important;
+}
+
+.app-shell-authenticated .nav-link.active .nav-icon {
+  border-color: rgba(101, 255, 241, 0.44) !important;
+  background: rgba(65, 238, 222, 0.18) !important;
+}
+
+.app-shell-authenticated .nav-icon::before,
+.app-shell-authenticated .nav-icon::after {
+  position: absolute;
+  display: block !important;
+  content: "" !important;
+}
+
+.app-shell-authenticated .nav-link[href="/dashboard"] .nav-icon::before {
+  left: 50%;
+  top: 50%;
+  width: 1rem;
+  height: 0.86rem;
+  border: 0.14rem solid currentColor;
+  border-top: 0;
+  border-radius: 0.12rem;
+  transform: translate(-50%, -35%);
+}
+
+.app-shell-authenticated .nav-link[href="/dashboard"] .nav-icon::after {
+  left: 50%;
+  top: 0.48rem;
+  width: 0.86rem;
+  height: 0.86rem;
+  border-top: 0.14rem solid currentColor;
+  border-left: 0.14rem solid currentColor;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.app-shell-authenticated .nav-link[href="/live"] .nav-icon::before,
+.app-shell-authenticated .nav-link[href="/gallery"] .nav-icon::before {
+  left: 50%;
+  top: 50%;
+  width: 1.12rem;
+  height: 0.76rem;
+  border: 0.14rem solid currentColor;
+  border-radius: 0.16rem;
+  transform: translate(-50%, -50%);
+}
+
+.app-shell-authenticated .nav-link[href="/live"] .nav-icon::after {
+  right: 0.38rem;
+  top: 0.78rem;
+  width: 0.38rem;
+  height: 0.48rem;
+  background: currentColor;
+  clip-path: polygon(0 25%, 100% 0, 100% 100%, 0 75%);
+}
+
+.app-shell-authenticated .nav-link[href="/gallery"] .nav-icon::after {
+  left: 0.75rem;
+  top: 0.78rem;
+  width: 0.18rem;
+  height: 0.18rem;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0.48rem 0.48rem 0 0 currentColor;
+}
+
+.app-shell-authenticated .nav-link[href="/settings"] .nav-icon::before {
+  left: 50%;
+  top: 50%;
+  width: 1.12rem;
+  height: 1.12rem;
+  border: 0.16rem solid currentColor;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+}
+
+.app-shell-authenticated .nav-link[href="/settings"] .nav-icon::after {
+  left: 50%;
+  top: 50%;
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+}
+
+.screen-live .live-control-tray {
+  width: min(29.5rem, calc(100% - 4.8rem)) !important;
+  min-height: 5rem !important;
+  padding: 0.62rem 0.75rem !important;
+  border-radius: 1.35rem !important;
+  background: rgba(2, 31, 42, 0.72) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+.screen-live .live-control-tray button {
+  min-height: 4.45rem !important;
+  padding: 2.7rem 0.2rem 0.42rem !important;
+  border-radius: 999px !important;
+  line-height: 1.04 !important;
+}
+
+.screen-live .live-control-tray button::after {
+  top: 0.88rem !important;
+}
+
+.screen-live .live-control-tray .primary-button {
+  background: linear-gradient(135deg, #ff7068, #f65347) !important;
+  box-shadow: 0 0.85rem 1.5rem rgba(255, 91, 75, 0.22) !important;
+}
+
+.screen-dashboard .quick-action-grid {
+  gap: 0.66rem !important;
+}
+
+.screen-dashboard .quick-action-tile {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 0.7rem 1.25rem rgba(0, 0, 0, 0.18) !important;
+}
