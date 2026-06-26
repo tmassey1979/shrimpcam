@@ -5379,3 +5379,170 @@ body,
     min-height: 34rem !important;
   }
 }
+
+/* Reference parity pass: preserve the phone-render dashboard layout at every viewport. */
+.screen-dashboard .dashboard-grid,
+.screen-dashboard .dashboard-overview {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 0.86rem !important;
+}
+
+.screen-dashboard .dashboard-grid {
+  grid-template-columns: 1fr !important;
+}
+
+.screen-dashboard .snapshot-card,
+.screen-dashboard .quick-actions-card {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  margin-bottom: 5.25rem !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card {
+  display: grid !important;
+  grid-template-columns: 3.35rem minmax(0, 1fr) !important;
+  grid-template-areas:
+    "icon label"
+    "icon value"
+    "icon detail" !important;
+  column-gap: 0.78rem !important;
+  align-content: center !important;
+  min-height: 7.45rem !important;
+  padding: 1rem !important;
+  overflow: hidden !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card::before {
+  grid-area: icon !important;
+  position: static !important;
+  width: 3.25rem !important;
+  height: 3.25rem !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card .eyebrow {
+  grid-area: label !important;
+  margin: 0 0 0.16rem !important;
+  overflow: hidden;
+  color: #ffffff !important;
+  font-size: clamp(0.76rem, 2.5vw, 0.96rem) !important;
+  letter-spacing: -0.02em !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.screen-dashboard .dashboard-overview .stat-card strong {
+  grid-area: value !important;
+  margin: 0 !important;
+  overflow: hidden;
+  font-size: clamp(1.5rem, 5.2vw, 1.95rem) !important;
+  line-height: 1.02 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.screen-dashboard .dashboard-overview .stat-card span {
+  grid-area: detail !important;
+  display: -webkit-box;
+  margin-top: 0.36rem !important;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: clamp(0.76rem, 2.45vw, 0.94rem) !important;
+  line-height: 1.16 !important;
+}
+
+.screen-dashboard .storage-usage-card {
+  min-height: 9.7rem !important;
+  grid-template-columns: 6rem minmax(0, 1fr) !important;
+  align-items: center !important;
+}
+
+.screen-dashboard .snapshot-card {
+  padding: 1.05rem !important;
+}
+
+.screen-dashboard .snapshot-preview {
+  min-height: clamp(15rem, 55vw, 21rem) !important;
+}
+
+.screen-dashboard .quick-actions-header {
+  display: block !important;
+  margin-bottom: 0.82rem !important;
+}
+
+.screen-dashboard .quick-actions-header span {
+  display: none !important;
+}
+
+.screen-dashboard .quick-action-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0.78rem !important;
+}
+
+.screen-dashboard .quick-action-tile {
+  min-height: 7.9rem !important;
+  padding: 0.8rem 0.52rem !important;
+}
+
+.screen-dashboard .quick-action-tile span {
+  width: 3.25rem !important;
+  height: 3.25rem !important;
+  font-size: 0 !important;
+}
+
+.screen-dashboard .quick-action-tile span::before {
+  color: #fff;
+  font-size: 1.45rem;
+  font-weight: 900;
+}
+
+.screen-dashboard .quick-action-tile.live span::before {
+  content: "▣";
+}
+
+.screen-dashboard .quick-action-tile.gallery span::before {
+  content: "▧";
+}
+
+.screen-dashboard .quick-action-tile.capture span::before {
+  content: "●";
+}
+
+.bottom-nav {
+  bottom: max(0.65rem, env(safe-area-inset-bottom)) !important;
+  min-height: auto !important;
+  padding: 0.58rem 0.72rem !important;
+  border-radius: 1.25rem !important;
+}
+
+.nav-link {
+  gap: 0.22rem !important;
+  min-height: 3.6rem !important;
+  padding: 0.36rem 0.32rem !important;
+  font-size: 0.68rem !important;
+}
+
+.nav-icon {
+  width: 2rem !important;
+  height: 2rem !important;
+  font-size: 0 !important;
+}
+
+.nav-link.active {
+  border-radius: 1rem !important;
+}
+
+@media (min-width: 760px) {
+  .bottom-nav {
+    position: sticky !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: max(0.65rem, env(safe-area-inset-bottom)) !important;
+    width: 100% !important;
+    margin: 1rem auto 0 !important;
+    transform: none !important;
+  }
+}

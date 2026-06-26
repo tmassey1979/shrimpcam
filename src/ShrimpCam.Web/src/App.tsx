@@ -2308,8 +2308,8 @@ function getNextCaptureEstimate() {
   next.setMinutes(minutes + minutesToAdd, 0, 0);
 
   return {
-    value: formatDateTime(next.toISOString()),
-    detail: "Estimated from the default five-minute interval until schedule settings are wired into the dashboard."
+    value: new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(next),
+    detail: "Today"
   };
 }
 
