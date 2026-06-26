@@ -6160,3 +6160,330 @@ body,
   cursor: not-allowed;
   filter: saturate(0.92) brightness(0.92);
 }
+
+/* Reference parity pass: collapse extra shell chrome and draw icon-only controls. */
+.app-shell-authenticated .app-header {
+  display: none !important;
+}
+
+.app-shell-authenticated .content {
+  padding-top: max(1.35rem, env(safe-area-inset-top)) !important;
+}
+
+.screen-dashboard .reference-screen-header {
+  min-height: 9.2rem !important;
+  align-items: center !important;
+  padding-top: 1.9rem !important;
+}
+
+.screen-dashboard .reference-brand-copy h2 {
+  font-size: clamp(2.42rem, 9.4vw, 3.18rem) !important;
+  line-height: 0.92 !important;
+}
+
+.screen-dashboard .reference-brand-copy p {
+  color: rgba(238, 255, 253, 0.86) !important;
+  font-size: clamp(0.98rem, 3.3vw, 1.18rem) !important;
+}
+
+.reference-shrimp-mark {
+  position: relative !important;
+  width: 4.35rem !important;
+  height: 3.2rem !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  transform: rotate(-12deg);
+}
+
+.reference-shrimp-mark::before {
+  position: absolute;
+  top: 0.82rem;
+  left: 0.46rem;
+  width: 2.78rem;
+  height: 1.32rem;
+  border-radius: 60% 45% 55% 45%;
+  background:
+    repeating-linear-gradient(90deg, #ff6f42 0 0.45rem, #ffe2ca 0.45rem 0.72rem),
+    linear-gradient(135deg, #ff7044, #ef462e);
+  box-shadow: inset 0 0.08rem 0 rgba(255, 255, 255, 0.58), 0 0.25rem 0.65rem rgba(0, 0, 0, 0.18);
+  content: "" !important;
+}
+
+.reference-shrimp-mark::after {
+  position: absolute;
+  top: 1.08rem;
+  left: 3.05rem;
+  width: 1.12rem;
+  height: 0.82rem;
+  border-top: 0.16rem solid #ff9a66;
+  border-right: 0.16rem solid #ff9a66;
+  border-radius: 0 80% 0 0;
+  box-shadow:
+    -2.95rem 0.72rem 0 -0.38rem #f25c39,
+    -2.58rem 0.93rem 0 -0.4rem #f25c39,
+    -2.22rem 0.78rem 0 -0.41rem #f25c39;
+  content: "" !important;
+  transform: rotate(-12deg);
+}
+
+.reference-header-action {
+  position: relative !important;
+  overflow: visible !important;
+}
+
+.reference-header-action::before {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  display: block !important;
+  width: 1.34rem !important;
+  height: 1.34rem !important;
+  border: 0.22rem solid rgba(255, 255, 255, 0.95) !important;
+  border-radius: 999px !important;
+  color: transparent !important;
+  content: "" !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.reference-header-action::after {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 1.92rem;
+  height: 1.92rem;
+  background:
+    linear-gradient(#fff, #fff) 50% 0 / 0.22rem 0.42rem no-repeat,
+    linear-gradient(#fff, #fff) 50% 100% / 0.22rem 0.42rem no-repeat,
+    linear-gradient(#fff, #fff) 0 50% / 0.42rem 0.22rem no-repeat,
+    linear-gradient(#fff, #fff) 100% 50% / 0.42rem 0.22rem no-repeat,
+    linear-gradient(#fff, #fff) 16% 16% / 0.34rem 0.18rem no-repeat,
+    linear-gradient(#fff, #fff) 84% 16% / 0.34rem 0.18rem no-repeat,
+    linear-gradient(#fff, #fff) 16% 84% / 0.34rem 0.18rem no-repeat,
+    linear-gradient(#fff, #fff) 84% 84% / 0.34rem 0.18rem no-repeat;
+  content: "";
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(22deg);
+}
+
+.screen-gallery .reference-header-action::before,
+.screen-timeline .reference-header-action::before {
+  inset: 50% auto auto 50%;
+  width: 1.15rem !important;
+  height: 1.15rem !important;
+  border-width: 0.16rem !important;
+}
+
+.screen-gallery .reference-header-action::after,
+.screen-timeline .reference-header-action::after {
+  width: 0.62rem;
+  height: 0.16rem;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 0.42rem 0 #fff, 0 -0.42rem 0 #fff;
+  transform: translate(-50%, -50%);
+}
+
+.screen-dashboard .storage-usage-card::after,
+.screen-dashboard .quick-action-tile span::before {
+  display: none !important;
+}
+
+.screen-dashboard .quick-action-tile span {
+  position: relative !important;
+}
+
+.screen-dashboard .quick-action-tile span::after {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  display: block !important;
+  content: "" !important;
+  transform: translate(-50%, -50%);
+}
+
+.screen-dashboard .quick-action-tile.live span::after {
+  width: 1.42rem;
+  height: 0.92rem;
+  border: 0.18rem solid #fff;
+  border-radius: 0.22rem;
+  box-shadow: 0.82rem 0.05rem 0 -0.22rem #fff;
+}
+
+.screen-dashboard .quick-action-tile.gallery span::after {
+  width: 1.34rem;
+  height: 1.08rem;
+  border: 0.18rem solid #fff;
+  border-radius: 0.22rem;
+  background:
+    radial-gradient(circle at 28% 28%, #fff 0 0.12rem, transparent 0.13rem),
+    linear-gradient(135deg, transparent 45%, #fff 46% 54%, transparent 55%);
+}
+
+.screen-dashboard .quick-action-tile.capture span::after {
+  width: 1.48rem;
+  height: 1.08rem;
+  border-radius: 0.22rem;
+  background:
+    radial-gradient(circle, transparent 0 0.32rem, #fff 0.34rem 0.48rem, transparent 0.5rem),
+    linear-gradient(#fff, #fff) 50% 0 / 0.7rem 0.22rem no-repeat,
+    #fff;
+}
+
+.screen-dashboard .snapshot-card {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 0.85rem !important;
+}
+
+.screen-dashboard .snapshot-card .eyebrow {
+  align-self: center !important;
+  margin: 0 !important;
+  color: #fff !important;
+  font-size: clamp(1.02rem, 3.7vw, 1.25rem) !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.04em !important;
+  text-transform: none !important;
+}
+
+.screen-dashboard .snapshot-preview {
+  grid-column: 1 / -1 !important;
+  overflow: hidden !important;
+  border-radius: 1.08rem !important;
+}
+
+.screen-dashboard .snapshot-file-name,
+.screen-dashboard .snapshot-card > p:not(.eyebrow):not(.snapshot-file-name),
+.screen-dashboard .snapshot-card .inline-link {
+  display: none !important;
+}
+
+.screen-dashboard .snapshot-preview::after {
+  position: absolute;
+  right: 50%;
+  bottom: 0.86rem;
+  width: 0.56rem;
+  height: 0.56rem;
+  border-radius: 999px;
+  background: #41efe1;
+  box-shadow: 1.15rem 0 0 rgba(255, 255, 255, 0.28), 2.3rem 0 0 rgba(255, 255, 255, 0.22), 3.45rem 0 0 rgba(255, 255, 255, 0.2);
+  content: "";
+  transform: translateX(-0.2rem);
+}
+
+@media (min-width: 760px) {
+  .app-shell-authenticated {
+    max-width: 35rem !important;
+    margin-inline: auto !important;
+  }
+}
+
+/* Reference parity pass: live tray and settings header icon cleanup. */
+.screen-live .live-control-tray button {
+  position: relative !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  min-height: 5.5rem !important;
+  padding: 3.05rem 0.24rem 0.72rem !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  line-height: 1.06 !important;
+  text-align: center !important;
+}
+
+.screen-live .live-control-tray button::before {
+  display: none !important;
+}
+
+.screen-live .live-control-tray button::after {
+  position: absolute;
+  top: 1.05rem;
+  left: 50%;
+  display: block !important;
+  content: "" !important;
+  transform: translateX(-50%);
+}
+
+.screen-live .live-control-tray button:nth-child(1)::after {
+  width: 1.36rem;
+  height: 1.02rem;
+  border-radius: 0.2rem;
+  background:
+    radial-gradient(circle, transparent 0 0.28rem, #fff 0.3rem 0.43rem, transparent 0.45rem),
+    linear-gradient(#fff, #fff) 50% -0.01rem / 0.64rem 0.22rem no-repeat,
+    #fff;
+}
+
+.screen-live .live-control-tray button:nth-child(2)::after {
+  clip-path: polygon(0 34%, 32% 34%, 70% 8%, 70% 92%, 32% 66%, 0 66%);
+  width: 1.18rem;
+  height: 1.18rem;
+  background: #fff;
+}
+
+.screen-live .live-control-tray button:nth-child(2) span::after,
+.screen-live .live-control-tray button:nth-child(2)::before {
+  display: none !important;
+}
+
+.screen-live .live-control-tray button:nth-child(3)::after {
+  width: 1.3rem;
+  height: 1.3rem;
+  background:
+    linear-gradient(#fff, #fff) 0 0 / 0.48rem 0.16rem no-repeat,
+    linear-gradient(#fff, #fff) 0 0 / 0.16rem 0.48rem no-repeat,
+    linear-gradient(#fff, #fff) 100% 0 / 0.48rem 0.16rem no-repeat,
+    linear-gradient(#fff, #fff) 100% 0 / 0.16rem 0.48rem no-repeat,
+    linear-gradient(#fff, #fff) 0 100% / 0.48rem 0.16rem no-repeat,
+    linear-gradient(#fff, #fff) 0 100% / 0.16rem 0.48rem no-repeat,
+    linear-gradient(#fff, #fff) 100% 100% / 0.48rem 0.16rem no-repeat,
+    linear-gradient(#fff, #fff) 100% 100% / 0.16rem 0.48rem no-repeat;
+}
+
+.screen-live .live-control-tray button:nth-child(4)::after {
+  width: 1.38rem;
+  height: 1.38rem;
+  border: 0.2rem solid #fff;
+  border-left-color: transparent;
+  border-radius: 999px;
+}
+
+.screen-live .live-control-tray button:nth-child(4) {
+  overflow: visible !important;
+}
+
+.screen-live .live-control-tray button:nth-child(4) span::after {
+  display: none !important;
+}
+
+.screen-settings .reference-screen-header {
+  grid-template-columns: 3.85rem minmax(0, 1fr) 5.45rem !important;
+  min-height: 7.6rem !important;
+  align-items: center !important;
+  padding-top: 1.1rem !important;
+}
+
+.screen-settings .reference-brand-copy h2 {
+  font-size: clamp(1.52rem, 5.2vw, 2.08rem) !important;
+  line-height: 0.98 !important;
+}
+
+.screen-settings .reference-brand-copy p {
+  font-size: clamp(0.68rem, 2.1vw, 0.82rem) !important;
+}
+
+.screen-settings .reference-header-action.settings,
+.screen-settings .reference-header-action {
+  width: 5.35rem !important;
+  height: 4.25rem !important;
+  border-radius: 0.72rem !important;
+  background:
+    linear-gradient(135deg, rgba(2, 44, 48, 0.1), rgba(0, 0, 0, 0.34)),
+    url("./assets/ref-settings-camera.png") center / cover no-repeat !important;
+}
+
+.screen-settings .reference-header-action.settings::before,
+.screen-settings .reference-header-action.settings::after,
+.screen-settings .reference-header-action::before,
+.screen-settings .reference-header-action::after {
+  display: none !important;
+}
