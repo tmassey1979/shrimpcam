@@ -6100,6 +6100,292 @@ body,
   box-shadow: 0 0 0 2px rgba(57, 244, 232, 0.28) !important;
 }
 
+/* Settings reference parity: shift from dense admin form to preference rows. */
+.screen-settings {
+  gap: clamp(0.9rem, 2.8vw, 1.25rem) !important;
+}
+
+.screen-settings .reference-screen-header {
+  min-height: clamp(8rem, 23vw, 10.2rem) !important;
+  padding-bottom: clamp(1.2rem, 3.8vw, 1.8rem) !important;
+}
+
+.screen-settings .reference-screen-header::after {
+  position: absolute !important;
+  right: clamp(1rem, 3.4vw, 1.55rem) !important;
+  bottom: clamp(0.85rem, 2.8vw, 1.2rem) !important;
+  width: clamp(7.2rem, 25vw, 10.2rem) !important;
+  height: clamp(4.65rem, 15.5vw, 6.4rem) !important;
+  border: 1px solid rgba(166, 245, 238, 0.34) !important;
+  border-radius: 1rem !important;
+  background:
+    linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.12)),
+    url("./assets/ref-settings-camera.png") center / cover no-repeat !important;
+  box-shadow: 0 0.9rem 1.8rem rgba(0, 25, 36, 0.28) !important;
+  content: "" !important;
+}
+
+.screen-settings .reference-brand-copy {
+  max-width: min(58%, 18rem) !important;
+}
+
+.screen-settings .settings-layout {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: clamp(1.05rem, 3vw, 1.5rem) !important;
+}
+
+.screen-settings .settings-form {
+  order: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: clamp(0.72rem, 2.2vw, 1rem) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.screen-settings .settings-summary-strip {
+  display: none !important;
+}
+
+.screen-settings .settings-form-header {
+  order: 20 !important;
+  margin-top: clamp(0.9rem, 2.8vw, 1.3rem) !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.screen-settings .settings-form-header > div {
+  display: none !important;
+}
+
+.screen-settings .settings-form-header .primary-button {
+  width: min(31.5rem, 100%) !important;
+  min-height: clamp(4.35rem, 12vw, 5.25rem) !important;
+  margin: 0 auto !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #ff7b72, #ef4438) !important;
+  color: #fff !important;
+  font-size: clamp(1.15rem, 3.5vw, 1.45rem) !important;
+  font-weight: 950 !important;
+  box-shadow: 0 1rem 2rem rgba(239, 68, 56, 0.28) !important;
+}
+
+.screen-settings .settings-form-header .primary-button::before {
+  display: inline-block !important;
+  width: 1.35rem !important;
+  height: 1.35rem !important;
+  margin-right: 0.65rem !important;
+  border: 0.18rem solid currentColor !important;
+  border-radius: 0.18rem !important;
+  content: "" !important;
+  vertical-align: -0.2rem !important;
+}
+
+.screen-settings .settings-form fieldset {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.58rem !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.screen-settings .settings-form legend {
+  margin: clamp(0.45rem, 1.6vw, 0.7rem) 0 0.25rem !important;
+  color: #68eee7 !important;
+  font-size: clamp(0.82rem, 2.35vw, 0.98rem) !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.24em !important;
+  text-transform: uppercase !important;
+}
+
+.screen-settings .settings-form fieldset > label,
+.screen-settings .settings-form .settings-grid > label,
+.screen-settings .schedule-window-card {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: clamp(3.35rem, 10vw, 4rem) minmax(0, 1fr) minmax(7rem, 42%) !important;
+  align-items: center !important;
+  gap: clamp(0.8rem, 2.4vw, 1.15rem) !important;
+  min-height: clamp(4.25rem, 12vw, 5.2rem) !important;
+  padding: clamp(0.68rem, 2vw, 0.9rem) clamp(0.8rem, 2.4vw, 1.05rem) !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(143, 229, 224, 0.28) !important;
+  border-radius: clamp(0.9rem, 2.8vw, 1.25rem) !important;
+  background: linear-gradient(145deg, rgba(10, 82, 95, 0.72), rgba(2, 49, 64, 0.82)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.screen-settings .settings-form fieldset > label::before,
+.screen-settings .settings-form .settings-grid > label::before,
+.screen-settings .schedule-window-card::before {
+  grid-column: 1 !important;
+  grid-row: 1 / span 2 !important;
+  width: clamp(2.75rem, 8vw, 3.3rem) !important;
+  height: clamp(2.75rem, 8vw, 3.3rem) !important;
+  border-radius: 0.9rem !important;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 0.48rem, rgba(255, 255, 255, 0.88) 0.5rem 0.66rem, transparent 0.68rem),
+    linear-gradient(135deg, #37e2d3, #158fa8) !important;
+  box-shadow: 0 0.65rem 1.2rem rgba(0, 26, 36, 0.2) !important;
+  content: "" !important;
+}
+
+.screen-settings .settings-form fieldset:nth-of-type(2) > label::before,
+.screen-settings .settings-form fieldset:nth-of-type(2) .settings-grid > label::before {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.86)) 50% 50% / 1.3rem 1.3rem no-repeat,
+    linear-gradient(135deg, #3ba9f4, #216bb8) !important;
+}
+
+.screen-settings .settings-form fieldset:nth-of-type(3) > label::before,
+.screen-settings .settings-form fieldset:nth-of-type(3) .settings-grid > label::before {
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 0.5rem, rgba(255, 255, 255, 0.9) 0.52rem 0.68rem, transparent 0.7rem),
+    linear-gradient(135deg, #f4a43f, #d26b31) !important;
+}
+
+.screen-settings .settings-form fieldset > label::after,
+.screen-settings .settings-form .settings-grid > label::after,
+.screen-settings .schedule-window-card::after {
+  display: none !important;
+}
+
+.screen-settings .settings-form fieldset > label > span,
+.screen-settings .settings-form .settings-grid > label > span {
+  grid-column: 2 !important;
+  color: #fff !important;
+  font-size: clamp(0.88rem, 2.55vw, 1.05rem) !important;
+  font-weight: 900 !important;
+  line-height: 1.05 !important;
+}
+
+.screen-settings .settings-form small,
+.screen-settings .schedule-window-card span,
+.screen-settings .schedule-window-hint {
+  color: rgba(220, 247, 245, 0.72) !important;
+  font-size: clamp(0.68rem, 2vw, 0.82rem) !important;
+  line-height: 1.25 !important;
+}
+
+.screen-settings .settings-form input,
+.screen-settings .settings-form select {
+  grid-column: 3 !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  min-height: clamp(2.5rem, 7vw, 3.05rem) !important;
+  padding: 0.5rem 0.75rem !important;
+  border: 1px solid rgba(139, 228, 224, 0.15) !important;
+  border-radius: 999px !important;
+  background: rgba(0, 30, 43, 0.72) !important;
+  color: #fff !important;
+  font-weight: 900 !important;
+  text-align: center !important;
+}
+
+.screen-settings .settings-form input[type="checkbox"] {
+  justify-self: end !important;
+  width: 1.45rem !important;
+  min-width: 1.45rem !important;
+  height: 1.45rem !important;
+  min-height: 1.45rem !important;
+  padding: 0 !important;
+  border-radius: 0.28rem !important;
+  accent-color: #ff776c !important;
+}
+
+.screen-settings .settings-grid,
+.screen-settings .resolution-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.58rem !important;
+}
+
+.screen-settings .schedule-window-card > div {
+  grid-column: 2 !important;
+}
+
+.screen-settings .schedule-window-card .toggle-row {
+  grid-column: 3 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.screen-settings .status-panel {
+  order: 2 !important;
+  padding: clamp(0.9rem, 2.8vw, 1.2rem) !important;
+  border-radius: clamp(1.1rem, 3.2vw, 1.55rem) !important;
+  background: linear-gradient(145deg, rgba(12, 85, 98, 0.82), rgba(2, 47, 63, 0.92)) !important;
+  border-color: rgba(138, 231, 226, 0.28) !important;
+}
+
+.screen-settings .status-panel .dashboard-toolbar {
+  margin-bottom: 0.8rem !important;
+}
+
+.screen-settings .status-panel .stat-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+}
+
+.screen-settings .status-panel .stat-card {
+  display: grid !important;
+  grid-template-columns: 3.2rem minmax(0, 1fr) auto !important;
+  min-height: 4rem !important;
+  padding: 0.72rem 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.screen-settings .status-panel .stat-card + .stat-card {
+  border-top: 1px solid rgba(149, 230, 225, 0.2) !important;
+}
+
+.screen-settings .status-panel .stat-card::before {
+  grid-column: 1 !important;
+  grid-row: 1 / span 2 !important;
+  width: 2.55rem !important;
+  height: 2.55rem !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #37d67d, #187c56) !important;
+  content: "" !important;
+}
+
+.screen-settings .status-panel .stat-card .eyebrow,
+.screen-settings .status-panel .stat-card strong {
+  grid-column: 2 !important;
+}
+
+.screen-settings .status-panel .stat-card span {
+  grid-column: 2 / span 2 !important;
+  color: rgba(220, 247, 245, 0.72) !important;
+}
+
+.screen-settings .status-panel .stat-card strong {
+  justify-self: end !important;
+  align-self: center !important;
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  padding: 0.3rem 0.7rem !important;
+  border-radius: 999px !important;
+  background: rgba(38, 154, 89, 0.32) !important;
+  color: #67ee87 !important;
+  font-size: 0.82rem !important;
+}
+
 .screen-dashboard .quick-action-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 0.78rem !important;
