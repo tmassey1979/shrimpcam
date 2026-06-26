@@ -7582,3 +7582,102 @@ body,
   grid-column: 2 !important;
   font-size: 0.82rem !important;
 }
+
+/* Reference parity pass: clean Live status rows and compact Timeline chrome. */
+.screen-live .live-status-panel {
+  padding: 1rem 1rem 1.15rem !important;
+}
+
+.screen-live .live-status-panel > div:first-child {
+  grid-template-columns: 2.6rem minmax(0, 1fr) auto !important;
+}
+
+.screen-live .live-status-panel > div:first-child::before {
+  width: 2.32rem !important;
+  height: 2.32rem !important;
+}
+
+.screen-live .live-status-panel h3::before {
+  display: none !important;
+}
+
+.screen-live .capture-facts {
+  display: grid !important;
+  gap: 0 !important;
+  margin-top: 0.72rem !important;
+}
+
+.screen-live .capture-facts div,
+.screen-live .capture-facts div + div {
+  grid-template-columns: 4.2rem minmax(0, 1fr) auto !important;
+  gap: 0.62rem !important;
+  min-height: 3.35rem !important;
+  padding: 0.58rem 0 !important;
+  border-top: 1px solid rgba(185, 255, 249, 0.18);
+}
+
+.screen-live .capture-facts div:first-child::before {
+  grid-row: 1 / span 2;
+  width: 3.55rem !important;
+  height: 2.36rem !important;
+}
+
+.screen-live .capture-facts div + div::before {
+  grid-row: 1 / span 2;
+  width: 2.2rem !important;
+  height: 2.2rem !important;
+  margin-left: 0.62rem;
+}
+
+.screen-live .capture-facts div:nth-child(2)::before {
+  border-radius: 0.72rem;
+}
+
+.screen-live .capture-facts div:nth-child(3)::before {
+  background:
+    linear-gradient(to top, #54f07d 0 35%, transparent 35%) 0.34rem 50% / 0.2rem 1rem no-repeat,
+    linear-gradient(to top, #54f07d 0 55%, transparent 55%) 0.72rem 50% / 0.2rem 1rem no-repeat,
+    linear-gradient(to top, #54f07d 0 75%, transparent 75%) 1.1rem 50% / 0.2rem 1rem no-repeat,
+    rgba(31, 216, 201, 0.16) !important;
+}
+
+.screen-live .capture-facts dt {
+  grid-column: 2 !important;
+  margin: 0 !important;
+}
+
+.screen-live .capture-facts dd {
+  grid-column: 2 / -1 !important;
+  margin: 0.08rem 0 0 !important;
+}
+
+.screen-live .capture-facts div:nth-child(3) dd {
+  color: #5df27e !important;
+  font-weight: 900 !important;
+}
+
+.screen-timeline .reference-screen-header,
+.screen-gallery .reference-screen-header {
+  min-height: 8.85rem !important;
+  padding-top: 2.95rem !important;
+}
+
+.screen-timeline .reference-brand-copy h2,
+.screen-gallery .reference-brand-copy h2 {
+  font-size: clamp(2rem, 6.4vw, 2.46rem) !important;
+}
+
+.screen-timeline .gallery-toolbar,
+.screen-gallery .gallery-toolbar {
+  margin-top: -0.45rem !important;
+}
+
+.screen-timeline .gallery-toolbar label:first-child input,
+.screen-gallery .gallery-toolbar label:first-child input {
+  min-height: 3.35rem !important;
+}
+
+.screen-timeline .gallery-toolbar input[type="date"],
+.screen-gallery .gallery-toolbar input[type="date"] {
+  min-height: 3.35rem !important;
+}

@@ -1464,6 +1464,10 @@ function LiveViewScreen({ auth }: { auth: AuthContext }) {
               <dt>Saved file</dt>
               <dd>{lastCaptureFileName ?? "Waiting for snapshot"}</dd>
             </div>
+            <div>
+              <dt>Connection health</dt>
+              <dd>{streamStatus === "online" ? "Excellent" : "Reconnecting"}</dd>
+            </div>
           </dl>
           {message ? (
             <p className="live-message" role={message.includes("failed") || streamUnavailable ? "alert" : "status"} aria-live="polite">
