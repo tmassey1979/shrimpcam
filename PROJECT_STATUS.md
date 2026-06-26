@@ -6,9 +6,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 20:15:23 -05:00 |
-| Total stories | 70 |
-| Accepted stories | 70 |
+| Last refreshed | 2026-06-25 20:22:41 -05:00 |
+| Total stories | 71 |
+| Accepted stories | 71 |
 | Remaining stories | 0 |
 | Overall completion | 100% |
 
@@ -18,18 +18,18 @@
 | --- | --- | --- | --- |
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
 | Epic 2: Camera, Capture, and Streaming | 16 | 16 | 100% |
-| Epic 3: API, Security, and Operations | 21 | 21 | 100% |
+| Epic 3: API, Security, and Operations | 22 | 22 | 100% |
 | Epic 4: PWA Product Experience | 21 | 21 | 100% |
 
 ## Latest Completed Stories
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-OPS-322 | Unify Release, Assembly, Web, And Image Version Stamping | Epic 3: API, Security, and Operations | 2026-06-25 | b7126bb |
 | SC-CAM-20 | Define Retry And Catch-Up Semantics For Failed Scheduled Intervals | Epic 2: Camera, Capture, and Streaming | 2026-06-25 | ab64fd0 |
 | SC-PWA-21 | Gallery And Settings Edge-State Playwright Coverage | Epic 4: PWA Product Experience | 2026-06-25 | e9af30e |
 | SC-PWA-20 | Auth Session Restore, Expiry, And Sign-Out Edge Coverage | Epic 4: PWA Product Experience | 2026-06-25 | 2b62d9a |
 | SC-PWA-19 | PWA Manifest And Service Worker Installability Verification | Epic 4: PWA Product Experience | 2026-06-25 | ffc02d7 |
-| SC-PWA-18 | Reference-Led Aquarium Visual Fidelity Pass | Epic 4: PWA Product Experience | 2026-06-25 | f70214f |
 
 ## Next Unaccepted Stories
 
