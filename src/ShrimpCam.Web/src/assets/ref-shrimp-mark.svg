@@ -1,22 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 118" role="img" aria-label="Shrimp mark">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 118" role="img" aria-label="Shrimp mark">
   <defs>
-    <linearGradient id="shrimpBody" x1="20" y1="88" x2="130" y2="22" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#ef432f"/>
-      <stop offset="0.55" stop-color="#ff714d"/>
-      <stop offset="1" stop-color="#ffa45f"/>
+    <linearGradient id="shell" x1="20" y1="84" x2="151" y2="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e9422f"/>
+      <stop offset="0.42" stop-color="#ff6747"/>
+      <stop offset="1" stop-color="#ffae62"/>
     </linearGradient>
-    <filter id="softShadow" x="-18%" y="-24%" width="150%" height="165%">
-      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#032936" flood-opacity="0.28"/>
+    <linearGradient id="belly" x1="40" y1="93" x2="143" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ff5c3e"/>
+      <stop offset="1" stop-color="#ffc174"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-32%" width="150%" height="175%">
+      <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#021b23" flood-opacity="0.32"/>
     </filter>
   </defs>
-  <g filter="url(#softShadow)" fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M26 67c11-31 43-52 77-48 30 4 51 23 49 45-2 24-29 39-61 31-22-6-42-15-65-28Z" fill="url(#shrimpBody)"/>
-    <path d="M29 67 8 54l18-14 25 17-12 23-26 7 16-20Z" fill="#f04e33"/>
-    <path d="M50 31c15-7 33-9 54-4" stroke="#ff9b62" stroke-width="4" opacity="0.55"/>
-    <path d="M130 43c15-12 31-16 45-10M132 54c17-3 30 2 40 14M119 34c13-18 29-27 47-29" stroke="#ffa45f" stroke-width="5"/>
-    <path d="M122 89c10 3 18 10 24 20M101 93c5 7 7 14 6 21M78 86c-1 9-6 17-14 24M56 76c-7 10-16 17-28 21" stroke="#ff7d55" stroke-width="5"/>
-    <path d="M119 34c8-4 18-2 25 5" stroke="#173642" stroke-width="4"/>
-    <circle cx="124" cy="37" r="4.5" fill="#173642"/>
-    <path d="M101 24c12-11 26-17 42-18" stroke="#ffa45f" stroke-width="5"/>
+  <g filter="url(#shadow)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M33 69c14-30 48-50 84-46 27 3 48 18 54 39 5 18-6 32-29 36-30 5-71-6-109-29Z" fill="url(#shell)"/>
+    <path d="M49 71c25 17 62 27 90 22-20 18-62 14-102-14Z" fill="url(#belly)" opacity="0.9"/>
+    <path d="M34 69 11 58l19-16 23 18-12 24-27 7 20-22Z" fill="#ee4a31"/>
+    <path d="M48 46c15-12 35-18 58-18" fill="none" stroke="#ffc075" stroke-width="4" opacity="0.72"/>
+    <path d="M65 31c-4 12-2 27 7 44M84 25c-2 17 3 36 15 55M104 25c2 17 11 34 27 49M124 31c4 13 13 24 28 34" fill="none" stroke="#fff0c8" stroke-width="4" opacity="0.72"/>
+    <path d="M155 48c16-15 33-22 50-22M159 58c19-5 34-1 45 13M146 39c14-21 31-33 51-36" fill="none" stroke="#ffb36b" stroke-width="5"/>
+    <path d="M132 93c12 4 20 11 25 22M109 94c5 8 6 15 2 22M84 86c-2 10-8 18-19 25M61 77c-7 9-18 16-32 20" fill="none" stroke="#ff8158" stroke-width="5"/>
+    <path d="M143 37c7-4 17-3 25 4" fill="none" stroke="#12313b" stroke-width="4"/>
+    <circle cx="147" cy="39" r="4.5" fill="#12313b"/>
+    <path d="M151 32c8-9 20-15 34-18" fill="none" stroke="#ffbf72" stroke-width="4"/>
   </g>
 </svg>
