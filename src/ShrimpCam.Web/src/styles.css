@@ -4073,3 +4073,179 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Visual parity pass: reduce nav obstruction and make media/timeline areas closer to the renders. */
+.app-shell {
+  --bottom-nav-clearance: calc(6.25rem + env(safe-area-inset-bottom)) !important;
+}
+
+.bottom-nav {
+  bottom: max(0.45rem, env(safe-area-inset-bottom)) !important;
+  width: min(calc(100vw - 1rem), 25.25rem) !important;
+  padding: 0.34rem !important;
+  border-radius: 1.45rem !important;
+  background: rgba(1, 25, 36, 0.94) !important;
+}
+
+.nav-link {
+  min-height: 3.45rem !important;
+  padding: 0.34rem 0.16rem !important;
+  gap: 0.08rem !important;
+  font-size: 0.62rem !important;
+}
+
+.nav-icon {
+  width: 1.7rem !important;
+  height: 1.7rem !important;
+  font-size: 0.66rem !important;
+}
+
+.screen-dashboard .snapshot-card {
+  margin-top: 1.15rem !important;
+  padding-top: 1.25rem !important;
+}
+
+.screen-dashboard .snapshot-preview {
+  min-height: 15.9rem !important;
+  margin-top: 0.55rem !important;
+}
+
+.screen-dashboard .snapshot-preview img {
+  min-height: 15.9rem !important;
+}
+
+.screen-dashboard .dashboard-grid {
+  gap: 1.05rem !important;
+}
+
+.screen-live .stream-frame {
+  min-height: 61svh !important;
+  border-radius: 2rem 2rem 0.9rem 0.9rem !important;
+}
+
+.screen-live .stream-frame img {
+  min-height: 36rem !important;
+}
+
+.screen-live .live-control-tray {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 0.45rem !important;
+  margin: -4.6rem 1rem 1.05rem !important;
+  padding: 0.55rem !important;
+  border-radius: 1.4rem !important;
+}
+
+.screen-live .live-control-tray button {
+  min-height: 3.75rem !important;
+  padding: 0.5rem 0.3rem !important;
+  font-size: 0.74rem !important;
+  border-radius: 999px !important;
+}
+
+.screen-live .live-control-tray button:nth-child(1)::before,
+.screen-live .live-control-tray button:nth-child(2)::before {
+  display: block;
+  margin-bottom: 0.12rem;
+  color: #fff;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.screen-live .live-control-tray button:nth-child(1)::before {
+  content: "?";
+}
+
+.screen-live .live-control-tray button:nth-child(2)::before {
+  content: "??";
+}
+
+.screen-live .live-status-panel {
+  margin-top: 0.3rem !important;
+  padding-bottom: 1.15rem !important;
+}
+
+.screen-gallery .gallery-browser {
+  padding-bottom: 0.9rem !important;
+}
+
+.screen-gallery .capture-list {
+  grid-auto-columns: 8.4rem !important;
+  gap: 0.7rem !important;
+  padding-top: 0.35rem !important;
+}
+
+.screen-gallery .capture-list-item {
+  position: relative;
+  overflow: hidden;
+  min-height: 7.25rem !important;
+  padding: 4.1rem 0.65rem 0.55rem !important;
+  border-color: rgba(102, 255, 241, 0.4) !important;
+  background:
+    linear-gradient(180deg, rgba(2, 16, 20, 0.08), rgba(2, 16, 20, 0.88)),
+    radial-gradient(circle at 45% 24%, rgba(79, 220, 91, 0.38), transparent 28%),
+    radial-gradient(circle at 78% 32%, rgba(42, 125, 74, 0.4), transparent 26%),
+    linear-gradient(135deg, rgba(16, 118, 108, 0.95), rgba(2, 33, 45, 0.96)) !important;
+}
+
+.screen-gallery .capture-list-item::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4.2rem;
+  background:
+    radial-gradient(circle at 30% 50%, rgba(247, 88, 60, 0.9) 0 0.22rem, transparent 0.28rem),
+    linear-gradient(135deg, rgba(77, 202, 71, 0.45), rgba(5, 58, 62, 0.1));
+  opacity: 0.85;
+  content: "";
+}
+
+.screen-gallery .capture-list-item span,
+.screen-gallery .capture-list-item strong,
+.screen-gallery .capture-list-item small {
+  position: relative;
+  z-index: 1;
+}
+
+.screen-gallery .capture-list-item strong {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.screen-gallery .viewer-frame {
+  min-height: 23rem !important;
+}
+
+.screen-gallery .viewer-frame img {
+  min-height: 23rem !important;
+  object-fit: cover !important;
+}
+
+@media (max-width: 420px) {
+  .screen-dashboard .snapshot-card {
+    margin-top: 1rem !important;
+  }
+
+  .screen-live .live-control-tray {
+    margin-left: 0.7rem !important;
+    margin-right: 0.7rem !important;
+  }
+
+  .screen-live .live-control-tray button {
+    font-size: 0.68rem !important;
+  }
+}
+
+/* Avoid platform-missing emoji glyphs in live controls; reference-like text buttons are cleaner than fallback boxes. */
+.screen-live .live-control-tray button::before {
+  display: none !important;
+  content: none !important;
+}
+
+.screen-live .live-control-tray {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.screen-live .live-control-tray button {
+  font-size: 0.82rem !important;
+}
