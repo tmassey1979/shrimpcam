@@ -98,6 +98,7 @@ type SettingsResponse = {
     streamFramesPerSecond: number;
     reconnectRetryAttempts: number;
     reconnectBackoffSeconds: number;
+    alwaysOnStreamEnabled: boolean;
   };
   capture: {
     enabled: boolean;
@@ -225,7 +226,7 @@ function App() {
     : "Offline shell active. Cached content may be stale.";
 
   return (
-    <div className="app-shell">
+    <div className={auth.isAuthenticated ? "app-shell app-shell-authenticated" : "app-shell"}>
       <a className="skip-link" href="#main-content">
         Skip to main content
       </a>
@@ -261,13 +262,15 @@ function App() {
           </div>
         ) : null}
 
-        <section className="shell-status-card" aria-label="Session and install status">
-          <div>
-            <p className="eyebrow">{auth.isAuthenticated ? "Session active" : "Sign-in required"}</p>
-            <p>{shellMessage}</p>
-          </div>
-          {!installPrompt.isInstalled ? <InstallPromptPanel installPrompt={installPrompt} /> : null}
-        </section>
+        {!auth.isAuthenticated ? (
+          <section className="shell-status-card" aria-label="Session and install status">
+            <div>
+              <p className="eyebrow">Sign-in required</p>
+              <p>{shellMessage}</p>
+            </div>
+            {!installPrompt.isInstalled ? <InstallPromptPanel installPrompt={installPrompt} /> : null}
+          </section>
+        ) : null}
 
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -1642,6 +1645,7 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
   const camera = state.health?.components.camera;
   const storage = state.health?.components.storage;
   const database = state.health?.components.database;
+  const isAllDaySchedule = form ? isCaptureWindowAllDay(form.capture) : false;
 
   return (
     <ScreenFrame
@@ -1691,9 +1695,7 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
               <article>
                 <span>Timelapse</span>
                 <strong>{form.capture.enabled ? `${form.capture.intervalMinutes} min` : "Paused"}</strong>
-                <small>
-                  UTC {form.capture.activeStartHourUtc}:00-{form.capture.activeEndHourUtc}:00
-                </small>
+                <small>{describeCaptureWindow(form.capture)}</small>
               </article>
               <article>
                 <span>Stream</span>
@@ -1735,13 +1737,40 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
                 />
                 <FieldError message={state.errors["capture.intervalMinutes"]} />
               </label>
+              <div className="schedule-window-card">
+                <div>
+                  <strong>Timelapse active window</strong>
+                  <span>
+                    Scheduled captures only run inside this UTC window. Use all day when you want captures to keep running overnight or right now.
+                  </span>
+                </div>
+                <label className="toggle-row">
+                  <span>Active all day</span>
+                  <input
+                    type="checkbox"
+                    checked={isAllDaySchedule}
+                    onChange={(event) =>
+                      updateForm((current) => ({
+                        ...current,
+                        capture: {
+                          ...current.capture,
+                          activeStartHourUtc: event.target.checked ? 0 : 6,
+                          activeEndHourUtc: event.target.checked ? 24 : 22
+                        }
+                      }))
+                    }
+                  />
+                </label>
+                <p className="schedule-window-hint">{describeCaptureWindow(form.capture)}</p>
+              </div>
               <div className="settings-grid">
                 <label>
-                  <span>Active start UTC</span>
+                  <span>Start hour UTC</span>
                   <input
                     type="number"
                     min="0"
                     max="23"
+                    disabled={isAllDaySchedule}
                     value={form.capture.activeStartHourUtc}
                     onChange={(event) =>
                       updateForm((current) => ({
@@ -1750,14 +1779,16 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
                       }))
                     }
                   />
+                  <small>0-23. Disabled when active all day is on.</small>
                   <FieldError message={state.errors["capture.activeStartHourUtc"]} />
                 </label>
                 <label>
-                  <span>Active end UTC</span>
+                  <span>End hour UTC</span>
                   <input
                     type="number"
                     min="1"
                     max="24"
+                    disabled={isAllDaySchedule}
                     value={form.capture.activeEndHourUtc}
                     onChange={(event) =>
                       updateForm((current) => ({
@@ -1766,6 +1797,7 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
                       }))
                     }
                   />
+                  <small>1-24. Use 24 for midnight at the end of the day.</small>
                   <FieldError message={state.errors["capture.activeEndHourUtc"]} />
                 </label>
               </div>
@@ -2055,6 +2087,23 @@ function formatCameraOption(camera: CameraOption) {
   return camera.displayName === camera.devicePath
     ? camera.displayName
     : `${camera.displayName} (${camera.devicePath})`;
+}
+
+function isCaptureWindowAllDay(capture: SettingsResponse["capture"]) {
+  return capture.activeStartHourUtc === 0 && capture.activeEndHourUtc === 24;
+}
+
+function describeCaptureWindow(capture: SettingsResponse["capture"]) {
+  if (isCaptureWindowAllDay(capture)) {
+    return "Active all day";
+  }
+
+  return `Active UTC ${formatUtcHour(capture.activeStartHourUtc)}-${formatUtcHour(capture.activeEndHourUtc)}`;
+}
+
+function formatUtcHour(hour: number) {
+  const normalized = hour === 24 ? 0 : hour;
+  return `${normalized.toString().padStart(2, "0")}:00`;
 }
 
 function validateSettings(settings: SettingsResponse) {
