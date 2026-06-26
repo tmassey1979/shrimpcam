@@ -4789,7 +4789,7 @@ main {
 }
 
 .app-shell:has(.screen-settings) .bottom-nav {
-  display: none !important;
+  display: grid !important;
 }
 
 .screen-settings .settings-form-header .primary-button {
@@ -5300,4 +5300,82 @@ main {
 
 .screen-dashboard .quick-actions-card {
   margin-bottom: 0.6rem !important;
+}
+
+/* Large-screen containment: keep the reference phone composition intact on desktop. */
+html,
+body,
+#root {
+  overflow-x: hidden;
+}
+
+@media (min-width: 760px) {
+  body {
+    background:
+      radial-gradient(circle at 12% 16%, rgba(70, 240, 222, 0.18), transparent 28rem),
+      radial-gradient(circle at 88% 20%, rgba(255, 144, 96, 0.16), transparent 30rem),
+      linear-gradient(145deg, #042532 0%, #06485b 46%, #03242f 100%) !important;
+  }
+
+  .app-shell {
+    width: min(100%, 31.5rem) !important;
+    max-width: 31.5rem !important;
+    margin-inline: auto !important;
+    padding-inline: 1rem !important;
+  }
+
+  .app-shell main,
+  .app-shell .screen {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .app-shell-authenticated {
+    padding-bottom: var(--bottom-nav-clearance) !important;
+  }
+
+  .screen-live .stream-frame {
+    margin-inline: 0 !important;
+    border-radius: 1.55rem !important;
+  }
+
+  .screen-live .live-control-tray {
+    margin-inline: 0.8rem !important;
+  }
+
+  .bottom-nav {
+    left: 50% !important;
+    right: auto !important;
+    width: min(29.5rem, calc(100vw - 2rem)) !important;
+    max-width: calc(100vw - 2rem) !important;
+    transform: translateX(-50%) !important;
+  }
+
+  .screen-settings .settings-form-header .primary-button {
+    left: 50% !important;
+    width: min(23rem, calc(100vw - 4rem)) !important;
+    transform: translateX(-50%) !important;
+  }
+}
+
+@media (min-width: 1100px) {
+  .app-shell {
+    min-height: calc(100svh - 2.5rem) !important;
+    margin-block: 1.25rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 2.25rem;
+    box-shadow:
+      0 2.5rem 6rem rgba(0, 18, 24, 0.42),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+
+  .app-shell::before,
+  .app-shell::after {
+    position: absolute !important;
+  }
+
+  .screen-live .stream-frame,
+  .screen-live .stream-frame img {
+    min-height: 34rem !important;
+  }
 }
