@@ -7026,3 +7026,162 @@ body,
   font-size: 0.86rem !important;
   text-align: center;
 }
+
+/* Reference parity pass: lean harder into aquarium imagery and compact phone composition. */
+.app-shell-authenticated {
+  background:
+    linear-gradient(180deg, rgba(5, 151, 154, 0.9) 0%, rgba(2, 47, 58, 0.96) 54%, rgba(1, 24, 35, 0.98) 100%),
+    url("./assets/ref-bottom-reef.png") center bottom / 100% auto no-repeat !important;
+}
+
+.app-shell-authenticated::before {
+  background:
+    radial-gradient(circle at 42% 7%, rgba(255, 255, 255, 0.16), transparent 2.6rem),
+    radial-gradient(circle at 46% 9.5%, rgba(255, 255, 255, 0.11), transparent 0.45rem),
+    linear-gradient(180deg, rgba(15, 183, 186, 0.24), transparent 36%),
+    url("./assets/ref-bottom-reef.png") center bottom / 115% auto no-repeat !important;
+  opacity: 0.74 !important;
+}
+
+.reference-screen-header::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 0 0 2rem 2rem;
+  background:
+    linear-gradient(180deg, rgba(5, 146, 154, 0.08), rgba(3, 48, 62, 0.24)),
+    url("./assets/ref-settings-camera.png") center 18% / cover no-repeat;
+  content: "";
+  mask-image: linear-gradient(180deg, #000 0 44%, transparent 100%);
+  opacity: 0.28;
+  pointer-events: none;
+}
+
+.screen-dashboard .reference-screen-header::after {
+  background:
+    linear-gradient(180deg, rgba(6, 158, 161, 0.18), rgba(3, 48, 62, 0.1)),
+    url("./assets/ref-bottom-reef.png") center bottom / 120% auto no-repeat;
+  opacity: 0.36;
+}
+
+.screen-live .reference-screen-header::after,
+.screen-gallery .reference-screen-header::after,
+.screen-settings .reference-screen-header::after {
+  opacity: 0.42;
+}
+
+.reference-shrimp-mark {
+  width: 4.1rem !important;
+  height: 3.4rem !important;
+  transform: none !important;
+}
+
+.reference-shrimp-mark::before {
+  top: 1.02rem !important;
+  left: 0.42rem !important;
+  width: 2.65rem !important;
+  height: 1.18rem !important;
+  border-radius: 62% 45% 55% 38% !important;
+  background:
+    radial-gradient(circle at 88% 23%, #102633 0 0.08rem, transparent 0.09rem),
+    repeating-linear-gradient(92deg, #ff6539 0 0.42rem, #ffd7bb 0.42rem 0.68rem),
+    linear-gradient(135deg, #ff7a48, #ec3f2f) !important;
+}
+
+.reference-shrimp-mark::after {
+  top: 0.98rem !important;
+  left: 3rem !important;
+  width: 1.18rem !important;
+  height: 1.08rem !important;
+  border-top: 0.13rem solid #ff9a66 !important;
+  border-right: 0.13rem solid #ff9a66 !important;
+  border-radius: 0 90% 0 0 !important;
+  box-shadow:
+    -2.18rem 0.78rem 0 -0.39rem #ff744b,
+    -1.78rem 0.93rem 0 -0.41rem #ff744b,
+    -1.36rem 0.78rem 0 -0.42rem #ff744b,
+    -0.18rem 0.1rem 0 -0.05rem #ff9a66 !important;
+}
+
+.screen-dashboard .reference-screen-header {
+  min-height: 8.15rem !important;
+  padding-top: 3.1rem !important;
+}
+
+.screen-dashboard .dashboard-overview {
+  gap: 0.62rem !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card {
+  min-height: 6.65rem !important;
+  border-radius: 1.1rem !important;
+  padding: 0.82rem !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card::before {
+  width: 2.95rem !important;
+  height: 2.95rem !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card strong {
+  font-size: clamp(1.38rem, 4.7vw, 1.78rem) !important;
+}
+
+.screen-dashboard .storage-usage-card {
+  min-height: 8.35rem !important;
+  border-radius: 1.25rem !important;
+}
+
+.screen-dashboard .snapshot-card {
+  margin-top: 0.65rem !important;
+  border-radius: 1.25rem !important;
+  padding: 0.9rem !important;
+}
+
+.screen-dashboard .snapshot-preview {
+  min-height: clamp(13.5rem, 49vw, 18rem) !important;
+}
+
+.screen-dashboard .quick-actions-card {
+  margin-top: -1.35rem !important;
+}
+
+.screen-dashboard .quick-action-tile {
+  min-height: 7.15rem !important;
+  border-radius: 1rem !important;
+}
+
+.screen-gallery .reference-brand-copy h2 {
+  font-size: clamp(2.05rem, 7vw, 2.62rem) !important;
+}
+
+.screen-gallery .reference-shrimp-mark::before,
+.screen-live .reference-shrimp-mark::before,
+.screen-settings .reference-shrimp-mark::before {
+  transform: scale(0.82);
+  transform-origin: left center;
+}
+
+.screen-gallery .reference-shrimp-mark::after,
+.screen-live .reference-shrimp-mark::after,
+.screen-settings .reference-shrimp-mark::after {
+  transform: scale(0.82) rotate(-12deg) !important;
+  transform-origin: left center;
+}
+
+.screen-settings .settings-form::after {
+  display: none !important;
+}
+
+.screen-settings .status-panel {
+  margin-top: 0.65rem !important;
+}
+
+@media (min-width: 760px) {
+  .app-shell-authenticated {
+    max-width: 35rem !important;
+    min-height: 100svh !important;
+    border-inline: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 1px rgba(8, 255, 239, 0.08), 0 2rem 5rem rgba(0, 0, 0, 0.24);
+  }
+}
