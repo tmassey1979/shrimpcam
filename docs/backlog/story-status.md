@@ -6,6 +6,7 @@
 
 | Story | Completed On | Commit |
 | --- | --- | --- |
+| SC-PWA-18 | 2026-06-25 | f70214f |
 | SC-CAM-19 | 2026-06-25 | 0a7fe1c |
 | SC-CAM-18 | 2026-06-25 | 10d96c0 |
 | SC-PWA-17 | 2026-06-25 | bd5c442 |
