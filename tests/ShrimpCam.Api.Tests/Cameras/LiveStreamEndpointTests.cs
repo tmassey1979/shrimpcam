@@ -109,6 +109,31 @@ public sealed class LiveStreamEndpointTests
 
     [Fact]
     [Trait("Category", "Api")]
+    public async Task Live_stream_endpoint_accepts_query_token_for_browser_image_streams()
+    {
+        var rootPath = CreateTempRoot();
+
+        try
+        {
+            var token = await SeedUserAndLoginAsync(rootPath, "shrimp-viewer", "ViewerPass123", "Viewer").ConfigureAwait(true);
+            await using var factory = new LiveStreamWebApplicationFactory(rootPath, shouldFail: false);
+            using var client = factory.CreateClient();
+
+            var response = await client
+                .GetAsync($"/stream/live?access_token={Uri.EscapeDataString(token)}", HttpCompletionOption.ResponseHeadersRead)
+                .ConfigureAwait(true);
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.Content.Headers.ContentType?.MediaType.Should().Be("multipart/x-mixed-replace");
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
     public async Task Live_stream_endpoint_returns_unauthorized_for_anonymous_callers()
     {
         var rootPath = CreateTempRoot();

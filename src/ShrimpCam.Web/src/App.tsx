@@ -1360,6 +1360,9 @@ function LiveViewScreen({ auth }: { auth: AuthContext }) {
   const [lastCaptureFileName, setLastCaptureFileName] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>("Connecting to the camera stream...");
   const streamUnavailable = streamStatus === "offline";
+  const liveStreamUrl = auth.session?.token
+    ? `/stream/live?view=${streamVersion}&access_token=${encodeURIComponent(auth.session.token)}`
+    : `/stream/live?view=${streamVersion}`;
 
   function retryStream() {
     setStreamStatus("connecting");
@@ -1422,7 +1425,7 @@ function LiveViewScreen({ auth }: { auth: AuthContext }) {
               setStreamStatus("online");
               setMessage("Live stream is online.");
             }}
-            src={`/stream/live?view=${streamVersion}`}
+            src={liveStreamUrl}
           />
         </div>
 

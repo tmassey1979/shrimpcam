@@ -101,7 +101,7 @@ internal sealed class SharedCameraStreamHub(
             StopPumpLocked();
             _currentOptions = CloneOptions(options);
             _lastFailureReason = null;
-            _pumpCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            _pumpCancellation = new CancellationTokenSource();
             _pumpTask = Task.Run(() => RunPumpAsync(_currentOptions, _pumpCancellation.Token), CancellationToken.None);
             return Task.CompletedTask;
         }

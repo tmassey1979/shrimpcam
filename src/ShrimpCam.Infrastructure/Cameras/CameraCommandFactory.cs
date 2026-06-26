@@ -83,7 +83,7 @@ internal sealed class CameraCommandFactory : ICameraCommandFactory
     private static string QuoteLinuxSource(string source) => QuotePath(source);
 
     private static string QuoteWindowsSource(string source) =>
-        "\"" + source.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal) + "\"";
+        "\"" + source.Replace("\"", "\\\"", StringComparison.Ordinal) + "\"";
 
     private static string QuotePath(string value) =>
         "\"" + value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal) + "\"";

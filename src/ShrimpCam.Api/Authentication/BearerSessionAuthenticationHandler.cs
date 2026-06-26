@@ -21,7 +21,7 @@ internal sealed class BearerSessionAuthenticationHandler(
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var token = GetBearerToken() ?? GetSessionCookieToken();
+        var token = GetBearerToken() ?? GetSessionCookieToken() ?? GetLiveStreamQueryToken();
         if (string.IsNullOrWhiteSpace(token))
         {
             return AuthenticateResult.NoResult();
@@ -64,6 +64,19 @@ internal sealed class BearerSessionAuthenticationHandler(
         Request.Cookies.TryGetValue(SessionCookieName, out var token)
             ? token
             : null;
+
+    private string? GetLiveStreamQueryToken()
+    {
+        if (!HttpMethods.IsGet(Request.Method) ||
+            !Request.Path.Equals("/stream/live", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        return Request.Query.TryGetValue("access_token", out var token)
+            ? token.ToString()
+            : null;
+    }
 
     protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
     {

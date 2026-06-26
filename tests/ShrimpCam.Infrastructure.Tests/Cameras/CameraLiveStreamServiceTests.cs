@@ -90,6 +90,46 @@ public sealed class CameraLiveStreamServiceTests
 
     [Fact]
     [Trait("Category", "Unit")]
+    public async Task Subscriber_cancellation_token_is_not_used_to_control_shared_camera_process()
+    {
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var processStreamRunner = Substitute.For<IProcessStreamRunner>();
+        var stream = new BlockingAppendStream();
+        var processStream = new StubProcessStream(stream, new ProcessResult(0, string.Empty, string.Empty));
+        var options = CreateOptions();
+        var command = new ProcessRequest("ffmpeg", "-stream");
+        var processCancellationToken = CancellationToken.None;
+        using var viewerCancellation = new CancellationTokenSource();
+
+        commandFactory.BuildLiveStreamCommand(Arg.Any<CameraOptions>()).Returns(command);
+        processStreamRunner
+            .StartAsync(command, Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                processCancellationToken = call.ArgAt<CancellationToken>(1);
+                return processStream;
+            });
+
+        var hub = CreateHub(commandFactory, cameraStatusService, processStreamRunner);
+        var service = new CameraLiveStreamService(hub);
+
+        var firstSubscriptionTask = service.StartAsync(options, viewerCancellation.Token);
+        await stream.AppendAsync("--shrimpcam\r\nContent-Type: image/jpeg\r\n\r\nframe-01\r\n").ConfigureAwait(true);
+        var firstSubscription = await firstSubscriptionTask.ConfigureAwait(true);
+
+        viewerCancellation.Cancel();
+
+        firstSubscription.Succeeded.Should().BeTrue();
+        processCancellationToken.IsCancellationRequested.Should().BeFalse();
+        await processStreamRunner.Received(1).StartAsync(command, Arg.Any<CancellationToken>()).ConfigureAwait(true);
+
+        await firstSubscription.Session!.DisposeAsync().ConfigureAwait(true);
+        await hub.DisposeAsync().ConfigureAwait(true);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
     public async Task Busy_camera_returns_failure_without_starting_process()
     {
         var commandFactory = Substitute.For<ICameraCommandFactory>();
