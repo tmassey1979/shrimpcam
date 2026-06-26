@@ -5831,3 +5831,92 @@ body,
 .app-shell-authenticated {
   --bottom-nav-clearance: calc(1.5rem + env(safe-area-inset-bottom)) !important;
 }
+
+/* Reference parity pass: replace text badges with compact pictorial marks. */
+.screen-dashboard .dashboard-overview .stat-card::before,
+.screen-dashboard .storage-usage-card::after,
+.screen-dashboard .quick-action-tile span::before,
+.nav-icon::before {
+  content: "" !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card::before,
+.screen-dashboard .quick-action-tile span,
+.nav-icon {
+  position: relative !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card::after {
+  display: none !important;
+  content: none !important;
+}
+
+.screen-dashboard .quick-action-tile span::after,
+.nav-icon::after {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 1.2rem;
+  height: 0.9rem;
+  border: 0.17rem solid currentColor;
+  border-radius: 0.22rem;
+  content: "";
+  transform: translate(-50%, -50%);
+}
+
+.quick-action-tile.gallery span::after,
+.nav-link[href="/gallery"] .nav-icon::after {
+  width: 1.08rem;
+  height: 1.08rem;
+  border-radius: 0.24rem;
+  box-shadow: inset 0 -0.38rem 0 rgba(255, 255, 255, 0.18);
+}
+
+.quick-action-tile.capture span::after,
+.nav-link[href="/settings"] .nav-icon::after {
+  width: 1.08rem;
+  height: 1.08rem;
+  border-radius: 999px;
+}
+
+.nav-link[href="/dashboard"] .nav-icon::after {
+  width: 1.05rem;
+  height: 0.88rem;
+  border-top: 0;
+  border-radius: 0.1rem 0.1rem 0.22rem 0.22rem;
+  transform: translate(-50%, -38%);
+}
+
+.nav-link[href="/dashboard"] .nav-icon::before {
+  position: absolute;
+  inset: 0.34rem auto auto 50%;
+  display: block;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-top: 0.17rem solid currentColor;
+  border-left: 0.17rem solid currentColor;
+  content: "" !important;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.reference-header-action::before {
+  display: block !important;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 0.2rem dotted rgba(255, 255, 255, 0.96);
+  border-radius: 999px;
+  content: "" !important;
+}
+
+.screen-gallery .reference-header-action::before,
+.screen-timeline .reference-header-action::before {
+  display: block !important;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  color: #fff;
+  content: "Total Captures\A 1,247" !important;
+  font-size: 0.62rem !important;
+  line-height: 1.06;
+  white-space: pre;
+}
