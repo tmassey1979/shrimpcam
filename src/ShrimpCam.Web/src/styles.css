@@ -7039,8 +7039,8 @@ body,
     radial-gradient(circle at 42% 7%, rgba(255, 255, 255, 0.16), transparent 2.6rem),
     radial-gradient(circle at 46% 9.5%, rgba(255, 255, 255, 0.11), transparent 0.45rem),
     linear-gradient(180deg, rgba(15, 183, 186, 0.24), transparent 36%),
-    url("./assets/ref-bottom-reef.png") center bottom / 115% auto no-repeat !important;
-  opacity: 0.74 !important;
+    url("./assets/ref-bottom-reef.png") center calc(100% + 1.8rem) / 116% auto no-repeat !important;
+  opacity: 0.48 !important;
 }
 
 .reference-screen-header::after {
@@ -7184,4 +7184,155 @@ body,
     border-inline: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 0 0 1px rgba(8, 255, 239, 0.08), 0 2rem 5rem rgba(0, 0, 0, 0.24);
   }
+}
+
+/* Reference parity pass: reduce dashboard drift after adding aquarium imagery. */
+.screen-dashboard .reference-screen-header {
+  grid-template-columns: 3.9rem minmax(0, 1fr) 3.9rem !important;
+  min-height: 7.25rem !important;
+  margin-bottom: 0.35rem !important;
+  padding-top: 2.95rem !important;
+}
+
+.screen-dashboard .reference-shrimp-mark {
+  width: 3.7rem !important;
+  height: 2.7rem !important;
+}
+
+.screen-dashboard .reference-brand-copy h2 {
+  font-size: clamp(2.05rem, 7vw, 2.72rem) !important;
+  line-height: 0.9 !important;
+}
+
+.screen-dashboard .reference-brand-copy p {
+  font-size: clamp(0.82rem, 2.75vw, 1rem) !important;
+}
+
+.screen-dashboard .reference-header-action {
+  width: 3.25rem !important;
+  height: 3.25rem !important;
+}
+
+.screen-dashboard .dashboard-overview {
+  margin-top: -0.1rem !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card {
+  grid-template-columns: 3rem minmax(0, 1fr) !important;
+  min-height: 5.95rem !important;
+  padding: 0.72rem !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card::before {
+  width: 2.72rem !important;
+  height: 2.72rem !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card .eyebrow {
+  font-size: clamp(0.68rem, 2.2vw, 0.84rem) !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card strong {
+  font-size: clamp(1.18rem, 4.35vw, 1.62rem) !important;
+}
+
+.screen-dashboard .dashboard-overview .stat-card span {
+  font-size: clamp(0.67rem, 2.15vw, 0.82rem) !important;
+}
+
+.screen-dashboard .storage-usage-card {
+  min-height: 7.7rem !important;
+  grid-template-columns: 5.2rem minmax(0, 1fr) !important;
+  padding: 0.9rem 1rem !important;
+}
+
+.screen-dashboard .storage-ring {
+  width: 4.6rem !important;
+  height: 4.6rem !important;
+}
+
+.screen-dashboard .storage-copy h3 {
+  font-size: 1.12rem !important;
+}
+
+.screen-dashboard .storage-copy p,
+.screen-dashboard .storage-copy small {
+  font-size: 0.82rem !important;
+}
+
+.screen-dashboard .snapshot-card {
+  margin-top: 0.25rem !important;
+  padding: 0.8rem !important;
+}
+
+.screen-dashboard .snapshot-preview {
+  min-height: clamp(12.2rem, 45vw, 16rem) !important;
+}
+
+.screen-dashboard .quick-actions-card {
+  margin-top: -2.25rem !important;
+  padding-bottom: 5rem !important;
+}
+
+.screen-dashboard .quick-action-tile {
+  min-height: 6.45rem !important;
+  padding: 0.6rem 0.45rem !important;
+}
+
+.screen-dashboard .quick-action-tile span {
+  width: 2.8rem !important;
+  height: 2.8rem !important;
+}
+
+.screen-dashboard .quick-action-tile strong {
+  font-size: clamp(0.95rem, 3.3vw, 1.12rem) !important;
+}
+
+.screen-dashboard .quick-action-tile small {
+  font-size: 0.78rem !important;
+}
+
+/* Reference parity pass: make settings save/status read like one intentional footer section. */
+.screen-settings .settings-form-header {
+  margin-top: 0.55rem !important;
+}
+
+.screen-settings .settings-form-header .primary-button::before {
+  display: inline-block;
+  width: 1.08rem;
+  height: 1.08rem;
+  margin-right: 0.58rem;
+  border: 0.16rem solid rgba(255, 255, 255, 0.95);
+  border-top-width: 0.36rem;
+  border-radius: 0.14rem;
+  content: "";
+  vertical-align: -0.18rem;
+}
+
+.screen-settings .status-panel {
+  padding: 0.9rem !important;
+  border-radius: 1.35rem !important;
+}
+
+.screen-settings .status-panel > div:first-child {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 0.7rem !important;
+  margin-bottom: 0.72rem !important;
+}
+
+.screen-settings .status-panel > div:first-child .eyebrow {
+  display: block !important;
+  margin: 0 !important;
+  color: rgba(232, 255, 252, 0.78) !important;
+  font-size: 0.9rem !important;
+  letter-spacing: -0.04em !important;
+  text-transform: none !important;
+}
+
+.screen-settings .status-panel .secondary-button {
+  min-height: 2.55rem !important;
+  padding: 0 0.9rem !important;
+  border-radius: 999px !important;
 }
