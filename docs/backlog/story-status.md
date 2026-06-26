@@ -6,6 +6,7 @@
 
 | Story | Completed On | Commit |
 | --- | --- | --- |
+| SC-OPS-323 | 2026-06-25 | b723721 |
 | SC-OPS-322 | 2026-06-25 | b7126bb |
 | SC-CAM-20 | 2026-06-25 | ab64fd0 |
 | SC-PWA-21 | 2026-06-25 | e9af30e |
