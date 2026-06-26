@@ -769,9 +769,10 @@ app.MapPost(
 
 app.MapGet(
     "/stream/live",
-    async (ICameraLiveStreamService liveStreamService, IOptions<ShrimpCamOptions> options, CancellationToken cancellationToken) =>
+    async (ICameraLiveStreamService liveStreamService, IEditableSettingsService settingsService, CancellationToken cancellationToken) =>
     {
-        var result = await liveStreamService.StartAsync(options.Value.Camera, cancellationToken).ConfigureAwait(false);
+        var settings = await settingsService.GetCurrentAsync(cancellationToken).ConfigureAwait(false);
+        var result = await liveStreamService.StartAsync(settings.Camera, cancellationToken).ConfigureAwait(false);
 
         if (!result.Succeeded)
         {

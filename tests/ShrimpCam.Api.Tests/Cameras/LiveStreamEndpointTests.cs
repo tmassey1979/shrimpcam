@@ -134,6 +134,31 @@ public sealed class LiveStreamEndpointTests
 
     [Fact]
     [Trait("Category", "Api")]
+    public async Task Live_stream_endpoint_uses_saved_camera_settings()
+    {
+        var rootPath = CreateTempRoot();
+
+        try
+        {
+            var token = await SeedUserAndLoginAsync(rootPath, "shrimp-viewer", "ViewerPass123", "Viewer").ConfigureAwait(true);
+            await SeedCameraSourceAsync(rootPath, "/dev/saved-video").ConfigureAwait(true);
+            await using var factory = new LiveStreamWebApplicationFactory(rootPath, shouldFail: false);
+            using var client = factory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await client.GetAsync("/stream/live", HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(true);
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            factory.StreamService.LastOptions?.Source.Should().Be("/dev/saved-video");
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
     public async Task Live_stream_endpoint_returns_unauthorized_for_anonymous_callers()
     {
         var rootPath = CreateTempRoot();
@@ -184,6 +209,17 @@ public sealed class LiveStreamEndpointTests
                 CancellationToken.None)
             .ConfigureAwait(true);
         await roleRepository.AssignAsync(new UserRoleRecord(userId, roleName, createdAtUtc), CancellationToken.None).ConfigureAwait(true);
+    }
+
+    private static async Task SeedCameraSourceAsync(string rootPath, string source)
+    {
+        var updatedAtUtc = new DateTimeOffset(2026, 06, 25, 04, 00, 00, TimeSpan.Zero);
+        using var provider = BuildProvider(rootPath);
+        var settingsRepository = provider.GetRequiredService<ISettingsRepository>();
+
+        await settingsRepository
+            .UpsertAsync(new PersistedSetting("camera.source", source, "Camera source", updatedAtUtc), CancellationToken.None)
+            .ConfigureAwait(true);
     }
 
     private static ServiceProvider BuildProvider(string rootPath)
@@ -251,6 +287,8 @@ public sealed class LiveStreamEndpointTests
 
     private sealed class LiveStreamWebApplicationFactory(string rootPath, bool shouldFail) : WebApplicationFactory<Program>
     {
+        public StubCameraLiveStreamService StreamService { get; } = new(shouldFail);
+
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("Development");
@@ -269,16 +307,19 @@ public sealed class LiveStreamEndpointTests
             builder.ConfigureTestServices(
                 services =>
                 {
-                    services.AddSingleton<ICameraLiveStreamService>(new StubCameraLiveStreamService(shouldFail));
+                    services.AddSingleton<ICameraLiveStreamService>(StreamService);
                 });
         }
     }
 
-    private sealed class StubCameraLiveStreamService(bool shouldFail) : ICameraLiveStreamService
+    internal sealed class StubCameraLiveStreamService(bool shouldFail) : ICameraLiveStreamService
     {
+        public CameraOptions? LastOptions { get; private set; }
+
         public Task<CameraLiveStreamStartResult> StartAsync(CameraOptions options, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            LastOptions = options;
 
             if (shouldFail)
             {
