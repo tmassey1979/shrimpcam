@@ -6,9 +6,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Last refreshed | 2026-06-25 19:57:29 -05:00 |
-| Total stories | 67 |
-| Accepted stories | 67 |
+| Last refreshed | 2026-06-25 20:02:26 -05:00 |
+| Total stories | 68 |
+| Accepted stories | 68 |
 | Remaining stories | 0 |
 | Overall completion | 100% |
 
@@ -19,17 +19,17 @@
 | Epic 1: Platform Foundation and Quality Gates | 12 | 12 | 100% |
 | Epic 2: Camera, Capture, and Streaming | 15 | 15 | 100% |
 | Epic 3: API, Security, and Operations | 21 | 21 | 100% |
-| Epic 4: PWA Product Experience | 19 | 19 | 100% |
+| Epic 4: PWA Product Experience | 20 | 20 | 100% |
 
 ## Latest Completed Stories
 
 | Story | Title | Epic | Completed On | Commit |
 | --- | --- | --- | --- | --- |
+| SC-PWA-20 | Auth Session Restore, Expiry, And Sign-Out Edge Coverage | Epic 4: PWA Product Experience | 2026-06-25 | 2b62d9a |
 | SC-PWA-19 | PWA Manifest And Service Worker Installability Verification | Epic 4: PWA Product Experience | 2026-06-25 | ffc02d7 |
 | SC-PWA-18 | Reference-Led Aquarium Visual Fidelity Pass | Epic 4: PWA Product Experience | 2026-06-25 | f70214f |
 | SC-CAM-19 | Make Scheduled Capture Worker Exception-Resilient | Epic 2: Camera, Capture, and Streaming | 2026-06-25 | 0a7fe1c |
 | SC-CAM-18 | Kill Still-Capture Child Processes On Cancellation And Timeout | Epic 2: Camera, Capture, and Streaming | 2026-06-25 | 10d96c0 |
-| SC-PWA-17 | Automated Accessibility Regression Coverage | Epic 4: PWA Product Experience | 2026-06-25 | bd5c442 |
 
 ## Next Unaccepted Stories
 
