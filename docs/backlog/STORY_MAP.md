@@ -55,6 +55,7 @@ These stories should land before most feature work begins:
 - `SC-CAM-17` Report manual capture health transitions
 - `SC-CAM-18` Kill still-capture child processes on cancellation and timeout
 - `SC-CAM-19` Make scheduled capture worker exception-resilient
+- `SC-CAM-20` Define retry and catch-up semantics for failed scheduled intervals
 - `SC-ASO-309` Audit and security event logging
 - `SC-ASO-310` Degraded startup and runtime resilience
 - `SC-ASO-311` Structured application logs
@@ -95,7 +96,7 @@ These stories should land before most feature work begins:
 
 ## Priority guidance
 
-- `P0`: `SC-PF-001` through `SC-PF-009`, `SC-PF-011`, `SC-PF-012`, `SC-ASO-301` through `SC-ASO-320`, `SC-OPS-321`, `SC-CC-01` through `SC-CC-09`, `SC-CAM-16` through `SC-CAM-19`, `SC-PWA-01` through `SC-PWA-21`
+- `P0`: `SC-PF-001` through `SC-PF-009`, `SC-PF-011`, `SC-PF-012`, `SC-ASO-301` through `SC-ASO-320`, `SC-OPS-321`, `SC-CC-01` through `SC-CC-09`, `SC-CAM-16` through `SC-CAM-20`, `SC-PWA-01` through `SC-PWA-21`
 - `P1`: `SC-ASO-313`, `SC-ASO-314`, `SC-CC-10`
 - `P2`: `SC-CC-11`, `SC-PF-010`
 

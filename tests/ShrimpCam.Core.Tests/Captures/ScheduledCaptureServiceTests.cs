@@ -227,6 +227,119 @@ public sealed class ScheduledCaptureServiceTests
 
     [Fact]
     [Trait("Category", "Unit")]
+    public async Task Failed_interval_is_not_retried_until_the_next_due_interval()
+    {
+        var asyncDelay = Substitute.For<IAsyncDelay>();
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var captureRecordRepository = Substitute.For<ICaptureRecordRepository>();
+        var captureStorage = Substitute.For<ICaptureStorage>();
+        var clock = Substitute.For<IClock>();
+        var fileSystem = Substitute.For<IFileSystem>();
+        var processRunner = Substitute.For<IProcessRunner>();
+        var stateStore = Substitute.For<IScheduledCaptureStateStore>();
+        var options = CreateOptions();
+        var failedInterval = new DateTimeOffset(2026, 06, 24, 12, 00, 00, TimeSpan.Zero);
+
+        clock.UtcNow.Returns(new DateTimeOffset(2026, 06, 24, 12, 03, 00, TimeSpan.Zero));
+        stateStore.LoadAsync(options.Storage, Arg.Any<CancellationToken>())
+            .Returns(new ScheduledCaptureState(failedInterval, ScheduledCaptureOutcome.Failed, ManualCaptureFailureReasons.CameraUnavailable));
+
+        var service = new ScheduledCaptureService(
+            asyncDelay,
+            commandFactory,
+            new AlwaysAvailableCameraResourceCoordinator(),
+            cameraStatusService,
+            captureRecordRepository,
+            captureStorage,
+            clock,
+            fileSystem,
+            processRunner,
+            stateStore);
+
+        var result = await service.RunDueCaptureAsync(options, CancellationToken.None).ConfigureAwait(true);
+
+        result.Outcome.Should().Be(ScheduledCaptureOutcome.Waiting);
+        result.IntervalStartUtc.Should().Be(failedInterval);
+        commandFactory.DidNotReceiveWithAnyArgs().BuildStillCaptureCommand(default!, default!);
+        await processRunner.DidNotReceiveWithAnyArgs().RunAsync(default!, default).ConfigureAwait(true);
+        await stateStore.DidNotReceiveWithAnyArgs().SaveAsync(default!, default!, default).ConfigureAwait(true);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task Scheduler_moves_forward_after_a_failed_interval_without_backfilling()
+    {
+        var asyncDelay = Substitute.For<IAsyncDelay>();
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var captureRecordRepository = Substitute.For<ICaptureRecordRepository>();
+        var captureStorage = Substitute.For<ICaptureStorage>();
+        var clock = Substitute.For<IClock>();
+        var fileSystem = Substitute.For<IFileSystem>();
+        var processRunner = Substitute.For<IProcessRunner>();
+        var stateStore = Substitute.For<IScheduledCaptureStateStore>();
+        var options = CreateOptions();
+        var failedInterval = new DateTimeOffset(2026, 06, 24, 12, 00, 00, TimeSpan.Zero);
+        var nextInterval = new DateTimeOffset(2026, 06, 24, 12, 05, 00, TimeSpan.Zero);
+        var stagedPath = "temp/scheduled.jpg";
+        var command = new ProcessRequest("ffmpeg", "-args");
+        var storedCapture = new StoredCapture(
+            "data/images/2026/06/24/scheduled.jpg",
+            "data/images/2026/06/24/scheduled.json",
+            "2026/06/24/scheduled.jpg",
+            "2026/06/24/scheduled.json",
+            "scheduled.jpg",
+            nextInterval,
+            CaptureSourceTypes.Scheduled);
+
+        clock.UtcNow.Returns(new DateTimeOffset(2026, 06, 24, 12, 08, 00, TimeSpan.Zero));
+        stateStore.LoadAsync(options.Storage, Arg.Any<CancellationToken>())
+            .Returns(new ScheduledCaptureState(failedInterval, ScheduledCaptureOutcome.Failed, ManualCaptureFailureReasons.CameraUnavailable));
+        fileSystem.GetTemporaryFilePath(".jpg").Returns(stagedPath);
+        fileSystem.FileExists(stagedPath).Returns(true);
+        commandFactory.BuildStillCaptureCommand(options.Camera, stagedPath).Returns(command);
+        processRunner.RunAsync(command, Arg.Any<CancellationToken>())
+            .Returns(new ProcessResult(0, string.Empty, string.Empty));
+        captureStorage.StoreAsync(
+                options.Storage,
+                Arg.Is<CaptureStorageRequest>(request =>
+                    request.CapturedAtUtc == nextInterval
+                    && request.SourceType == CaptureSourceTypes.Scheduled),
+                Arg.Any<CancellationToken>())
+            .Returns(storedCapture);
+
+        var service = new ScheduledCaptureService(
+            asyncDelay,
+            commandFactory,
+            new AlwaysAvailableCameraResourceCoordinator(),
+            cameraStatusService,
+            captureRecordRepository,
+            captureStorage,
+            clock,
+            fileSystem,
+            processRunner,
+            stateStore);
+
+        var result = await service.RunDueCaptureAsync(options, CancellationToken.None).ConfigureAwait(true);
+
+        result.Outcome.Should().Be(ScheduledCaptureOutcome.Captured);
+        result.IntervalStartUtc.Should().Be(nextInterval);
+        result.Capture.Should().Be(storedCapture);
+        await stateStore.Received(1).SaveAsync(
+                options.Storage,
+                new ScheduledCaptureState(nextInterval, ScheduledCaptureOutcome.Captured, null),
+                Arg.Any<CancellationToken>())
+            .ConfigureAwait(true);
+        await captureRecordRepository.Received(1)
+            .CreateAsync(
+                Arg.Is<CaptureRecord>(record => record.CapturedAtUtc == nextInterval),
+                Arg.Any<CancellationToken>())
+            .ConfigureAwait(true);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
     public async Task Busy_camera_marks_due_interval_failed_without_starting_capture_process()
     {
         var asyncDelay = Substitute.For<IAsyncDelay>();

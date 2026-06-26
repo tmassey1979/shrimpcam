@@ -476,3 +476,38 @@ Scenario: Scheduler continues after an unexpected exception
   And it attempts the next scheduled iteration
   And health diagnostics report the degraded condition without terminating the background service
 ```
+
+### SC-CAM-20 - Define Retry And Catch-Up Semantics For Failed Scheduled Intervals
+
+**User Story**  
+As a Shrimp Cam operator, I want failed scheduled intervals to have explicit retry and catch-up semantics so that temporary camera failures do not create duplicate capture storms or unexpected backfill after recovery.
+
+**Dependencies**
+- SC-CC-05
+- SC-CAM-16
+- SC-CAM-19
+
+**Test Expectations**
+- Unit tests verify camera command retry attempts happen only within the active scheduled capture run according to configured camera retry settings.
+- Unit tests verify a failed interval is persisted as processed and is not retried again while the clock remains in that same interval.
+- Unit tests verify the scheduler moves forward to the next due interval after a failed interval and does not backfill the older failed slot.
+- Existing worker resilience tests continue to prove unexpected exceptions do not terminate future scheduled iterations.
+
+**Acceptance Criteria**
+
+```gherkin
+Scenario: Failed interval is not retried repeatedly
+  Given a scheduled interval has already failed and been persisted
+  And the clock still falls inside that same interval
+  When the scheduled capture service runs again
+  Then it waits instead of starting another camera process
+  And it does not overwrite scheduled capture state
+
+Scenario: Scheduler moves forward after a failed interval
+  Given a scheduled interval failed previously
+  And the clock reaches the next due interval
+  When the scheduled capture service runs successfully
+  Then it captures the current interval
+  And it does not backfill the older failed interval
+  And it records the current interval as captured
+```
