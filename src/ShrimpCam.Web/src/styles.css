@@ -5579,6 +5579,27 @@ body,
   }
 }
 
+/* Absolute final live edge lock: override earlier duplicated full-bleed attempts. */
+.screen-live .stream-frame {
+  left: 0 !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin-right: calc(50vw - 50%) !important;
+  margin-left: calc(50vw - 50%) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.screen-live .stream-frame img {
+  width: 100vw !important;
+  max-width: none !important;
+  min-width: 100vw !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
 /* Live edge-to-edge lock: this must be last so the real camera feed touches the viewport sides. */
 .app-shell:has(.screen-live).app-shell-authenticated {
   width: 100% !important;
@@ -10724,4 +10745,25 @@ body::after {
     gap: 1.35rem !important;
     align-items: start !important;
   }
+}
+
+/* Absolute final live edge lock: override every earlier full-bleed attempt. */
+.screen-live .stream-frame {
+  left: 0 !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin-right: calc(50vw - 50%) !important;
+  margin-left: calc(50vw - 50%) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.screen-live .stream-frame img {
+  width: 100vw !important;
+  max-width: none !important;
+  min-width: 100vw !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
