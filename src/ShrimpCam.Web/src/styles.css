@@ -7887,6 +7887,7 @@ body::after {
 
 .screen-settings .settings-form fieldset > label,
 .screen-settings .settings-form .settings-grid > label,
+.screen-settings .settings-choice-row,
 .screen-settings .schedule-window-card {
   position: relative !important;
   display: grid !important;
@@ -7904,6 +7905,7 @@ body::after {
 
 .screen-settings .settings-form fieldset > label::before,
 .screen-settings .settings-form .settings-grid > label::before,
+.screen-settings .settings-choice-icon,
 .screen-settings .schedule-window-card::before {
   grid-column: 1 !important;
   grid-row: 1 / span 2 !important;
@@ -7915,6 +7917,22 @@ body::after {
     linear-gradient(135deg, #37e2d3, #158fa8) !important;
   box-shadow: 0 0.65rem 1.2rem rgba(0, 26, 36, 0.2) !important;
   content: "" !important;
+}
+
+.screen-settings .settings-choice-icon {
+  display: block !important;
+}
+
+.screen-settings .settings-choice-icon.hd {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.88)) 50% 50% / 1.35rem 0.92rem no-repeat,
+    linear-gradient(135deg, #3ba9f4, #216bb8) !important;
+}
+
+.screen-settings .settings-choice-icon.fps {
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 0.52rem, rgba(255, 255, 255, 0.9) 0.54rem 0.7rem, transparent 0.72rem),
+    linear-gradient(135deg, #f4a43f, #d26b31) !important;
 }
 
 .screen-settings .settings-form fieldset:nth-of-type(2) > label::before,
@@ -7952,6 +7970,82 @@ body::after {
   color: rgba(220, 247, 245, 0.72) !important;
   font-size: clamp(0.68rem, 2vw, 0.82rem) !important;
   line-height: 1.25 !important;
+}
+
+.screen-settings .settings-choice-copy {
+  grid-column: 2 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.18rem !important;
+  min-width: 0 !important;
+}
+
+.screen-settings .settings-choice-copy strong {
+  color: #fff !important;
+  font-size: clamp(0.88rem, 2.55vw, 1.05rem) !important;
+  font-weight: 950 !important;
+  line-height: 1.05 !important;
+}
+
+.screen-settings .settings-choice-copy small {
+  color: rgba(220, 247, 245, 0.72) !important;
+}
+
+.screen-settings .settings-segmented-control {
+  grid-column: 3 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 0.12rem !important;
+  min-width: 0 !important;
+  padding: 0.18rem !important;
+  overflow: auto hidden !important;
+  border: 1px solid rgba(139, 228, 224, 0.2) !important;
+  border-radius: 999px !important;
+  background: rgba(0, 30, 43, 0.56) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  scrollbar-width: none !important;
+}
+
+.screen-settings .settings-segmented-control::-webkit-scrollbar {
+  display: none !important;
+}
+
+.screen-settings .settings-segmented-control button {
+  flex: 0 0 auto !important;
+  min-width: 2.45rem !important;
+  min-height: clamp(2.18rem, 6.2vw, 2.65rem) !important;
+  padding: 0.4rem 0.68rem !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: rgba(226, 249, 247, 0.78) !important;
+  font: inherit !important;
+  font-size: clamp(0.78rem, 2.2vw, 0.92rem) !important;
+  font-weight: 850 !important;
+  cursor: pointer !important;
+}
+
+.screen-settings .settings-segmented-control button.active {
+  background: linear-gradient(135deg, #41e6df, #1fb8d0) !important;
+  color: #fff !important;
+  box-shadow: 0 0.55rem 1rem rgba(25, 190, 210, 0.28) !important;
+}
+
+.screen-settings .resolution-control button {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 0.05rem !important;
+  min-width: 4.4rem !important;
+  line-height: 1.05 !important;
+}
+
+.screen-settings .resolution-control button small {
+  color: inherit !important;
+  font-size: 0.58rem !important;
+  font-weight: 750 !important;
+  opacity: 0.72 !important;
 }
 
 .screen-settings .settings-form input,
@@ -8062,6 +8156,42 @@ body::after {
   background: rgba(38, 154, 89, 0.32) !important;
   color: #67ee87 !important;
   font-size: 0.82rem !important;
+}
+
+@media (max-width: 560px) {
+  .screen-settings .settings-choice-row {
+    grid-template-columns: clamp(3.1rem, 12vw, 3.55rem) minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    align-items: start !important;
+    padding: 0.72rem !important;
+  }
+
+  .screen-settings .settings-choice-icon {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  .screen-settings .settings-choice-copy {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    padding-top: 0.18rem !important;
+  }
+
+  .screen-settings .settings-segmented-control {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    margin-top: 0.62rem !important;
+  }
+
+  .screen-settings .settings-segmented-control button {
+    min-width: 3.25rem !important;
+  }
+
+  .screen-settings .resolution-control button {
+    min-width: 4.8rem !important;
+  }
 }
 
 /* Final shared header parity pass: match the compact phone-render brand lockup. */

@@ -147,6 +147,18 @@ type ValidationProblemResponse = {
   errors?: Record<string, string[]>;
 };
 
+const timelapseIntervalPresets = [1, 2, 5, 10, 20, 30, 60];
+
+const webcamResolutionPresets = [
+  { label: "480p", detail: "640x480", width: 640, height: 480 },
+  { label: "720p", detail: "1280x720", width: 1280, height: 720 },
+  { label: "1080p", detail: "1920x1080", width: 1920, height: 1080 },
+  { label: "2K", detail: "2560x1440", width: 2560, height: 1440 },
+  { label: "4K", detail: "3840x2160", width: 3840, height: 2160 }
+];
+
+const streamFrameRatePresets = [10, 15, 24, 30];
+
 type CachedShellMetadata = {
   cachedAtUtc: string;
   dashboard?: {
@@ -1747,22 +1759,32 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
                   }
                 />
               </label>
-              <label>
-                <span>Interval minutes</span>
-                <input
-                  type="number"
-                  min="1"
-                  max="1440"
-                  value={form.capture.intervalMinutes}
-                  onChange={(event) =>
-                    updateForm((current) => ({
-                      ...current,
-                      capture: { ...current.capture, intervalMinutes: toInteger(event.target.value) }
-                    }))
-                  }
-                />
+              <div className="settings-choice-row interval-choice-row">
+                <span className="settings-choice-icon" aria-hidden="true" />
+                <div className="settings-choice-copy">
+                  <strong>Capture interval</strong>
+                  <small>How often timelapse snapshots are captured</small>
+                </div>
+                <div className="settings-segmented-control" aria-label="Timelapse interval">
+                  {timelapseIntervalPresets.map((interval) => (
+                    <button
+                      key={interval}
+                      type="button"
+                      className={form.capture.intervalMinutes === interval ? "active" : ""}
+                      aria-pressed={form.capture.intervalMinutes === interval}
+                      onClick={() =>
+                        updateForm((current) => ({
+                          ...current,
+                          capture: { ...current.capture, intervalMinutes: interval }
+                        }))
+                      }
+                    >
+                      {interval}m
+                    </button>
+                  ))}
+                </div>
                 <FieldError message={state.errors["capture.intervalMinutes"]} />
-              </label>
+              </div>
               <div className="schedule-window-card">
                 <div>
                   <strong>Timelapse active window</strong>
@@ -1920,81 +1942,99 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
                 </label>
               </div>
               <div className="settings-grid resolution-grid" aria-label="Camera resolution controls">
-                <label>
-                  <span>Capture width</span>
-                  <input
-                    type="number"
-                    min="320"
-                    max="7680"
-                    value={form.camera.captureWidth}
-                    onChange={(event) =>
-                      updateForm((current) => ({
-                        ...current,
-                        camera: { ...current.camera, captureWidth: toInteger(event.target.value) }
-                      }))
-                    }
-                  />
-                </label>
-                <label>
-                  <span>Capture height</span>
-                  <input
-                    type="number"
-                    min="240"
-                    max="4320"
-                    value={form.camera.captureHeight}
-                    onChange={(event) =>
-                      updateForm((current) => ({
-                        ...current,
-                        camera: { ...current.camera, captureHeight: toInteger(event.target.value) }
-                      }))
-                    }
-                  />
-                </label>
-                <label>
-                  <span>Stream width</span>
-                  <input
-                    type="number"
-                    min="320"
-                    max="3840"
-                    value={form.camera.streamWidth}
-                    onChange={(event) =>
-                      updateForm((current) => ({
-                        ...current,
-                        camera: { ...current.camera, streamWidth: toInteger(event.target.value) }
-                      }))
-                    }
-                  />
-                </label>
-                <label>
-                  <span>Stream height</span>
-                  <input
-                    type="number"
-                    min="240"
-                    max="2160"
-                    value={form.camera.streamHeight}
-                    onChange={(event) =>
-                      updateForm((current) => ({
-                        ...current,
-                        camera: { ...current.camera, streamHeight: toInteger(event.target.value) }
-                      }))
-                    }
-                  />
-                </label>
-                <label>
-                  <span>Stream FPS</span>
-                  <input
-                    type="number"
-                    min="1"
-                    max="60"
-                    value={form.camera.streamFramesPerSecond}
-                    onChange={(event) =>
-                      updateForm((current) => ({
-                        ...current,
-                        camera: { ...current.camera, streamFramesPerSecond: toInteger(event.target.value) }
-                      }))
-                    }
-                  />
-                </label>
+                <div className="settings-choice-row resolution-choice-row">
+                  <span className="settings-choice-icon hd" aria-hidden="true" />
+                  <div className="settings-choice-copy">
+                    <strong>Capture resolution</strong>
+                    <small>Saved timelapse image size</small>
+                  </div>
+                  <div className="settings-segmented-control resolution-control" aria-label="Capture resolution">
+                    {webcamResolutionPresets.map((resolution) => (
+                      <button
+                        key={`capture-${resolution.label}`}
+                        type="button"
+                        className={
+                          form.camera.captureWidth === resolution.width && form.camera.captureHeight === resolution.height
+                            ? "active"
+                            : ""
+                        }
+                        aria-pressed={form.camera.captureWidth === resolution.width && form.camera.captureHeight === resolution.height}
+                        onClick={() =>
+                          updateForm((current) => ({
+                            ...current,
+                            camera: {
+                              ...current.camera,
+                              captureWidth: resolution.width,
+                              captureHeight: resolution.height
+                            }
+                          }))
+                        }
+                      >
+                        <span>{resolution.label}</span>
+                        <small>{resolution.detail}</small>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="settings-choice-row resolution-choice-row">
+                  <span className="settings-choice-icon hd" aria-hidden="true" />
+                  <div className="settings-choice-copy">
+                    <strong>Live stream resolution</strong>
+                    <small>Streaming quality for the live feed</small>
+                  </div>
+                  <div className="settings-segmented-control resolution-control" aria-label="Live stream resolution">
+                    {webcamResolutionPresets.map((resolution) => (
+                      <button
+                        key={`stream-${resolution.label}`}
+                        type="button"
+                        className={
+                          form.camera.streamWidth === resolution.width && form.camera.streamHeight === resolution.height
+                            ? "active"
+                            : ""
+                        }
+                        aria-pressed={form.camera.streamWidth === resolution.width && form.camera.streamHeight === resolution.height}
+                        onClick={() =>
+                          updateForm((current) => ({
+                            ...current,
+                            camera: {
+                              ...current.camera,
+                              streamWidth: resolution.width,
+                              streamHeight: resolution.height
+                            }
+                          }))
+                        }
+                      >
+                        <span>{resolution.label}</span>
+                        <small>{resolution.detail}</small>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="settings-choice-row fps-choice-row">
+                  <span className="settings-choice-icon fps" aria-hidden="true" />
+                  <div className="settings-choice-copy">
+                    <strong>Stream frame rate</strong>
+                    <small>Lower FPS can help slower devices stay stable</small>
+                  </div>
+                  <div className="settings-segmented-control" aria-label="Live stream frame rate">
+                    {streamFrameRatePresets.map((framesPerSecond) => (
+                      <button
+                        key={framesPerSecond}
+                        type="button"
+                        className={form.camera.streamFramesPerSecond === framesPerSecond ? "active" : ""}
+                        aria-pressed={form.camera.streamFramesPerSecond === framesPerSecond}
+                        onClick={() =>
+                          updateForm((current) => ({
+                            ...current,
+                            camera: { ...current.camera, streamFramesPerSecond: framesPerSecond }
+                          }))
+                        }
+                      >
+                        {framesPerSecond}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </fieldset>
 
