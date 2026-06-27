@@ -5579,6 +5579,740 @@ body,
   }
 }
 
+/* Live edge-to-edge lock: this must be last so the real camera feed touches the viewport sides. */
+.app-shell:has(.screen-live).app-shell-authenticated {
+  width: 100% !important;
+  padding-right: 0 !important;
+  padding-left: 0 !important;
+}
+
+.app-shell:has(.screen-live).app-shell-authenticated .reference-screen-header,
+.app-shell:has(.screen-live).app-shell-authenticated .live-status-panel,
+.app-shell:has(.screen-live).app-shell-authenticated .live-control-tray {
+  margin-right: clamp(0.85rem, 3vw, 1.5rem) !important;
+  margin-left: clamp(0.85rem, 3vw, 1.5rem) !important;
+}
+
+.app-shell:has(.screen-live).app-shell-authenticated .live-layout {
+  display: block !important;
+}
+
+.screen-live .live-stage,
+.screen-live .stream-frame {
+  width: 100vw !important;
+  max-width: 100vw !important;
+}
+
+.screen-live .stream-frame {
+  position: relative !important;
+  left: 50% !important;
+  min-height: clamp(24rem, 68svh, 56rem) !important;
+  margin-right: 0 !important;
+  margin-left: -50vw !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: #03141d !important;
+  box-shadow: none !important;
+}
+
+.screen-live .stream-frame img {
+  display: block !important;
+  width: 100vw !important;
+  max-width: none !important;
+  min-width: 100vw !important;
+  height: clamp(24rem, 68svh, 56rem) !important;
+  min-height: clamp(24rem, 68svh, 56rem) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  object-fit: cover !important;
+}
+
+@media (min-width: 900px) {
+  .app-shell:has(.screen-live).app-shell-authenticated .bottom-nav {
+    right: clamp(1.5rem, 3vw, 2.5rem) !important;
+    left: clamp(1.5rem, 3vw, 2.5rem) !important;
+  }
+}
+
+/* Live edge-to-edge lock: the camera feed should touch the viewport sides on every screen size. */
+.app-shell:has(.screen-live).app-shell-authenticated {
+  width: 100% !important;
+  padding-right: 0 !important;
+  padding-left: 0 !important;
+}
+
+.app-shell:has(.screen-live).app-shell-authenticated .reference-screen-header,
+.app-shell:has(.screen-live).app-shell-authenticated .live-status-panel,
+.app-shell:has(.screen-live).app-shell-authenticated .live-control-tray {
+  margin-right: clamp(0.85rem, 3vw, 1.5rem) !important;
+  margin-left: clamp(0.85rem, 3vw, 1.5rem) !important;
+}
+
+.app-shell:has(.screen-live).app-shell-authenticated .live-layout {
+  display: block !important;
+}
+
+.screen-live .live-stage,
+.screen-live .stream-frame {
+  width: 100vw !important;
+  max-width: 100vw !important;
+}
+
+.screen-live .stream-frame {
+  position: relative !important;
+  left: 50% !important;
+  min-height: clamp(24rem, 68svh, 56rem) !important;
+  margin-right: 0 !important;
+  margin-left: -50vw !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.screen-live .stream-frame img {
+  display: block !important;
+  width: 100vw !important;
+  max-width: none !important;
+  height: clamp(24rem, 68svh, 56rem) !important;
+  min-height: clamp(24rem, 68svh, 56rem) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  object-fit: cover !important;
+}
+
+@media (min-width: 900px) {
+  .app-shell:has(.screen-live).app-shell-authenticated .bottom-nav {
+    right: clamp(1.5rem, 3vw, 2.5rem) !important;
+    left: clamp(1.5rem, 3vw, 2.5rem) !important;
+  }
+}
+
+/* Final live viewport lock: keep the camera surface flush with the screen edges. */
+.screen-live .live-stage,
+.screen-live .stream-frame,
+.screen-live .stream-frame:has(img) {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin-right: calc(50% - 50vw) !important;
+  margin-left: calc(50% - 50vw) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.screen-live .stream-frame img {
+  display: block !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  min-width: 100vw !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  object-fit: cover !important;
+}
+
+/* Live viewport lock: keep the camera surface flush with the screen edges. */
+.screen-live .live-stage,
+.screen-live .stream-frame,
+.screen-live .stream-frame:has(img) {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin-right: calc(50% - 50vw) !important;
+  margin-left: calc(50% - 50vw) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.screen-live .stream-frame img {
+  display: block !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  min-width: 100vw !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  object-fit: cover !important;
+}
+
+/* True full-bleed live feed: stretch the camera image to the viewport edges. */
+.screen-live .live-stage,
+.screen-live .stream-frame,
+.screen-live .stream-frame:has(img) {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin-right: calc(50% - 50vw) !important;
+  margin-left: calc(50% - 50vw) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.screen-live .stream-frame img {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  min-width: 100vw !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  object-fit: cover !important;
+}
+
+/* Final live feed lock: the camera image itself must stay borderless. */
+.screen-live .stream-frame,
+.screen-live .stream-frame:has(img),
+.screen-live .stream-frame img {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Live feed lock: keep the real camera image borderless on every viewport. */
+.screen-live .stream-frame,
+.screen-live .stream-frame:has(img),
+.screen-live .stream-frame img {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Absolute final mobile scale lock: keep the PWA from rendering like a zoomed crop. */
+@media (max-width: 899px) {
+  .app-shell-authenticated {
+    width: min(100%, 27.6rem) !important;
+    max-width: 27.6rem !important;
+    padding-top: max(0.45rem, env(safe-area-inset-top)) !important;
+    padding-right: 0.85rem !important;
+    padding-bottom: calc(6.35rem + env(safe-area-inset-bottom)) !important;
+    padding-left: 0.85rem !important;
+  }
+
+  .app-shell-authenticated .reference-screen-header {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    column-gap: 0.62rem !important;
+    padding-top: clamp(1.15rem, 5vw, 1.85rem) !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0.85rem !important;
+  }
+
+  .app-shell-authenticated .reference-shrimp-mark,
+  .screen-dashboard .reference-shrimp-mark,
+  .screen-live .reference-shrimp-mark,
+  .screen-gallery .reference-shrimp-mark,
+  .screen-timeline .reference-shrimp-mark,
+  .screen-settings .reference-shrimp-mark {
+    width: clamp(2.2rem, 8.4vw, 2.85rem) !important;
+    height: clamp(1.48rem, 5.8vw, 1.95rem) !important;
+  }
+
+  .app-shell-authenticated .reference-brand-copy h2,
+  .screen-dashboard .reference-brand-copy h2,
+  .screen-live .reference-brand-copy h2,
+  .screen-gallery .reference-brand-copy h2,
+  .screen-timeline .reference-brand-copy h2,
+  .screen-settings .reference-brand-copy h2 {
+    font-size: clamp(1.58rem, 7.2vw, 2.02rem) !important;
+    letter-spacing: -0.045em !important;
+    line-height: 0.96 !important;
+  }
+
+  .screen-live .reference-brand-copy h2,
+  .screen-settings .reference-brand-copy h2 {
+    font-size: clamp(1.45rem, 6.2vw, 1.78rem) !important;
+  }
+
+  .app-shell-authenticated .reference-brand-copy p {
+    margin-top: 0.08rem !important;
+    font-size: clamp(0.82rem, 3.45vw, 1rem) !important;
+    line-height: 1.18 !important;
+  }
+
+  .screen-dashboard .dashboard-overview {
+    gap: 0.68rem !important;
+    margin-bottom: 0.42rem !important;
+  }
+
+  .screen-dashboard .dashboard-grid {
+    gap: 0.62rem !important;
+    margin-top: 0 !important;
+  }
+
+  .screen-dashboard .dashboard-overview .stat-card {
+    min-height: 6.8rem !important;
+    padding: 0.88rem 0.82rem !important;
+    border-radius: 1.24rem !important;
+  }
+
+  .screen-dashboard .dashboard-overview .stat-card::before {
+    width: 2.85rem !important;
+    height: 2.85rem !important;
+    margin-bottom: 0.52rem !important;
+  }
+
+  .screen-dashboard .dashboard-overview .stat-card .eyebrow {
+    font-size: 0.76rem !important;
+  }
+
+  .screen-dashboard .dashboard-overview .stat-card strong {
+    font-size: clamp(1.22rem, 5.8vw, 1.6rem) !important;
+    line-height: 1.02 !important;
+  }
+
+  .screen-dashboard .dashboard-overview .stat-card span {
+    font-size: 0.74rem !important;
+    line-height: 1.14 !important;
+  }
+
+  .screen-dashboard .storage-usage-card {
+    min-height: 5.8rem !important;
+    padding: 0.92rem !important;
+    border-radius: 1.24rem !important;
+  }
+
+  .screen-dashboard .storage-ring {
+    width: 5.05rem !important;
+    height: 5.05rem !important;
+  }
+
+  .screen-dashboard .snapshot-card {
+    min-height: 0 !important;
+    padding: 0.92rem !important;
+    border-radius: 1.3rem !important;
+  }
+
+  .screen-dashboard .snapshot-preview,
+  .screen-dashboard .snapshot-preview img,
+  .screen-dashboard .snapshot-preview-empty {
+    min-height: 10.25rem !important;
+    max-height: 11.5rem !important;
+    border-radius: 1rem !important;
+  }
+
+  .screen-dashboard .quick-actions-card {
+    margin-top: 0.62rem !important;
+    padding: 0.78rem 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .screen-dashboard .quick-actions-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.66rem !important;
+  }
+
+  .screen-dashboard .quick-action-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.66rem !important;
+  }
+
+  .screen-dashboard .quick-action-tile {
+    min-height: 6.75rem !important;
+    padding: 0.68rem 0.42rem !important;
+    border-radius: 1.04rem !important;
+  }
+
+  .screen-dashboard .snapshot-file-name,
+  .screen-dashboard .snapshot-card > p:not(.eyebrow),
+  .screen-dashboard .snapshot-card .inline-link,
+  .screen-dashboard .panel.stack-gap {
+    display: none !important;
+  }
+
+  .screen-live .stream-frame {
+    min-height: 28rem !important;
+    margin: 0 -0.85rem !important;
+    border-radius: 1.35rem !important;
+  }
+
+  .screen-live .stream-frame img {
+    height: 28rem !important;
+    min-height: 28rem !important;
+  }
+
+  .screen-live .live-control-tray {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 0.45rem !important;
+    width: calc(100% - 2.5rem) !important;
+    margin: -4.8rem auto 0.85rem !important;
+    padding: 0.55rem !important;
+    border-radius: 1.32rem !important;
+  }
+
+  .screen-live .live-control-tray button {
+    min-height: 3.32rem !important;
+    padding: 0.42rem 0.22rem !important;
+    font-size: 0.72rem !important;
+    line-height: 1.05 !important;
+  }
+
+  .screen-gallery .gallery-browser,
+  .screen-timeline .gallery-browser {
+    padding: 0.84rem !important;
+    border-radius: 1.22rem !important;
+  }
+
+  .screen-gallery .viewer-frame,
+  .screen-gallery .viewer-frame img,
+  .screen-timeline .viewer-frame,
+  .screen-timeline .viewer-frame img {
+    min-height: 15rem !important;
+    max-height: 17.5rem !important;
+    border-radius: 1rem !important;
+  }
+
+  .app-shell-authenticated .bottom-nav,
+  .app-shell:has(.screen-settings) .bottom-nav,
+  .app-shell:has(.screen-live) .bottom-nav {
+    right: max(0.78rem, calc((100vw - min(27.6rem, 100vw)) / 2 + 0.78rem)) !important;
+    bottom: calc(0.58rem + env(safe-area-inset-bottom)) !important;
+    left: max(0.78rem, calc((100vw - min(27.6rem, 100vw)) / 2 + 0.78rem)) !important;
+    min-height: 4.12rem !important;
+    padding: 0.38rem !important;
+    border-radius: 1.42rem !important;
+  }
+
+  .app-shell-authenticated .nav-link {
+    min-height: 3.28rem !important;
+    padding: 0.34rem 0.18rem !important;
+    border-radius: 1rem !important;
+    font-size: 0.67rem !important;
+  }
+
+  .app-shell-authenticated .nav-icon {
+    width: 1.85rem !important;
+    height: 1.85rem !important;
+    margin-bottom: 0.08rem !important;
+    font-size: 0.64rem !important;
+  }
+}
+
+/* Reference scale calibration: restore the compact Samsung render density. */
+@media (max-width: 899px) {
+  .app-shell-authenticated {
+    width: min(100%, 27.6rem) !important;
+    padding-top: max(0.45rem, env(safe-area-inset-top)) !important;
+    padding-right: 0.85rem !important;
+    padding-bottom: calc(6.25rem + env(safe-area-inset-bottom)) !important;
+    padding-left: 0.85rem !important;
+  }
+
+  .app-shell-authenticated .content {
+    gap: 0.72rem !important;
+  }
+
+  .app-shell-authenticated .reference-screen-header {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    column-gap: 0.62rem !important;
+    padding-top: clamp(1.2rem, 5.2vw, 1.85rem) !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0.9rem !important;
+  }
+
+  .app-shell-authenticated .reference-shrimp-mark,
+  .screen-dashboard .reference-shrimp-mark,
+  .screen-live .reference-shrimp-mark,
+  .screen-gallery .reference-shrimp-mark,
+  .screen-timeline .reference-shrimp-mark,
+  .screen-settings .reference-shrimp-mark {
+    width: clamp(2.25rem, 9vw, 3rem) !important;
+    height: clamp(1.55rem, 6.1vw, 2.05rem) !important;
+  }
+
+  .app-shell-authenticated .reference-brand-copy h2,
+  .screen-dashboard .reference-brand-copy h2,
+  .screen-live .reference-brand-copy h2,
+  .screen-gallery .reference-brand-copy h2,
+  .screen-timeline .reference-brand-copy h2,
+  .screen-settings .reference-brand-copy h2 {
+    font-size: clamp(1.92rem, 9vw, 2.45rem) !important;
+    letter-spacing: -0.045em !important;
+    line-height: 0.95 !important;
+  }
+
+  .screen-live .reference-brand-copy h2,
+  .screen-settings .reference-brand-copy h2 {
+    font-size: clamp(1.72rem, 7.4vw, 2.1rem) !important;
+  }
+
+  .app-shell-authenticated .reference-brand-copy p {
+    margin-top: 0.08rem !important;
+    font-size: clamp(0.82rem, 3.5vw, 1rem) !important;
+    line-height: 1.18 !important;
+  }
+
+  .screen-dashboard .dashboard-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.7rem !important;
+    margin-bottom: 0.65rem !important;
+  }
+
+  .screen-dashboard .dashboard-overview .stat-card {
+    min-height: 6.85rem !important;
+    padding: 0.9rem 0.85rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  .screen-dashboard .dashboard-overview .stat-card::before {
+    width: 2.95rem !important;
+    height: 2.95rem !important;
+    margin-bottom: 0.55rem !important;
+  }
+
+  .screen-dashboard .dashboard-overview .stat-card .eyebrow {
+    font-size: 0.78rem !important;
+  }
+
+  .screen-dashboard .dashboard-overview .stat-card strong {
+    font-size: clamp(1.25rem, 6vw, 1.65rem) !important;
+    line-height: 1.02 !important;
+  }
+
+  .screen-dashboard .dashboard-overview .stat-card span {
+    font-size: 0.76rem !important;
+    line-height: 1.15 !important;
+  }
+
+  .screen-dashboard .storage-usage-card {
+    min-height: 5.9rem !important;
+    gap: 0.85rem !important;
+    padding: 0.95rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  .screen-dashboard .storage-ring {
+    width: 5.2rem !important;
+    height: 5.2rem !important;
+  }
+
+  .screen-dashboard .snapshot-card {
+    min-height: 0 !important;
+    padding: 0.95rem !important;
+    border-radius: 1.32rem !important;
+  }
+
+  .screen-dashboard .snapshot-card h3 {
+    font-size: 1.05rem !important;
+  }
+
+  .screen-dashboard .snapshot-preview,
+  .screen-dashboard .snapshot-preview img,
+  .screen-dashboard .snapshot-preview-empty {
+    min-height: 12.1rem !important;
+    max-height: 14.25rem !important;
+    border-radius: 1rem !important;
+  }
+
+  .screen-dashboard .quick-actions-card {
+    margin-top: 0.65rem !important;
+    padding: 0.85rem 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .screen-dashboard .quick-actions-header h3 {
+    font-size: 1.06rem !important;
+  }
+
+  .screen-dashboard .quick-actions-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.7rem !important;
+  }
+
+  .screen-dashboard .quick-action-tile {
+    min-height: 6.85rem !important;
+    padding: 0.72rem 0.45rem !important;
+    border-radius: 1.05rem !important;
+  }
+
+  .screen-dashboard .quick-action-tile span {
+    width: 2.55rem !important;
+    height: 2.55rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .screen-dashboard .quick-action-tile strong {
+    font-size: 0.9rem !important;
+  }
+
+  .screen-dashboard .quick-action-tile small {
+    font-size: 0.72rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .screen-live .reference-screen-header {
+    margin-bottom: 0.55rem !important;
+  }
+
+  .screen-live .live-stage {
+    min-height: 0 !important;
+    padding: 0 !important;
+  }
+
+  .screen-live .stream-frame {
+    min-height: 28rem !important;
+    margin: 0 -0.85rem !important;
+    border-radius: 1.4rem !important;
+  }
+
+  .screen-live .stream-frame img {
+    height: 28rem !important;
+    min-height: 28rem !important;
+  }
+
+  .screen-live .live-stage-top {
+    top: 0.95rem !important;
+    right: 0.95rem !important;
+    left: 0.95rem !important;
+    gap: 0.55rem !important;
+  }
+
+  .screen-live .live-stage-top .eyebrow,
+  .screen-live .live-stage-top .status-pill {
+    min-height: 2rem !important;
+    padding: 0.36rem 0.65rem !important;
+    border-radius: 0.55rem !important;
+    font-size: 0.78rem !important;
+  }
+
+  .screen-live .live-control-tray {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 0.45rem !important;
+    width: calc(100% - 2.6rem) !important;
+    margin: -4.85rem auto 0.85rem !important;
+    padding: 0.56rem !important;
+    border-radius: 1.35rem !important;
+  }
+
+  .screen-live .live-control-tray button {
+    min-height: 3.4rem !important;
+    padding: 0.45rem 0.25rem !important;
+    border-radius: 999px !important;
+    font-size: 0.72rem !important;
+    line-height: 1.05 !important;
+  }
+
+  .screen-live .live-status-panel {
+    padding: 1rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  .screen-gallery .gallery-browser,
+  .screen-timeline .gallery-browser {
+    padding: 0.85rem !important;
+    border-radius: 1.25rem !important;
+  }
+
+  .screen-gallery .gallery-toolbar,
+  .screen-timeline .gallery-toolbar {
+    gap: 0.48rem !important;
+  }
+
+  .screen-gallery .gallery-toolbar input,
+  .screen-timeline .gallery-toolbar input {
+    min-height: 2.65rem !important;
+    font-size: 0.88rem !important;
+  }
+
+  .screen-gallery .filter-chip,
+  .screen-timeline .filter-chip,
+  .screen-gallery .gallery-toolbar label,
+  .screen-timeline .gallery-toolbar label,
+  .screen-gallery .gallery-toolbar button,
+  .screen-timeline .gallery-toolbar button {
+    min-height: 2.5rem !important;
+    padding: 0.52rem 0.72rem !important;
+    border-radius: 0.85rem !important;
+    font-size: 0.78rem !important;
+  }
+
+  .screen-gallery .viewer-card,
+  .screen-timeline .viewer-card {
+    border-radius: 1.2rem !important;
+  }
+
+  .screen-gallery .viewer-frame,
+  .screen-gallery .viewer-frame img,
+  .screen-timeline .viewer-frame,
+  .screen-timeline .viewer-frame img {
+    min-height: 15rem !important;
+    max-height: 17.5rem !important;
+    border-radius: 1rem !important;
+  }
+
+  .app-shell-authenticated .bottom-nav,
+  .app-shell:has(.screen-settings) .bottom-nav,
+  .app-shell:has(.screen-live) .bottom-nav {
+    right: max(0.78rem, calc((100vw - min(27.6rem, 100vw)) / 2 + 0.78rem)) !important;
+    bottom: calc(0.58rem + env(safe-area-inset-bottom)) !important;
+    left: max(0.78rem, calc((100vw - min(27.6rem, 100vw)) / 2 + 0.78rem)) !important;
+    min-height: 4.15rem !important;
+    padding: 0.4rem !important;
+    border-radius: 1.45rem !important;
+  }
+
+  .app-shell-authenticated .nav-link {
+    min-height: 3.35rem !important;
+    padding: 0.35rem 0.18rem !important;
+    border-radius: 1.02rem !important;
+    font-size: 0.68rem !important;
+  }
+
+  .app-shell-authenticated .nav-icon {
+    width: 1.9rem !important;
+    height: 1.9rem !important;
+    margin-bottom: 0.1rem !important;
+    font-size: 0.66rem !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .app-shell-authenticated .reference-screen-header {
+    padding-top: 1.25rem !important;
+  }
+
+  .app-shell-authenticated .reference-brand-copy h2 {
+    font-size: clamp(2.2rem, 4vw, 3.2rem) !important;
+  }
+
+  .screen-dashboard .snapshot-preview,
+  .screen-dashboard .snapshot-preview img {
+    max-height: 24rem !important;
+  }
+
+  .screen-live .stream-frame,
+  .screen-live .stream-frame img {
+    min-height: 32rem !important;
+    height: 52vh !important;
+  }
+}
+
 /* Real-device PWA header cleanup: the phone already provides status chrome. */
 .reference-phone-time,
 .reference-phone-status,
@@ -9990,69 +10724,4 @@ body::after {
     gap: 1.35rem !important;
     align-items: start !important;
   }
-}
-/* Final live feed lock: the camera image itself must stay borderless. */
-.screen-live .stream-frame,
-.screen-live .stream-frame:has(img),
-.screen-live .stream-frame img {
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  outline: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-/* True full-bleed live feed: stretch the camera image to the viewport edges. */
-.screen-live .live-stage,
-.screen-live .stream-frame,
-.screen-live .stream-frame:has(img) {
-  width: 100vw !important;
-  max-width: 100vw !important;
-  margin-right: calc(50% - 50vw) !important;
-  margin-left: calc(50% - 50vw) !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  outline: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.screen-live .stream-frame img {
-  width: 100vw !important;
-  max-width: 100vw !important;
-  min-width: 100vw !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  outline: 0 !important;
-  box-shadow: none !important;
-  object-fit: cover !important;
-}
-
-/* Final live viewport lock: keep the camera surface flush with the screen edges. */
-.screen-live .live-stage,
-.screen-live .stream-frame,
-.screen-live .stream-frame:has(img) {
-  width: 100vw !important;
-  max-width: 100vw !important;
-  margin-right: calc(50% - 50vw) !important;
-  margin-left: calc(50% - 50vw) !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  outline: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.screen-live .stream-frame img {
-  display: block !important;
-  width: 100vw !important;
-  max-width: 100vw !important;
-  min-width: 100vw !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  outline: 0 !important;
-  box-shadow: none !important;
-  object-fit: cover !important;
 }
