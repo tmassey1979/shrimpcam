@@ -10002,3 +10002,29 @@ body::after {
   background: transparent !important;
   box-shadow: none !important;
 }
+/* True full-bleed live feed: stretch the camera image to the viewport edges. */
+.screen-live .live-stage,
+.screen-live .stream-frame,
+.screen-live .stream-frame:has(img) {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin-right: calc(50% - 50vw) !important;
+  margin-left: calc(50% - 50vw) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.screen-live .stream-frame img {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  min-width: 100vw !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  object-fit: cover !important;
+}
