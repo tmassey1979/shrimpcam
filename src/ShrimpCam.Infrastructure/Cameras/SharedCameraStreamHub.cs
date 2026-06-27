@@ -16,6 +16,10 @@ internal sealed class SharedCameraStreamHub(
 {
     private static readonly TimeSpan StartupTimeout = TimeSpan.FromSeconds(10);
     private static readonly TimeSpan SubscriberFirstChunkTimeout = TimeSpan.FromSeconds(5);
+    private static readonly byte[] MjpegPartPrefix = "--"u8.ToArray();
+    private static readonly byte[] MjpegHeaderSuffix = "\r\nContent-Type: image/jpeg\r\nContent-Length: "u8.ToArray();
+    private static readonly byte[] MjpegHeaderTerminator = "\r\n\r\n"u8.ToArray();
+    private static readonly byte[] MjpegPartTerminator = "\r\n"u8.ToArray();
     private static readonly Action<ILogger, Exception?> SharedPumpStopped =
         LoggerMessage.Define(
             LogLevel.Warning,
@@ -201,6 +205,7 @@ internal sealed class SharedCameraStreamHub(
         var processStream = await processStreamRunner.StartAsync(command, cancellationToken).ConfigureAwait(false);
         await using var configuredProcessStream = processStream.ConfigureAwait(false);
         var buffer = new byte[16384];
+        using var framePump = new MjpegFramePump(recorder, Broadcast);
 
         using var startupCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         startupCancellation.CancelAfter(StartupTimeout);
@@ -222,8 +227,7 @@ internal sealed class SharedCameraStreamHub(
         }
 
         cameraStatusService.ReportOnline();
-        Broadcast(buffer.AsMemory(0, firstRead));
-        recorder.Observe(buffer.AsMemory(0, firstRead));
+        framePump.Observe(buffer.AsMemory(0, firstRead));
 
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -237,8 +241,7 @@ internal sealed class SharedCameraStreamHub(
             }
 
             var chunk = buffer.AsMemory(0, bytesRead);
-            recorder.Observe(chunk);
-            Broadcast(chunk);
+            framePump.Observe(chunk);
         }
 
         return true;
@@ -339,6 +342,37 @@ internal sealed class SharedCameraStreamHub(
             AlwaysOnStreamEnabled = options.AlwaysOnStreamEnabled,
         };
 
+    private static byte[] CreateMjpegPart(byte[] jpegFrame)
+    {
+        var lengthText = System.Text.Encoding.ASCII.GetBytes(jpegFrame.Length.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        var boundary = System.Text.Encoding.ASCII.GetBytes(LiveStreamConstants.Boundary);
+        var payload = new byte[
+            MjpegPartPrefix.Length
+            + boundary.Length
+            + MjpegHeaderSuffix.Length
+            + lengthText.Length
+            + MjpegHeaderTerminator.Length
+            + jpegFrame.Length
+            + MjpegPartTerminator.Length];
+        var offset = 0;
+
+        Copy(MjpegPartPrefix);
+        Copy(boundary);
+        Copy(MjpegHeaderSuffix);
+        Copy(lengthText);
+        Copy(MjpegHeaderTerminator);
+        Copy(jpegFrame);
+        Copy(MjpegPartTerminator);
+
+        return payload;
+
+        void Copy(byte[] source)
+        {
+            source.CopyTo(payload.AsSpan(offset));
+            offset += source.Length;
+        }
+    }
+
     private sealed class CameraLiveStreamSession(Stream content) : ICameraLiveStreamSession
     {
         public string ContentType => LiveStreamConstants.ContentType;
@@ -431,6 +465,52 @@ internal sealed class SharedCameraStreamHub(
             Dispose(disposing: true);
             return base.DisposeAsync();
         }
+    }
+
+    private sealed class MjpegFramePump(ILiveFrameSnapshotRecorder recorder, Action<ReadOnlyMemory<byte>> broadcast)
+        : IDisposable
+    {
+        private const byte JpegStartPrefix = 0xFF;
+        private const byte JpegStartMarker = 0xD8;
+        private const byte JpegEndMarker = 0xD9;
+        private readonly MemoryStream _currentFrame = new();
+        private bool _capturing;
+        private byte? _previousByte;
+
+        public void Observe(ReadOnlyMemory<byte> buffer)
+        {
+            foreach (var currentByte in buffer.Span)
+            {
+                if (!_capturing)
+                {
+                    if (_previousByte == JpegStartPrefix && currentByte == JpegStartMarker)
+                    {
+                        _capturing = true;
+                        _currentFrame.SetLength(0);
+                        _currentFrame.WriteByte(JpegStartPrefix);
+                        _currentFrame.WriteByte(JpegStartMarker);
+                    }
+
+                    _previousByte = currentByte;
+                    continue;
+                }
+
+                _currentFrame.WriteByte(currentByte);
+
+                if (_previousByte == JpegStartPrefix && currentByte == JpegEndMarker)
+                {
+                    var frame = _currentFrame.ToArray();
+                    recorder.Observe(frame);
+                    broadcast(CreateMjpegPart(frame));
+                    _currentFrame.SetLength(0);
+                    _capturing = false;
+                }
+
+                _previousByte = currentByte;
+            }
+        }
+
+        public void Dispose() => _currentFrame.Dispose();
     }
 
 }

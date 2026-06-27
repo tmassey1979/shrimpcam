@@ -801,7 +801,27 @@ app.MapGet(
             {
                 try
                 {
-                    await session.Content.CopyToAsync(outputStream, cancellationToken).ConfigureAwait(false);
+                    var buffer = new byte[16 * 1024];
+                    while (!cancellationToken.IsCancellationRequested)
+                    {
+                        var bytesRead = await session.Content
+                            .ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken)
+                            .ConfigureAwait(false);
+
+                        if (bytesRead <= 0)
+                        {
+                            break;
+                        }
+
+                        await outputStream
+                            .WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken)
+                            .ConfigureAwait(false);
+                        await outputStream.FlushAsync(cancellationToken).ConfigureAwait(false);
+                    }
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    // Browser navigation, refresh, and tab closes are normal endings for an MJPEG response.
                 }
                 finally
                 {

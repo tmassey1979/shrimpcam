@@ -31,12 +31,12 @@ public sealed class CameraLiveStreamServiceTests
         var service = new CameraLiveStreamService(hub);
 
         var firstSubscriptionTask = service.StartAsync(options, CancellationToken.None);
-        await stream.AppendAsync("--shrimpcam\r\nContent-Type: image/jpeg\r\n\r\nframe-01\r\n").ConfigureAwait(true);
+        await stream.AppendFrameAsync("frame-01").ConfigureAwait(true);
         var firstSubscription = await firstSubscriptionTask.ConfigureAwait(true);
 
         var secondSubscriptionTask = service.StartAsync(options, CancellationToken.None);
         await Task.Delay(50).ConfigureAwait(true);
-        await stream.AppendAsync("--shrimpcam\r\nContent-Type: image/jpeg\r\n\r\nframe-02\r\n").ConfigureAwait(true);
+        await stream.AppendFrameAsync("frame-02").ConfigureAwait(true);
         var secondSubscription = await secondSubscriptionTask.ConfigureAwait(true);
 
         firstSubscription.Succeeded.Should().BeTrue();
@@ -69,7 +69,7 @@ public sealed class CameraLiveStreamServiceTests
             processStreamRunner.StartAsync(command, Arg.Any<CancellationToken>()).Returns(processStream);
 
             await hub.EnsureRunningAsync(options, CancellationToken.None).ConfigureAwait(true);
-            await stream.AppendAsync(Encoding.ASCII.GetBytes("--shrimpcam\r\nContent-Type: image/jpeg\r\n\r\n").Concat(jpeg).ToArray()).ConfigureAwait(true);
+            await stream.AppendAsync(jpeg).ConfigureAwait(true);
 
             await EventuallyAsync(async () =>
             {
@@ -115,7 +115,7 @@ public sealed class CameraLiveStreamServiceTests
         var service = new CameraLiveStreamService(hub);
 
         var firstSubscriptionTask = service.StartAsync(options, viewerCancellation.Token);
-        await stream.AppendAsync("--shrimpcam\r\nContent-Type: image/jpeg\r\n\r\nframe-01\r\n").ConfigureAwait(true);
+        await stream.AppendFrameAsync("frame-01").ConfigureAwait(true);
         var firstSubscription = await firstSubscriptionTask.ConfigureAwait(true);
 
         viewerCancellation.Cancel();
@@ -125,6 +125,38 @@ public sealed class CameraLiveStreamServiceTests
         await processStreamRunner.Received(1).StartAsync(command, Arg.Any<CancellationToken>()).ConfigureAwait(true);
 
         await firstSubscription.Session!.DisposeAsync().ConfigureAwait(true);
+        await hub.DisposeAsync().ConfigureAwait(true);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task Subscriber_disconnect_does_not_stop_shared_camera_process()
+    {
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var processStreamRunner = Substitute.For<IProcessStreamRunner>();
+        var stream = new BlockingAppendStream();
+        var processStream = new StubProcessStream(stream, new ProcessResult(0, string.Empty, string.Empty));
+        var options = CreateOptions();
+        var command = new ProcessRequest("ffmpeg", "-stream");
+
+        commandFactory.BuildLiveStreamCommand(Arg.Any<CameraOptions>()).Returns(command);
+        processStreamRunner.StartAsync(command, Arg.Any<CancellationToken>()).Returns(processStream);
+
+        var hub = CreateHub(commandFactory, cameraStatusService, processStreamRunner);
+        var service = new CameraLiveStreamService(hub);
+
+        var subscriptionTask = service.StartAsync(options, CancellationToken.None);
+        await stream.AppendFrameAsync("frame-01").ConfigureAwait(true);
+        var subscription = await subscriptionTask.ConfigureAwait(true);
+        subscription.Succeeded.Should().BeTrue();
+
+        await subscription.Session!.DisposeAsync().ConfigureAwait(true);
+        await stream.AppendFrameAsync("frame-02").ConfigureAwait(true);
+
+        await processStreamRunner.Received(1).StartAsync(command, Arg.Any<CancellationToken>()).ConfigureAwait(true);
+        cameraStatusService.Received(1).ReportOnline();
+
         await hub.DisposeAsync().ConfigureAwait(true);
     }
 
@@ -154,7 +186,7 @@ public sealed class CameraLiveStreamServiceTests
         var service = new CameraLiveStreamService(hub);
 
         var subscriptionTask = service.StartAsync(options, CancellationToken.None);
-        await firstStream.AppendAsync("--shrimpcam\r\nContent-Type: image/jpeg\r\n\r\nframe-01\r\n").ConfigureAwait(true);
+        await firstStream.AppendFrameAsync("frame-01").ConfigureAwait(true);
         var subscription = await subscriptionTask.ConfigureAwait(true);
         subscription.Succeeded.Should().BeTrue();
         var buffer = new byte[512];
@@ -166,7 +198,7 @@ public sealed class CameraLiveStreamServiceTests
         {
             await processStreamRunner.Received(2).StartAsync(command, Arg.Any<CancellationToken>()).ConfigureAwait(true);
         }).ConfigureAwait(true);
-        await secondStream.AppendAsync("--shrimpcam\r\nContent-Type: image/jpeg\r\n\r\nframe-02\r\n").ConfigureAwait(true);
+        await secondStream.AppendFrameAsync("frame-02").ConfigureAwait(true);
 
         var bytesRead = await subscription.Session!.Content.ReadAsync(buffer, CancellationToken.None).ConfigureAwait(true);
         var payload = Encoding.ASCII.GetString(buffer, 0, bytesRead);
@@ -358,6 +390,12 @@ public sealed class CameraLiveStreamServiceTests
         }
 
         public Task AppendAsync(string value) => AppendAsync(Encoding.ASCII.GetBytes(value));
+
+        public Task AppendFrameAsync(string value)
+        {
+            var body = Encoding.ASCII.GetBytes(value);
+            return AppendAsync([0xFF, 0xD8, .. body, 0xFF, 0xD9]);
+        }
 
         public Task AppendAsync(byte[] bytes)
         {
