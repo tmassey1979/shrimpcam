@@ -122,6 +122,47 @@ public sealed class CameraLiveStreamServiceTests
 
     [Fact]
     [Trait("Category", "Unit")]
+    public async Task Shared_stream_records_provider_frames_for_timelapse_consumers()
+    {
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var processStreamRunner = Substitute.For<IProcessStreamRunner>();
+        var frameStore = new LiveFrameSnapshotStore();
+        var provider = new PushFrameSourceProvider();
+        var outputPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.jpg");
+        var providerRegistry = new StaticFrameSourceProviderRegistry(provider);
+        var hub = CreateHub(
+            commandFactory,
+            cameraStatusService,
+            processStreamRunner,
+            frameStore,
+            providerRegistry: providerRegistry);
+
+        try
+        {
+            var subscriptionTask = hub.SubscribeAsync(CreateOptions(), CancellationToken.None);
+            await EventuallyAsync(() => provider.IsStarted.Should().BeTrue()).ConfigureAwait(true);
+            provider.Publish([0xFF, 0xD8, 0x41, 0x42, 0xFF, 0xD9]);
+            var subscription = await subscriptionTask.ConfigureAwait(true);
+
+            subscription.Succeeded.Should().BeTrue();
+            (await frameStore.TryWriteLatestFrameAsync(outputPath, CancellationToken.None).ConfigureAwait(true))
+                .Should()
+                .BeTrue();
+            File.ReadAllBytes(outputPath).Should().Equal([0xFF, 0xD8, 0x41, 0x42, 0xFF, 0xD9]);
+            await processStreamRunner.DidNotReceiveWithAnyArgs().StartAsync(default!, default).ConfigureAwait(true);
+
+            await subscription.Session!.DisposeAsync().ConfigureAwait(true);
+        }
+        finally
+        {
+            await hub.DisposeAsync().ConfigureAwait(true);
+            await DeleteIfExistsAsync(outputPath).ConfigureAwait(true);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
     public async Task Shared_stream_reports_online_when_provider_fails_but_process_fallback_streams()
     {
         var commandFactory = Substitute.For<ICameraCommandFactory>();

@@ -153,7 +153,7 @@ internal sealed class SharedCameraStreamHub(
 
             for (var failureCount = 0; !cancellationToken.IsCancellationRequested;)
             {
-                var streamed = await RunProviderPumpAsync(options, cancellationToken).ConfigureAwait(false);
+                var streamed = await RunProviderPumpAsync(options, recorder, cancellationToken).ConfigureAwait(false);
                 if (!streamed)
                 {
                     streamed = await RunProcessPumpAsync(options, recorder, cancellationToken).ConfigureAwait(false);
@@ -202,7 +202,10 @@ internal sealed class SharedCameraStreamHub(
         }
     }
 
-    private async Task<bool> RunProviderPumpAsync(CameraOptions options, CancellationToken cancellationToken)
+    private async Task<bool> RunProviderPumpAsync(
+        CameraOptions options,
+        ILiveFrameSnapshotRecorder recorder,
+        CancellationToken cancellationToken)
     {
         var hostPlatform = string.IsNullOrWhiteSpace(options.Platform)
             ? CameraPlatforms.Windows
@@ -214,6 +217,7 @@ internal sealed class SharedCameraStreamHub(
             frame =>
             {
                 streamedFrames = true;
+                recorder.Observe(frame);
                 Broadcast(CreateMjpegPart(frame.ToArray()));
             },
             cancellationToken);
