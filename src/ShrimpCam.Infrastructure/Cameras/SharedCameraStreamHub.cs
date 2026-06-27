@@ -7,6 +7,7 @@ using ShrimpCam.Core.Configuration;
 namespace ShrimpCam.Infrastructure.Cameras;
 
 internal sealed class SharedCameraStreamHub(
+    ICameraFrameSourceProviderRegistry providerRegistry,
     ICameraCommandFactory commandFactory,
     ICameraResourceCoordinator cameraResourceCoordinator,
     ICameraStatusService cameraStatusService,
@@ -152,7 +153,12 @@ internal sealed class SharedCameraStreamHub(
 
             for (var failureCount = 0; !cancellationToken.IsCancellationRequested;)
             {
-                var streamed = await RunProcessPumpAsync(options, recorder, cancellationToken).ConfigureAwait(false);
+                var streamed = await RunProviderPumpAsync(options, cancellationToken).ConfigureAwait(false);
+                if (!streamed)
+                {
+                    streamed = await RunProcessPumpAsync(options, recorder, cancellationToken).ConfigureAwait(false);
+                }
+
                 if (cancellationToken.IsCancellationRequested)
                 {
                     break;
@@ -194,6 +200,31 @@ internal sealed class SharedCameraStreamHub(
                 await cameraLease.DisposeAsync().ConfigureAwait(false);
             }
         }
+    }
+
+    private async Task<bool> RunProviderPumpAsync(CameraOptions options, CancellationToken cancellationToken)
+    {
+        var hostPlatform = string.IsNullOrWhiteSpace(options.Platform)
+            ? CameraPlatforms.Windows
+            : options.Platform;
+        var provider = providerRegistry.GetProvider(options, hostPlatform);
+        var streamedFrames = false;
+        var result = provider.Start(
+            options,
+            frame =>
+            {
+                streamedFrames = true;
+                Broadcast(CreateMjpegPart(frame.ToArray()));
+            },
+            cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return false;
+        }
+
+        await result.RunningTask!.ConfigureAwait(false);
+        return streamedFrames;
     }
 
     private async Task<bool> RunProcessPumpAsync(

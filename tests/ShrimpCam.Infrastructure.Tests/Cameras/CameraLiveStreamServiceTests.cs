@@ -90,6 +90,38 @@ public sealed class CameraLiveStreamServiceTests
 
     [Fact]
     [Trait("Category", "Unit")]
+    public async Task Shared_stream_can_publish_frames_from_selected_frame_source_provider()
+    {
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var processStreamRunner = Substitute.For<IProcessStreamRunner>();
+        var provider = new PushFrameSourceProvider();
+        var providerRegistry = new StaticFrameSourceProviderRegistry(provider);
+        var hub = CreateHub(
+            commandFactory,
+            cameraStatusService,
+            processStreamRunner,
+            providerRegistry: providerRegistry);
+        var service = new CameraLiveStreamService(hub);
+
+        var subscriptionTask = service.StartAsync(CreateOptions(), CancellationToken.None);
+        await EventuallyAsync(() => provider.IsStarted.Should().BeTrue()).ConfigureAwait(true);
+        provider.Publish([0xFF, 0xD8, 0xCA, 0xFE, 0xFF, 0xD9]);
+        var subscription = await subscriptionTask.ConfigureAwait(true);
+
+        subscription.Succeeded.Should().BeTrue();
+        await processStreamRunner.DidNotReceiveWithAnyArgs().StartAsync(default!, default).ConfigureAwait(true);
+
+        var buffer = new byte[512];
+        var bytesRead = await subscription.Session!.Content.ReadAsync(buffer, CancellationToken.None).ConfigureAwait(true);
+        buffer.AsSpan(0, bytesRead).ToArray().Should().ContainInOrder([0xCA, 0xFE]);
+
+        await subscription.Session!.DisposeAsync().ConfigureAwait(true);
+        await hub.DisposeAsync().ConfigureAwait(true);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
     public async Task Subscriber_cancellation_token_is_not_used_to_control_shared_camera_process()
     {
         var commandFactory = Substitute.For<ICameraCommandFactory>();
@@ -261,8 +293,10 @@ public sealed class CameraLiveStreamServiceTests
         ICameraStatusService cameraStatusService,
         IProcessStreamRunner processStreamRunner,
         ILiveFrameSnapshotStore? frameStore = null,
-        ICameraResourceCoordinator? resourceCoordinator = null) =>
+        ICameraResourceCoordinator? resourceCoordinator = null,
+        ICameraFrameSourceProviderRegistry? providerRegistry = null) =>
         new(
+            providerRegistry ?? new LegacyFallbackFrameSourceProviderRegistry(),
             commandFactory,
             resourceCoordinator ?? new AlwaysAvailableCameraResourceCoordinator(),
             cameraStatusService,
@@ -354,6 +388,67 @@ public sealed class CameraLiveStreamServiceTests
     {
         public ValueTask<CameraResourceLease?> TryAcquireAsync(string owner, CancellationToken cancellationToken) =>
             ValueTask.FromResult<CameraResourceLease?>(null);
+    }
+
+    private sealed class LegacyFallbackFrameSourceProviderRegistry : ICameraFrameSourceProviderRegistry
+    {
+        private readonly ICameraFrameSourceProvider _provider = new LegacyFallbackFrameSourceProvider();
+
+        public ICameraFrameSourceProvider GetProvider(CameraOptions options, string hostPlatform) => _provider;
+
+        public IReadOnlyList<CameraFrameSourceProviderDescriptor> ListProviders() => [_provider.Descriptor];
+    }
+
+    private sealed class LegacyFallbackFrameSourceProvider : ICameraFrameSourceProvider
+    {
+        public CameraFrameSourceProviderDescriptor Descriptor { get; } = new(
+            "legacy-test-fallback",
+            "Legacy test fallback",
+            CameraPlatforms.Windows,
+            IsPrimary: false,
+            RequiresExternalProcess: true,
+            "legacy-test-fallback");
+
+        public CameraFrameSourceStartResult Start(
+            CameraOptions options,
+            Action<ReadOnlyMemory<byte>> publishFrame,
+            CancellationToken cancellationToken) =>
+            CameraFrameSourceStartResult.Failure("legacyFallbackRequested");
+    }
+
+    private sealed class StaticFrameSourceProviderRegistry(ICameraFrameSourceProvider provider) : ICameraFrameSourceProviderRegistry
+    {
+        public ICameraFrameSourceProvider GetProvider(CameraOptions options, string hostPlatform) => provider;
+
+        public IReadOnlyList<CameraFrameSourceProviderDescriptor> ListProviders() => [provider.Descriptor];
+    }
+
+    private sealed class PushFrameSourceProvider : ICameraFrameSourceProvider
+    {
+        private Action<ReadOnlyMemory<byte>>? _publishFrame;
+        private readonly TaskCompletionSource _stopped = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public bool IsStarted => _publishFrame is not null;
+
+        public CameraFrameSourceProviderDescriptor Descriptor { get; } = new(
+            "push-test-provider",
+            "Push test provider",
+            CameraPlatforms.Windows,
+            IsPrimary: true,
+            RequiresExternalProcess: false,
+            "push-test-provider");
+
+        public CameraFrameSourceStartResult Start(
+            CameraOptions options,
+            Action<ReadOnlyMemory<byte>> publishFrame,
+            CancellationToken cancellationToken)
+        {
+            _publishFrame = publishFrame;
+            cancellationToken.Register(() => _stopped.TrySetResult());
+            return CameraFrameSourceStartResult.Success(_stopped.Task);
+        }
+
+        public void Publish(byte[] frame) => _publishFrame?.Invoke(frame);
     }
 
     private sealed class StubProcessStream(Stream standardOutput, ProcessResult exitResult) : IProcessStreamHandle

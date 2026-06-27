@@ -54,6 +54,7 @@ public static class DependencyInjection
         services.AddSingleton<IProcessStreamRunner, ProcessStreamRunner>();
         services.AddSingleton<IAuditRecordRepository, SqliteAuditRecordRepository>();
         services.AddSingleton<ICameraCommandFactory, CameraCommandFactory>();
+        services.AddSingleton<LinuxV4l2FfmpegFrameSourceAdapter>();
         services.AddSingleton<ICameraFrameSourceSelector, CameraFrameSourceSelector>();
         services.AddSingleton<ICameraFrameSourceProvider, LinuxV4l2FfmpegFrameSourceProvider>();
         services.AddSingleton<ICameraFrameSourceProvider, WindowsFfmpegFallbackFrameSourceProvider>();

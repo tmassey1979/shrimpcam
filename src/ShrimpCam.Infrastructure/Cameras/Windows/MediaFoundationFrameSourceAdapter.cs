@@ -9,7 +9,10 @@ internal sealed class MediaFoundationFrameSourceAdapter(
     ICameraStatusService cameraStatusService,
     ILiveFrameSnapshotStore liveFrameSnapshotStore)
 {
-    public MediaFoundationFrameSourceStartResult Start(CameraOptions options, CancellationToken cancellationToken)
+    public MediaFoundationFrameSourceStartResult Start(
+        CameraOptions options,
+        CancellationToken cancellationToken,
+        Action<ReadOnlyMemory<byte>>? publishFrame = null)
     {
         ArgumentNullException.ThrowIfNull(options);
         cancellationToken.ThrowIfCancellationRequested();
@@ -45,6 +48,7 @@ internal sealed class MediaFoundationFrameSourceAdapter(
                                 (frame, _) =>
                                 {
                                     recorder.Observe(frame);
+                                    publishFrame?.Invoke(frame);
                                     cameraStatusService.ReportOnline();
                                     return ValueTask.CompletedTask;
                                 },
