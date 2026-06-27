@@ -7,6 +7,7 @@ internal sealed class NativeMediaFoundationCamera : IMediaFoundationCamera
 {
     private const int FrameReadDelayMilliseconds = 5;
     private const int FirstFrameTimeoutSeconds = 8;
+    private const int FrameReadTimeoutSeconds = 3;
 
     public async Task RunAsync(
         CameraOptions options,
@@ -48,7 +49,7 @@ internal sealed class NativeMediaFoundationCamera : IMediaFoundationCamera
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            var read = capture.Read(frame);
+            var read = await ReadFrameWithTimeoutAsync(capture, frame, device, cancellationToken).ConfigureAwait(false);
             if (!read || frame.Empty())
             {
                 if (!hasPublishedFrame)
@@ -68,6 +69,27 @@ internal sealed class NativeMediaFoundationCamera : IMediaFoundationCamera
             hasPublishedFrame = true;
             await onFrame(jpegBytes, cancellationToken).ConfigureAwait(false);
             await Task.Delay(FrameReadDelayMilliseconds, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    private static async Task<bool> ReadFrameWithTimeoutAsync(
+        VideoCapture capture,
+        Mat frame,
+        MediaFoundationDeviceDescriptor device,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await Task
+                .Run(() => capture.Read(frame), cancellationToken)
+                .WaitAsync(TimeSpan.FromSeconds(FrameReadTimeoutSeconds), cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (TimeoutException exception)
+        {
+            throw new InvalidOperationException(
+                $"Windows camera read timed out after {FrameReadTimeoutSeconds} seconds for '{device.DisplayName}'. Try the FFmpeg DirectShow fallback or lower the stream resolution.",
+                exception);
         }
     }
 
