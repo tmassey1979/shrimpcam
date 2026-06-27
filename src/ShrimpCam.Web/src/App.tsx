@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, FormEvent, ReactNode } from "react";
 import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import type { NavigateFunction } from "react-router-dom";
@@ -1378,6 +1378,7 @@ function GalleryScreen({
 }
 
 function LiveViewScreen({ auth }: { auth: AuthContext }) {
+  const streamFrameRef = useRef<HTMLDivElement | null>(null);
   const [streamVersion, setStreamVersion] = useState(1);
   const [streamStatus, setStreamStatus] = useState<LiveStreamStatus>("connecting");
   const [isCapturing, setIsCapturing] = useState(false);
@@ -1419,6 +1420,34 @@ function LiveViewScreen({ auth }: { auth: AuthContext }) {
     }
   }
 
+  async function openFullscreen() {
+    const streamFrame = streamFrameRef.current;
+    if (!streamFrame) {
+      return;
+    }
+
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+        return;
+      }
+
+      const webkitRequestFullscreen = (
+        streamFrame as HTMLDivElement & { webkitRequestFullscreen?: () => Promise<void> | void }
+      ).webkitRequestFullscreen;
+
+      if (streamFrame.requestFullscreen) {
+        await streamFrame.requestFullscreen();
+      } else if (webkitRequestFullscreen) {
+        await webkitRequestFullscreen.call(streamFrame);
+      } else {
+        setMessage("Fullscreen is not supported by this browser.");
+      }
+    } catch {
+      setMessage("Fullscreen could not be opened. Try using your browser fullscreen control.");
+    }
+  }
+
   return (
     <ScreenFrame
       title="Live"
@@ -1433,7 +1462,7 @@ function LiveViewScreen({ auth }: { auth: AuthContext }) {
           <span className={`status-pill ${streamStatus}`}>{streamStatus}</span>
         </div>
 
-        <div className="stream-frame">
+        <div className="stream-frame" ref={streamFrameRef}>
           {streamUnavailable ? (
             <div className="stream-fallback" role="status">
               <strong>Stream unavailable</strong>
@@ -1463,10 +1492,7 @@ function LiveViewScreen({ auth }: { auth: AuthContext }) {
           >
             {isCapturing ? "Capturing..." : "Capture snapshot"}
           </button>
-          <button type="button" className="secondary-button" disabled>
-            Mute
-          </button>
-          <button type="button" className="secondary-button" disabled>
+          <button type="button" className="secondary-button" disabled={streamUnavailable} onClick={() => void openFullscreen()}>
             Fullscreen
           </button>
           <button type="button" className="secondary-button" onClick={retryStream}>

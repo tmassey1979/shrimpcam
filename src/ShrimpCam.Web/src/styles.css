@@ -10981,3 +10981,38 @@ body::after {
     transform: translateX(-50%) !important;
   }
 }
+
+/* Live controls and image fit final pass. */
+.screen-live .stream-frame {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  background: #00121a !important;
+}
+
+.screen-live .stream-frame img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  background: #00121a !important;
+}
+
+.screen-live .stream-frame:fullscreen,
+.screen-live .stream-frame:-webkit-full-screen {
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  background: #000 !important;
+}
+
+.screen-live .stream-frame:fullscreen img,
+.screen-live .stream-frame:-webkit-full-screen img {
+  width: 100vw !important;
+  height: 100vh !important;
+  object-fit: contain !important;
+}
