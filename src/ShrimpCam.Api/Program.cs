@@ -554,6 +554,7 @@ app.MapGet(
         [Authorize(Policy = AuthorizationPolicies.Administrator)] async (
             string? platform,
             IOptions<ShrimpCamOptions> shrimpCamOptions,
+            ICameraFrameSourceProviderRegistry frameSourceProviderRegistry,
             ILinuxCameraDiscovery linuxCameraDiscovery,
             IWindowsCameraDiscovery windowsCameraDiscovery,
             CancellationToken cancellationToken) =>
@@ -577,7 +578,11 @@ app.MapGet(
                         {
                             ["platform"] = [$"Unsupported camera platform '{requestedPlatform}'."],
                         })
-                    : Results.Ok(CameraDiscoveryEndpointMapping.ToCameraListResponse(requestedPlatform, cameras));
+                    : Results.Ok(
+                        CameraDiscoveryEndpointMapping.ToCameraListResponse(
+                            requestedPlatform,
+                            cameras,
+                            frameSourceProviderRegistry.ListProviders()));
             }
             catch (InvalidOperationException ex)
             {
@@ -1092,7 +1097,10 @@ internal static class SettingsEndpointMapping
 
 internal static class CameraDiscoveryEndpointMapping
 {
-    public static object ToCameraListResponse(string platform, IReadOnlyList<CameraDescriptor> cameras) =>
+    public static object ToCameraListResponse(
+        string platform,
+        IReadOnlyList<CameraDescriptor> cameras,
+        IReadOnlyList<CameraFrameSourceProviderDescriptor> providers) =>
         new
         {
             platform,
@@ -1103,6 +1111,23 @@ internal static class CameraDiscoveryEndpointMapping
                         camera.DisplayName,
                         camera.DevicePath,
                         camera.Platform,
+                    })
+                .ToArray(),
+            providers = providers
+                .Where(provider => string.Equals(provider.Platform, platform, StringComparison.Ordinal))
+                .OrderByDescending(provider => provider.IsPrimary)
+                .ThenBy(provider => provider.DisplayName, StringComparer.Ordinal)
+                .Select(
+                    provider => new
+                    {
+                        provider.ProviderKind,
+                        provider.DisplayName,
+                        provider.Platform,
+                        provider.IsPrimary,
+                        provider.RequiresExternalProcess,
+                        provider.DiagnosticsName,
+                        provider.IsRuntimeAvailable,
+                        provider.UnavailableReason,
                     })
                 .ToArray(),
         };

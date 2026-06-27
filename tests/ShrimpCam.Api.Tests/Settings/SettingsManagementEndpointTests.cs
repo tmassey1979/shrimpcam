@@ -186,6 +186,18 @@ public sealed class SettingsManagementEndpointTests
             payload.Cameras.Should().ContainSingle();
             payload.Cameras[0].DisplayName.Should().Be("Logitech C920");
             payload.Cameras[0].DevicePath.Should().Be("@device_pnp_\\\\?\\usb#vid_046d&pid_082d#shrimp#{abc}");
+            payload.Providers.Should().Contain(provider =>
+                provider.ProviderKind == "windows-media-foundation" &&
+                provider.IsPrimary &&
+                !provider.RequiresExternalProcess &&
+                !provider.IsRuntimeAvailable &&
+                provider.UnavailableReason == "mediaFoundationNativeBoundaryUnavailable");
+            payload.Providers.Should().Contain(provider =>
+                provider.ProviderKind == "windows-ffmpeg-directshow" &&
+                !provider.IsPrimary &&
+                provider.RequiresExternalProcess &&
+                provider.IsRuntimeAvailable &&
+                provider.UnavailableReason == null);
         }
         finally
         {
@@ -369,12 +381,23 @@ public sealed class SettingsManagementEndpointTests
 
     private sealed record CameraDiscoveryResponse(
         string Platform,
-        CameraDiscoveryItem[] Cameras);
+        CameraDiscoveryItem[] Cameras,
+        CameraFrameSourceProviderItem[] Providers);
 
     private sealed record CameraDiscoveryItem(
         string DisplayName,
         string DevicePath,
         string Platform);
+
+    private sealed record CameraFrameSourceProviderItem(
+        string ProviderKind,
+        string DisplayName,
+        string Platform,
+        bool IsPrimary,
+        bool RequiresExternalProcess,
+        string DiagnosticsName,
+        bool IsRuntimeAvailable,
+        string? UnavailableReason);
 
     private sealed record CameraSettingsResponse(
         string Platform,
