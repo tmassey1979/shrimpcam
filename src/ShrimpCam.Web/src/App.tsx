@@ -92,6 +92,7 @@ type SettingsResponse = {
   camera: {
     platform: string;
     source: string;
+    backendMode: string;
     captureWidth: number;
     captureHeight: number;
     streamWidth: number;
@@ -1882,6 +1883,24 @@ function SettingsScreen({ auth }: { auth: AuthContext }) {
                     <option value="Windows">Windows</option>
                     <option value="Linux">Linux</option>
                   </select>
+                </label>
+                <label>
+                  <span>Camera backend</span>
+                  <select
+                    value={form.camera.backendMode}
+                    onChange={(event) =>
+                      updateForm((current) => ({
+                        ...current,
+                        camera: { ...current.camera, backendMode: event.target.value }
+                      }))
+                    }
+                  >
+                    <option value="Automatic">Automatic</option>
+                    <option value="WindowsMediaFoundation">Windows Media Foundation</option>
+                    <option value="WindowsFfmpegFallback">Windows FFmpeg fallback</option>
+                    <option value="LinuxV4l2Ffmpeg">Linux V4L2 and FFmpeg</option>
+                  </select>
+                  <small>Use Automatic for normal operation, or choose a host-specific adapter while testing.</small>
                 </label>
                 <label>
                   <span>Retention days</span>

@@ -317,6 +317,7 @@ internal sealed class SharedCameraStreamHub(
         current is not null
         && string.Equals(current.Platform, next.Platform, StringComparison.Ordinal)
         && string.Equals(current.Source, next.Source, StringComparison.Ordinal)
+        && string.Equals(current.BackendMode, next.BackendMode, StringComparison.Ordinal)
         && current.StreamWidth == next.StreamWidth
         && current.StreamHeight == next.StreamHeight
         && current.StreamFramesPerSecond == next.StreamFramesPerSecond
@@ -327,6 +328,7 @@ internal sealed class SharedCameraStreamHub(
         {
             Platform = options.Platform,
             Source = options.Source,
+            BackendMode = options.BackendMode,
             CaptureWidth = options.CaptureWidth,
             CaptureHeight = options.CaptureHeight,
             StreamWidth = options.StreamWidth,

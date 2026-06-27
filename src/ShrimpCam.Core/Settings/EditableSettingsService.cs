@@ -20,6 +20,7 @@ public sealed class EditableSettingsService(
             {
                 Platform = GetString(persisted, "camera.platform", defaults.Camera.Platform),
                 Source = GetString(persisted, "camera.source", defaults.Camera.Source),
+                BackendMode = GetString(persisted, "camera.backendMode", defaults.Camera.BackendMode),
                 CaptureWidth = GetInt(persisted, "camera.captureWidth", defaults.Camera.CaptureWidth),
                 CaptureHeight = GetInt(persisted, "camera.captureHeight", defaults.Camera.CaptureHeight),
                 StreamWidth = GetInt(persisted, "camera.streamWidth", defaults.Camera.StreamWidth),
@@ -88,6 +89,7 @@ public sealed class EditableSettingsService(
         [
             CreateSetting("camera.platform", settings.Camera.Platform, "Camera platform", updatedAtUtc),
             CreateSetting("camera.source", settings.Camera.Source, "Camera source", updatedAtUtc),
+            CreateSetting("camera.backendMode", settings.Camera.BackendMode, "Camera backend mode", updatedAtUtc),
             CreateSetting("camera.captureWidth", settings.Camera.CaptureWidth, "Capture width", updatedAtUtc),
             CreateSetting("camera.captureHeight", settings.Camera.CaptureHeight, "Capture height", updatedAtUtc),
             CreateSetting("camera.streamWidth", settings.Camera.StreamWidth, "Stream width", updatedAtUtc),

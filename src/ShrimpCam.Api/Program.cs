@@ -853,6 +853,9 @@ internal sealed record UpdateSettingsHttpRequest(
                 StreamFramesPerSecond = Camera.StreamFramesPerSecond,
                 ReconnectRetryAttempts = Camera.ReconnectRetryAttempts,
                 ReconnectBackoffSeconds = Camera.ReconnectBackoffSeconds,
+                BackendMode = string.IsNullOrWhiteSpace(Camera.BackendMode)
+                    ? CameraBackendModes.Automatic
+                    : Camera.BackendMode,
                 AlwaysOnStreamEnabled = Camera.AlwaysOnStreamEnabled,
             },
             new CaptureOptions
@@ -882,6 +885,7 @@ internal sealed record CameraSettingsHttpRequest(
     int StreamFramesPerSecond,
     int ReconnectRetryAttempts,
     int ReconnectBackoffSeconds,
+    string? BackendMode,
     bool AlwaysOnStreamEnabled);
 
 internal sealed record CaptureSettingsHttpRequest(
@@ -1035,6 +1039,7 @@ internal static class SettingsEndpointMapping
             {
                 settings.Camera.Platform,
                 settings.Camera.Source,
+                settings.Camera.BackendMode,
                 settings.Camera.CaptureWidth,
                 settings.Camera.CaptureHeight,
                 settings.Camera.StreamWidth,

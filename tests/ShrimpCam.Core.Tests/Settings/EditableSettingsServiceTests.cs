@@ -1,5 +1,6 @@
 using NSubstitute;
 using ShrimpCam.Core.Abstractions;
+using ShrimpCam.Core.Cameras;
 using ShrimpCam.Core.Configuration;
 using ShrimpCam.Core.Persistence;
 using ShrimpCam.Core.Settings;
@@ -19,6 +20,7 @@ public sealed class EditableSettingsServiceTests
             .Returns(
                 [
                     new PersistedSetting("capture.intervalMinutes", "10", null, DateTimeOffset.UtcNow),
+                    new PersistedSetting("camera.backendMode", CameraBackendModes.WindowsFfmpegFallback, null, DateTimeOffset.UtcNow),
                     new PersistedSetting("storage.retentionDays", "45", null, DateTimeOffset.UtcNow),
                     new PersistedSetting("security.hostMode", "RemoteReady", null, DateTimeOffset.UtcNow),
                 ]);
@@ -27,6 +29,7 @@ public sealed class EditableSettingsServiceTests
         var settings = await service.GetCurrentAsync(CancellationToken.None).ConfigureAwait(true);
 
         settings.Camera.Source.Should().Be("Logitech C920");
+        settings.Camera.BackendMode.Should().Be(CameraBackendModes.WindowsFfmpegFallback);
         settings.Capture.IntervalMinutes.Should().Be(10);
         settings.Storage.RetentionDays.Should().Be(45);
         settings.Security.HostMode.Should().Be("RemoteReady");
@@ -72,8 +75,16 @@ public sealed class EditableSettingsServiceTests
 
         await service.UpdateAsync(settings, CancellationToken.None).ConfigureAwait(true);
 
-        await settingsRepository.Received(19)
+        await settingsRepository.Received(20)
             .UpsertAsync(Arg.Any<PersistedSetting>(), CancellationToken.None)
+            .ConfigureAwait(true);
+        await settingsRepository.Received(1)
+            .UpsertAsync(
+                Arg.Is<PersistedSetting>(setting =>
+                    setting.Key == "camera.backendMode" &&
+                    setting.Value == CameraBackendModes.WindowsFfmpegFallback &&
+                    setting.UpdatedAtUtc == now),
+                CancellationToken.None)
             .ConfigureAwait(true);
         await settingsRepository.Received(1)
             .UpsertAsync(
@@ -126,6 +137,7 @@ public sealed class EditableSettingsServiceTests
             {
                 Platform = "Windows",
                 Source = "Logitech C920",
+                BackendMode = CameraBackendModes.WindowsFfmpegFallback,
                 CaptureWidth = 1920,
                 CaptureHeight = 1080,
                 StreamWidth = 1280,

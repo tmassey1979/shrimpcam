@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using ShrimpCam.Core.Cameras;
 
 namespace ShrimpCam.Core.Configuration;
 
@@ -11,6 +12,12 @@ public sealed class CameraOptions
     [Required]
     [MinLength(1)]
     public string Source { get; init; } = string.Empty;
+
+    [Required]
+    [RegularExpression(
+        "Automatic|WindowsMediaFoundation|WindowsFfmpegFallback|LinuxV4l2Ffmpeg",
+        ErrorMessage = "Camera backend mode must be Automatic, WindowsMediaFoundation, WindowsFfmpegFallback, or LinuxV4l2Ffmpeg.")]
+    public string BackendMode { get; init; } = CameraBackendModes.Automatic;
 
     [Range(1, 7680)]
     public int CaptureWidth { get; init; } = 1920;

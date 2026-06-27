@@ -54,6 +54,7 @@ public static class DependencyInjection
         services.AddSingleton<IProcessStreamRunner, ProcessStreamRunner>();
         services.AddSingleton<IAuditRecordRepository, SqliteAuditRecordRepository>();
         services.AddSingleton<ICameraCommandFactory, CameraCommandFactory>();
+        services.AddSingleton<ICameraFrameSourceSelector, CameraFrameSourceSelector>();
         services.AddSingleton<ICameraResourceCoordinator, InMemoryCameraResourceCoordinator>();
         services.AddSingleton<ILiveFrameSnapshotStore, LiveFrameSnapshotStore>();
         services.AddSingleton<ISharedCameraStreamHub, SharedCameraStreamHub>();
