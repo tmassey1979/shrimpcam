@@ -24,8 +24,8 @@ public sealed class CameraFrameSourceProviderRegistryTests
         provider.Descriptor.ProviderKind.Should().Be(CameraFrameProviderKinds.WindowsMediaFoundation);
         provider.Descriptor.IsPrimary.Should().BeTrue();
         provider.Descriptor.RequiresExternalProcess.Should().BeFalse();
-        provider.Descriptor.IsRuntimeAvailable.Should().BeFalse();
-        provider.Descriptor.UnavailableReason.Should().Be("mediaFoundationNativeBoundaryUnavailable");
+        provider.Descriptor.IsRuntimeAvailable.Should().BeTrue();
+        provider.Descriptor.UnavailableReason.Should().BeNull();
     }
 
     [Fact]

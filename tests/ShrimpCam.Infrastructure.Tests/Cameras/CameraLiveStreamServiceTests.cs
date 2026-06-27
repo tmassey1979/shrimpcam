@@ -168,7 +168,8 @@ public sealed class CameraLiveStreamServiceTests
         var commandFactory = Substitute.For<ICameraCommandFactory>();
         var cameraStatusService = Substitute.For<ICameraStatusService>();
         var processStreamRunner = Substitute.For<IProcessStreamRunner>();
-        var providerRegistry = new StaticFrameSourceProviderRegistry(new DegradingFrameSourceProvider(cameraStatusService));
+        var providerRegistry = new StaticFrameSourceProviderRegistry(
+            new DegradingFrameSourceProvider(cameraStatusService, requiresExternalProcess: true));
         var stream = new BlockingAppendStream();
         var processStream = new StubProcessStream(stream, new ProcessResult(0, string.Empty, string.Empty));
         var command = new ProcessRequest("ffmpeg", "-stream");
@@ -193,6 +194,30 @@ public sealed class CameraLiveStreamServiceTests
         cameraStatusService.Received(1).ReportOnline();
 
         await subscription.Session!.DisposeAsync().ConfigureAwait(true);
+        await hub.DisposeAsync().ConfigureAwait(true);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task Shared_stream_does_not_launch_process_fallback_for_native_provider_failure()
+    {
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var processStreamRunner = Substitute.For<IProcessStreamRunner>();
+        var providerRegistry = new StaticFrameSourceProviderRegistry(new DegradingFrameSourceProvider(cameraStatusService));
+        var hub = CreateHub(
+            commandFactory,
+            cameraStatusService,
+            processStreamRunner,
+            providerRegistry: providerRegistry);
+        var service = new CameraLiveStreamService(hub);
+
+        var subscription = await service.StartAsync(CreateOptions(), CancellationToken.None).ConfigureAwait(true);
+
+        subscription.Succeeded.Should().BeFalse();
+        await processStreamRunner.DidNotReceiveWithAnyArgs().StartAsync(default!, default).ConfigureAwait(true);
+        cameraStatusService.Received().ReportDegraded("provider-startup-failed");
+
         await hub.DisposeAsync().ConfigureAwait(true);
     }
 
@@ -527,14 +552,16 @@ public sealed class CameraLiveStreamServiceTests
         public void Publish(byte[] frame) => _publishFrame?.Invoke(frame);
     }
 
-    private sealed class DegradingFrameSourceProvider(ICameraStatusService cameraStatusService) : ICameraFrameSourceProvider
+    private sealed class DegradingFrameSourceProvider(
+        ICameraStatusService cameraStatusService,
+        bool requiresExternalProcess = false) : ICameraFrameSourceProvider
     {
         public CameraFrameSourceProviderDescriptor Descriptor { get; } = new(
             "degrading-test-provider",
             "Degrading test provider",
             CameraPlatforms.Windows,
             IsPrimary: true,
-            RequiresExternalProcess: false,
+            RequiresExternalProcess: requiresExternalProcess,
             "degrading-test-provider");
 
         public CameraFrameSourceStartResult Start(

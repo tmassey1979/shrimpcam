@@ -140,26 +140,38 @@ public sealed class MediaFoundationFrameSourceAdapterTests
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task Native_media_foundation_placeholder_reports_stable_unavailable_reason()
+    public void Windows_media_foundation_provider_reports_runtime_available()
     {
-        var cameraStatusService = Substitute.For<ICameraStatusService>();
-        var frameStore = new LiveFrameSnapshotStore();
-        var deviceEnumerator = new FakeMediaFoundationDeviceEnumerator([CreateDevice()]);
         var adapter = new MediaFoundationFrameSourceAdapter(
-            deviceEnumerator,
-            new NativeMediaFoundationCamera(),
-            cameraStatusService,
-            frameStore);
+            new FakeMediaFoundationDeviceEnumerator([]),
+            new FakeMediaFoundationCamera((_, _) => Task.CompletedTask),
+            Substitute.For<ICameraStatusService>(),
+            new LiveFrameSnapshotStore());
+        var provider = new WindowsMediaFoundationFrameSourceProvider(adapter);
 
-        var result = adapter.Start(CreateOptions(), CancellationToken.None);
-        await result.RunningTask!.WaitAsync(TimeSpan.FromSeconds(2)).ConfigureAwait(true);
+        provider.Descriptor.IsRuntimeAvailable.Should().BeTrue();
+        provider.Descriptor.UnavailableReason.Should().BeNull();
+        provider.Descriptor.RequiresExternalProcess.Should().BeFalse();
+    }
 
-        result.Succeeded.Should().BeTrue();
-        cameraStatusService.Received(1)
-            .ReportDegraded(Arg.Is<string>(reason =>
-                reason.Contains(MediaFoundationFailureReasons.StartupFailed, StringComparison.Ordinal)
-                && reason.Contains(MediaFoundationFailureReasons.NativeBoundaryUnavailable, StringComparison.Ordinal)));
-        cameraStatusService.DidNotReceive().ReportOnline();
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task Native_media_foundation_camera_requires_native_device_index()
+    {
+        var camera = new NativeMediaFoundationCamera();
+        var act = async () => await camera
+            .RunAsync(
+                CreateOptions(),
+                CreateDevice(),
+                new MediaFoundationFrameFormat(1280, 720, 15, MediaFoundationFormatSubtypes.Mjpeg),
+                (_, _) => ValueTask.CompletedTask,
+                CancellationToken.None)
+            .ConfigureAwait(true);
+
+        await act.Should()
+            .ThrowAsync<InvalidOperationException>()
+            .WithMessage("*native camera index*")
+            .ConfigureAwait(true);
     }
 
     private static CameraOptions CreateOptions(string source = "Logi C270 HD WebCam") =>

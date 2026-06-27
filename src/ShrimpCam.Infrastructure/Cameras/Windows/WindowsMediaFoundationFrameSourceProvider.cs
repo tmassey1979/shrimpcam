@@ -12,9 +12,7 @@ internal sealed class WindowsMediaFoundationFrameSourceProvider(
         CameraPlatforms.Windows,
         IsPrimary: true,
         RequiresExternalProcess: false,
-        "windows-media-foundation",
-        IsRuntimeAvailable: false,
-        MediaFoundationFailureReasons.NativeBoundaryUnavailable);
+        "windows-media-foundation");
 
     public CameraFrameSourceStartResult Start(
         CameraOptions options,

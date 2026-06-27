@@ -44,13 +44,22 @@ internal sealed class WindowsMediaFoundationDeviceEnumerator(
     private async Task<IReadOnlyList<MediaFoundationDeviceDescriptor>> EnumerateDirectShowFallbackAsync(CancellationToken cancellationToken)
     {
         var cameras = await cameraDiscovery.DiscoverAsync(cancellationToken).ConfigureAwait(false);
-
-        return cameras
+        var videoCameras = cameras
             .Where(camera => string.Equals(camera.Platform, CameraPlatforms.Windows, StringComparison.OrdinalIgnoreCase))
-            .Select(camera => new MediaFoundationDeviceDescriptor(
+            .Where(IsVideoCamera)
+            .ToList();
+
+        return videoCameras
+            .Select((camera, index) => new MediaFoundationDeviceDescriptor(
                 camera.DisplayName,
                 camera.DevicePath,
-                DefaultLogitechFormats))
+                DefaultLogitechFormats,
+                index))
             .ToList();
     }
+
+    private static bool IsVideoCamera(CameraDescriptor camera) =>
+        !camera.DisplayName.Contains("microphone", StringComparison.OrdinalIgnoreCase)
+        && !camera.DevicePath.Contains("wave_", StringComparison.OrdinalIgnoreCase)
+        && !camera.DevicePath.Contains("audio", StringComparison.OrdinalIgnoreCase);
 }

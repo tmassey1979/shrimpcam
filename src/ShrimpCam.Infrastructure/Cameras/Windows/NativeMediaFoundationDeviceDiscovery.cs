@@ -60,7 +60,8 @@ internal sealed class NativeMediaFoundationDeviceDiscovery : IMediaFoundationNat
                             new MediaFoundationDeviceDescriptor(
                                 displayName,
                                 symbolicLink,
-                                WindowsMediaFoundationDeviceEnumerator.DefaultLogitechFormats));
+                                WindowsMediaFoundationDeviceEnumerator.DefaultLogitechFormats,
+                                index));
                     }
                 }
                 finally

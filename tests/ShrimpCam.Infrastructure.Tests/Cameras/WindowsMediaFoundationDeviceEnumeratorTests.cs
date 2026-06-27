@@ -37,15 +37,20 @@ public sealed class WindowsMediaFoundationDeviceEnumeratorTests
             .Returns(
                 [
                     new CameraDescriptor("Logi C270 HD WebCam", @"@device:pnp:\\?\usb#vid_046d&pid_0825", CameraPlatforms.Windows),
+                    new CameraDescriptor("Microphone (Logi C270 HD WebCam)", @"@device:audio:logi", CameraPlatforms.Windows),
+                    new CameraDescriptor("Integrated Webcam", @"@device:pnp:\\?\usb#vid_0c45&pid_6a1b", CameraPlatforms.Windows),
                     new CameraDescriptor("Linux camera", "/dev/video0", CameraPlatforms.Linux),
                 ]);
         var enumerator = new WindowsMediaFoundationDeviceEnumerator(nativeDiscovery, discovery);
 
         var devices = await enumerator.EnumerateAsync(CancellationToken.None).ConfigureAwait(true);
 
-        devices.Should().ContainSingle();
+        devices.Should().HaveCount(2);
         devices[0].DisplayName.Should().Be("Logi C270 HD WebCam");
         devices[0].SymbolicLink.Should().Be(@"@device:pnp:\\?\usb#vid_046d&pid_0825");
+        devices[0].NativeIndex.Should().Be(0);
+        devices[1].DisplayName.Should().Be("Integrated Webcam");
+        devices[1].NativeIndex.Should().Be(1);
         devices[0].Formats.Should().Contain(format =>
             format.Width == 1280
             && format.Height == 720
@@ -68,6 +73,7 @@ public sealed class WindowsMediaFoundationDeviceEnumeratorTests
         devices.Should().ContainSingle();
         devices[0].DisplayName.Should().Be("Fallback Camera");
         devices[0].SymbolicLink.Should().Be("fallback-device");
+        devices[0].NativeIndex.Should().Be(0);
     }
 
     private sealed class FakeNativeMediaFoundationDeviceDiscovery(
