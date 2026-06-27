@@ -3,7 +3,8 @@ using ShrimpCam.Core.Configuration;
 
 namespace ShrimpCam.Infrastructure.Cameras.Windows;
 
-internal sealed class WindowsMediaFoundationFrameSourceProvider : ICameraFrameSourceProvider
+internal sealed class WindowsMediaFoundationFrameSourceProvider(
+    MediaFoundationFrameSourceAdapter adapter) : ICameraFrameSourceProvider
 {
     public CameraFrameSourceProviderDescriptor Descriptor { get; } = new(
         CameraFrameProviderKinds.WindowsMediaFoundation,
@@ -16,6 +17,11 @@ internal sealed class WindowsMediaFoundationFrameSourceProvider : ICameraFrameSo
     public CameraFrameSourceStartResult Start(
         CameraOptions options,
         Action<ReadOnlyMemory<byte>> publishFrame,
-        CancellationToken cancellationToken) =>
-        CameraFrameSourceStartResult.Failure("windowsMediaFoundationNativeBoundaryPending");
+        CancellationToken cancellationToken)
+    {
+        var result = adapter.Start(options, cancellationToken, publishFrame);
+        return result.Succeeded
+            ? CameraFrameSourceStartResult.Success(result.RunningTask!)
+            : CameraFrameSourceStartResult.Failure(result.FailureReason!);
+    }
 }

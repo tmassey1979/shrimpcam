@@ -114,6 +114,30 @@ public sealed class MediaFoundationFrameSourceAdapterTests
         cameraStatusService.Received(1).ReportDegraded(MediaFoundationFailureReasons.MissingDevice);
     }
 
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task Windows_media_foundation_provider_delegates_to_adapter_and_publishes_frames()
+    {
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var frameStore = new LiveFrameSnapshotStore();
+        var deviceEnumerator = new FakeMediaFoundationDeviceEnumerator([CreateDevice()]);
+        var camera = new FakeMediaFoundationCamera(async (onFrame, cancellationToken) =>
+        {
+            await onFrame(new byte[] { 0xFF, 0xD8, 0x55, 0xAA, 0xFF, 0xD9 }, cancellationToken).ConfigureAwait(false);
+        });
+        var adapter = new MediaFoundationFrameSourceAdapter(deviceEnumerator, camera, cameraStatusService, frameStore);
+        var provider = new WindowsMediaFoundationFrameSourceProvider(adapter);
+        var published = new List<byte[]>();
+
+        var result = provider.Start(CreateOptions(), frame => published.Add(frame.ToArray()), CancellationToken.None);
+        await result.RunningTask!.WaitAsync(TimeSpan.FromSeconds(2)).ConfigureAwait(true);
+
+        result.Succeeded.Should().BeTrue();
+        published.Should().ContainSingle()
+            .Which.Should().Equal([0xFF, 0xD8, 0x55, 0xAA, 0xFF, 0xD9]);
+        cameraStatusService.Received(1).ReportOnline();
+    }
+
     private static CameraOptions CreateOptions(string source = "Logi C270 HD WebCam") =>
         new()
         {

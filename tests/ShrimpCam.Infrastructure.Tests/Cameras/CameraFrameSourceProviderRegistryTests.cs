@@ -84,6 +84,7 @@ public sealed class CameraFrameSourceProviderRegistryTests
     private static ICameraFrameSourceProviderRegistry CreateRegistry()
     {
         var services = new ServiceCollection();
+        services.AddLogging();
         Infrastructure.DependencyInjection.AddInfrastructure(services);
 
         using var provider = services.BuildServiceProvider();
