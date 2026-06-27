@@ -82,6 +82,32 @@ public sealed class CameraCommandFactoryTests
 
     [Fact]
     [Trait("Category", "Unit")]
+    public void Linux_stream_command_uses_v4l2_device_resolution_frame_rate_and_mjpeg_output()
+    {
+        var factory = BuildFactory();
+        var options = new CameraOptions
+        {
+            Platform = CameraPlatforms.Linux,
+            Source = "/dev/video4",
+            StreamWidth = 1280,
+            StreamHeight = 720,
+            StreamFramesPerSecond = 20,
+        };
+
+        var command = factory.BuildLiveStreamCommand(options);
+
+        command.FileName.Should().Be("ffmpeg");
+        command.Arguments.Should().Contain("-f video4linux2");
+        command.Arguments.Should().Contain("-framerate 20");
+        command.Arguments.Should().Contain("-video_size 1280x720");
+        command.Arguments.Should().Contain("-i \"/dev/video4\"");
+        command.Arguments.Should().Contain("-f mpjpeg");
+        command.Arguments.Should().Contain("-boundary_tag shrimpcam");
+        command.Arguments.Should().Contain("pipe:1");
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
     public void Windows_source_identifiers_with_quotes_are_escaped()
     {
         var factory = BuildFactory();
