@@ -207,6 +207,41 @@ public sealed class SettingsManagementEndpointTests
 
     [Fact]
     [Trait("Category", "Api")]
+    public async Task Administrator_can_discover_linux_camera_sources_and_v4l2_provider_diagnostics()
+    {
+        var rootPath = CreateTempRoot();
+
+        try
+        {
+            var token = await SeedUserAndLoginAsync(rootPath, "shrimp-admin", "AdminPass1234", "Administrator").ConfigureAwait(true);
+            await using var factory = new SettingsWebApplicationFactory(rootPath);
+            using var client = factory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await client.GetAsync("/cameras?platform=Linux").ConfigureAwait(true);
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var payload = await response.Content.ReadFromJsonAsync<CameraDiscoveryResponse>().ConfigureAwait(true);
+            payload.Should().NotBeNull();
+            payload!.Platform.Should().Be("Linux");
+            payload.Cameras.Should().ContainSingle();
+            payload.Cameras[0].DisplayName.Should().Be("HD Pro Webcam C920 (usb-0000:01:00.0-1)");
+            payload.Cameras[0].DevicePath.Should().Be("/dev/video0");
+            payload.Providers.Should().ContainSingle(provider =>
+                provider.ProviderKind == "linux-v4l2-ffmpeg" &&
+                provider.IsPrimary &&
+                provider.RequiresExternalProcess &&
+                provider.IsRuntimeAvailable &&
+                provider.UnavailableReason == null);
+        }
+        finally
+        {
+            DeleteDirectory(rootPath);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Api")]
     public async Task Anonymous_users_cannot_discover_camera_sources()
     {
         var rootPath = CreateTempRoot();
@@ -494,6 +529,18 @@ public sealed class SettingsManagementEndpointTests
                         [dshow @ 000001]  "Logitech C920"
                         [dshow @ 000001]     Alternative name "@device_pnp_\\?\usb#vid_046d&pid_082d#shrimp#{abc}"
                         """));
+            }
+
+            if (request.FileName.Equals("v4l2-ctl", StringComparison.OrdinalIgnoreCase))
+            {
+                return Task.FromResult(
+                    new ProcessResult(
+                        0,
+                        """
+                        HD Pro Webcam C920 (usb-0000:01:00.0-1):
+                        	/dev/video0
+                        """,
+                        string.Empty));
             }
 
             return Task.FromResult(new ProcessResult(0, string.Empty, string.Empty));
