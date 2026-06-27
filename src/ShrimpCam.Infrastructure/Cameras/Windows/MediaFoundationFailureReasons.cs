@@ -7,4 +7,6 @@ internal static class MediaFoundationFailureReasons
     public const string UnsupportedFormat = "mediaFoundationUnsupportedFormat";
 
     public const string StartupFailed = "mediaFoundationStartupFailed";
+
+    public const string NativeBoundaryUnavailable = "mediaFoundationNativeBoundaryUnavailable";
 }

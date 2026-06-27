@@ -6,4 +6,6 @@ public sealed record CameraFrameSourceProviderDescriptor(
     string Platform,
     bool IsPrimary,
     bool RequiresExternalProcess,
-    string DiagnosticsName);
+    string DiagnosticsName,
+    bool IsRuntimeAvailable = true,
+    string? UnavailableReason = null);

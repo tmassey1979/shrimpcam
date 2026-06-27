@@ -138,6 +138,30 @@ public sealed class MediaFoundationFrameSourceAdapterTests
         cameraStatusService.Received(1).ReportOnline();
     }
 
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task Native_media_foundation_placeholder_reports_stable_unavailable_reason()
+    {
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var frameStore = new LiveFrameSnapshotStore();
+        var deviceEnumerator = new FakeMediaFoundationDeviceEnumerator([CreateDevice()]);
+        var adapter = new MediaFoundationFrameSourceAdapter(
+            deviceEnumerator,
+            new NativeMediaFoundationCamera(),
+            cameraStatusService,
+            frameStore);
+
+        var result = adapter.Start(CreateOptions(), CancellationToken.None);
+        await result.RunningTask!.WaitAsync(TimeSpan.FromSeconds(2)).ConfigureAwait(true);
+
+        result.Succeeded.Should().BeTrue();
+        cameraStatusService.Received(1)
+            .ReportDegraded(Arg.Is<string>(reason =>
+                reason.Contains(MediaFoundationFailureReasons.StartupFailed, StringComparison.Ordinal)
+                && reason.Contains(MediaFoundationFailureReasons.NativeBoundaryUnavailable, StringComparison.Ordinal)));
+        cameraStatusService.DidNotReceive().ReportOnline();
+    }
+
     private static CameraOptions CreateOptions(string source = "Logi C270 HD WebCam") =>
         new()
         {

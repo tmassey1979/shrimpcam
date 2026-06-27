@@ -24,6 +24,8 @@ public sealed class CameraFrameSourceProviderRegistryTests
         provider.Descriptor.ProviderKind.Should().Be(CameraFrameProviderKinds.WindowsMediaFoundation);
         provider.Descriptor.IsPrimary.Should().BeTrue();
         provider.Descriptor.RequiresExternalProcess.Should().BeFalse();
+        provider.Descriptor.IsRuntimeAvailable.Should().BeFalse();
+        provider.Descriptor.UnavailableReason.Should().Be("mediaFoundationNativeBoundaryUnavailable");
     }
 
     [Fact]
@@ -44,6 +46,8 @@ public sealed class CameraFrameSourceProviderRegistryTests
         provider.Descriptor.ProviderKind.Should().Be(CameraFrameProviderKinds.WindowsFfmpegDirectShow);
         provider.Descriptor.IsPrimary.Should().BeFalse();
         provider.Descriptor.RequiresExternalProcess.Should().BeTrue();
+        provider.Descriptor.IsRuntimeAvailable.Should().BeTrue();
+        provider.Descriptor.UnavailableReason.Should().BeNull();
     }
 
     [Fact]
@@ -64,6 +68,8 @@ public sealed class CameraFrameSourceProviderRegistryTests
         provider.Descriptor.ProviderKind.Should().Be(CameraFrameProviderKinds.LinuxV4l2Ffmpeg);
         provider.Descriptor.IsPrimary.Should().BeTrue();
         provider.Descriptor.RequiresExternalProcess.Should().BeTrue();
+        provider.Descriptor.IsRuntimeAvailable.Should().BeTrue();
+        provider.Descriptor.UnavailableReason.Should().BeNull();
     }
 
     [Fact]
