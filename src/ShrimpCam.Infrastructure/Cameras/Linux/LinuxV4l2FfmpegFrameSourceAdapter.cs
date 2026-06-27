@@ -49,8 +49,9 @@ internal sealed class LinuxV4l2FfmpegFrameSourceAdapter(
                     .ConfigureAwait(false);
                 var processResult = await processStream.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
 
+                var failureReason = ClassifyProcessExit(processResult.StandardError);
                 cameraStatusService.ReportDegraded(
-                    $"{LinuxV4l2FfmpegFailureReasons.ProcessExited}: exit {processResult.ExitCode}; frames {streamedFrames}; {processResult.StandardError}");
+                    $"{failureReason}: exit {processResult.ExitCode}; frames {streamedFrames}; {processResult.StandardError}");
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -104,5 +105,22 @@ internal sealed class LinuxV4l2FfmpegFrameSourceAdapter(
         }
 
         return streamedFrames;
+    }
+
+    private static string ClassifyProcessExit(string standardError)
+    {
+        if (standardError.Contains("Permission denied", StringComparison.OrdinalIgnoreCase))
+        {
+            return LinuxV4l2FfmpegFailureReasons.PermissionDenied;
+        }
+
+        if (standardError.Contains("Invalid argument", StringComparison.OrdinalIgnoreCase) ||
+            standardError.Contains("does not support", StringComparison.OrdinalIgnoreCase) ||
+            standardError.Contains("not supported", StringComparison.OrdinalIgnoreCase))
+        {
+            return LinuxV4l2FfmpegFailureReasons.UnsupportedResolution;
+        }
+
+        return LinuxV4l2FfmpegFailureReasons.ProcessExited;
     }
 }

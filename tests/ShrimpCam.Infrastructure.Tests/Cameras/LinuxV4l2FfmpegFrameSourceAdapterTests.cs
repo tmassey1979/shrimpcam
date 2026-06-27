@@ -81,6 +81,43 @@ public sealed class LinuxV4l2FfmpegFrameSourceAdapterTests
             reason.Contains(LinuxV4l2FfmpegFailureReasons.ProcessExited, StringComparison.Ordinal)));
     }
 
+    [Theory]
+    [Trait("Category", "Unit")]
+    [InlineData(
+        "open /dev/video0: Permission denied",
+        LinuxV4l2FfmpegFailureReasons.PermissionDenied)]
+    [InlineData(
+        "[video4linux2,v4l2 @ 0x123] ioctl(VIDIOC_S_FMT): Invalid argument",
+        LinuxV4l2FfmpegFailureReasons.UnsupportedResolution)]
+    [InlineData(
+        "The driver does not support the requested video size",
+        LinuxV4l2FfmpegFailureReasons.UnsupportedResolution)]
+    public async Task Linux_v4l2_process_exit_reports_actionable_failure_reason(
+        string standardError,
+        string expectedFailureReason)
+    {
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var processStreamRunner = Substitute.For<IProcessStreamRunner>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var frameStore = new LiveFrameSnapshotStore();
+        var command = new ProcessRequest("ffmpeg", "-f video4linux2");
+        var options = CreateOptions(reconnectRetryAttempts: 0);
+
+        commandFactory.BuildLiveStreamCommand(options).Returns(command);
+        processStreamRunner.StartAsync(command, Arg.Any<CancellationToken>())
+            .Returns(new StubProcessStream(new MemoryStream([]), new ProcessResult(1, string.Empty, standardError)));
+
+        var adapter = new LinuxV4l2FfmpegFrameSourceAdapter(commandFactory, processStreamRunner, cameraStatusService, frameStore);
+
+        var result = adapter.Start(options, CancellationToken.None);
+        await result.RunningTask!.WaitAsync(TimeSpan.FromSeconds(2)).ConfigureAwait(true);
+
+        result.Succeeded.Should().BeTrue();
+        cameraStatusService.Received(1).ReportDegraded(Arg.Is<string>(reason =>
+            reason.Contains(expectedFailureReason, StringComparison.Ordinal) &&
+            reason.Contains(standardError, StringComparison.Ordinal)));
+    }
+
     [Fact]
     [Trait("Category", "Unit")]
     public async Task Missing_v4l2_device_fails_before_starting_ffmpeg()
