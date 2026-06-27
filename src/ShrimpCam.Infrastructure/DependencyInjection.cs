@@ -55,6 +55,7 @@ public static class DependencyInjection
         services.AddSingleton<IAuditRecordRepository, SqliteAuditRecordRepository>();
         services.AddSingleton<ICameraCommandFactory, CameraCommandFactory>();
         services.AddSingleton<LinuxV4l2FfmpegFrameSourceAdapter>();
+        services.AddSingleton<IMediaFoundationNativeDeviceDiscovery, NativeMediaFoundationDeviceDiscovery>();
         services.AddSingleton<IMediaFoundationDeviceEnumerator, WindowsMediaFoundationDeviceEnumerator>();
         services.AddSingleton<IMediaFoundationCamera, NativeMediaFoundationCamera>();
         services.AddSingleton<MediaFoundationFrameSourceAdapter>();
