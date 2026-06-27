@@ -122,6 +122,41 @@ public sealed class CameraLiveStreamServiceTests
 
     [Fact]
     [Trait("Category", "Unit")]
+    public async Task Shared_stream_reports_online_when_provider_fails_but_process_fallback_streams()
+    {
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var processStreamRunner = Substitute.For<IProcessStreamRunner>();
+        var providerRegistry = new StaticFrameSourceProviderRegistry(new DegradingFrameSourceProvider(cameraStatusService));
+        var stream = new BlockingAppendStream();
+        var processStream = new StubProcessStream(stream, new ProcessResult(0, string.Empty, string.Empty));
+        var command = new ProcessRequest("ffmpeg", "-stream");
+
+        commandFactory.BuildLiveStreamCommand(Arg.Any<CameraOptions>()).Returns(command);
+        processStreamRunner.StartAsync(command, Arg.Any<CancellationToken>()).Returns(processStream);
+
+        var hub = CreateHub(
+            commandFactory,
+            cameraStatusService,
+            processStreamRunner,
+            providerRegistry: providerRegistry);
+        var service = new CameraLiveStreamService(hub);
+
+        var subscriptionTask = service.StartAsync(CreateOptions(), CancellationToken.None);
+        await stream.AppendFrameAsync("fallback-frame").ConfigureAwait(true);
+        var subscription = await subscriptionTask.ConfigureAwait(true);
+
+        subscription.Succeeded.Should().BeTrue();
+        await processStreamRunner.Received(1).StartAsync(command, Arg.Any<CancellationToken>()).ConfigureAwait(true);
+        cameraStatusService.Received(1).ReportDegraded("provider-startup-failed");
+        cameraStatusService.Received(1).ReportOnline();
+
+        await subscription.Session!.DisposeAsync().ConfigureAwait(true);
+        await hub.DisposeAsync().ConfigureAwait(true);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
     public async Task Subscriber_cancellation_token_is_not_used_to_control_shared_camera_process()
     {
         var commandFactory = Substitute.For<ICameraCommandFactory>();
@@ -449,6 +484,26 @@ public sealed class CameraLiveStreamServiceTests
         }
 
         public void Publish(byte[] frame) => _publishFrame?.Invoke(frame);
+    }
+
+    private sealed class DegradingFrameSourceProvider(ICameraStatusService cameraStatusService) : ICameraFrameSourceProvider
+    {
+        public CameraFrameSourceProviderDescriptor Descriptor { get; } = new(
+            "degrading-test-provider",
+            "Degrading test provider",
+            CameraPlatforms.Windows,
+            IsPrimary: true,
+            RequiresExternalProcess: false,
+            "degrading-test-provider");
+
+        public CameraFrameSourceStartResult Start(
+            CameraOptions options,
+            Action<ReadOnlyMemory<byte>> publishFrame,
+            CancellationToken cancellationToken)
+        {
+            cameraStatusService.ReportDegraded("provider-startup-failed");
+            return CameraFrameSourceStartResult.Failure("provider-startup-failed");
+        }
     }
 
     private sealed class StubProcessStream(Stream standardOutput, ProcessResult exitResult) : IProcessStreamHandle
