@@ -4,6 +4,7 @@ using ShrimpCam.Core.Configuration;
 namespace ShrimpCam.Infrastructure.Cameras.Windows;
 
 internal sealed class MediaFoundationFrameSourceAdapter(
+    IMediaFoundationDeviceEnumerator deviceEnumerator,
     IMediaFoundationCamera camera,
     ICameraStatusService cameraStatusService,
     ILiveFrameSnapshotStore liveFrameSnapshotStore)
@@ -27,9 +28,20 @@ internal sealed class MediaFoundationFrameSourceAdapter(
                 {
                     try
                     {
+                        var devices = await deviceEnumerator.EnumerateAsync(cancellationToken).ConfigureAwait(false);
+                        var device = FindDevice(devices, options.Source);
+                        if (device is null)
+                        {
+                            cameraStatusService.ReportDegraded(MediaFoundationFailureReasons.MissingDevice);
+                            return;
+                        }
+
+                        var format = MediaFoundationFrameFormatSelector.SelectStreamFormat(device, options);
                         await camera
                             .RunAsync(
                                 options,
+                                device,
+                                format,
                                 (frame, _) =>
                                 {
                                     recorder.Observe(frame);
@@ -56,4 +68,11 @@ internal sealed class MediaFoundationFrameSourceAdapter(
 
         return MediaFoundationFrameSourceStartResult.Success(runningTask);
     }
+
+    private static MediaFoundationDeviceDescriptor? FindDevice(
+        IEnumerable<MediaFoundationDeviceDescriptor> devices,
+        string source) =>
+        devices.FirstOrDefault(device =>
+            string.Equals(device.SymbolicLink, source, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(device.DisplayName, source, StringComparison.OrdinalIgnoreCase));
 }
