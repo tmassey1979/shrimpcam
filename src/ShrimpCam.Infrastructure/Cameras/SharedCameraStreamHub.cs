@@ -14,7 +14,7 @@ internal sealed class SharedCameraStreamHub(
     IProcessStreamRunner processStreamRunner,
     ILogger<SharedCameraStreamHub> logger) : ISharedCameraStreamHub, IAsyncDisposable
 {
-    private static readonly TimeSpan StartupTimeout = TimeSpan.FromSeconds(2);
+    private static readonly TimeSpan StartupTimeout = TimeSpan.FromSeconds(10);
     private static readonly TimeSpan SubscriberFirstChunkTimeout = TimeSpan.FromSeconds(5);
     private static readonly Action<ILogger, Exception?> SharedPumpStopped =
         LoggerMessage.Define(
@@ -204,9 +204,17 @@ internal sealed class SharedCameraStreamHub(
 
         using var startupCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         startupCancellation.CancelAfter(StartupTimeout);
-        var firstRead = await processStream.StandardOutput
-            .ReadAsync(buffer.AsMemory(0, buffer.Length), startupCancellation.Token)
-            .ConfigureAwait(false);
+        int firstRead;
+        try
+        {
+            firstRead = await processStream.StandardOutput
+                .ReadAsync(buffer.AsMemory(0, buffer.Length), startupCancellation.Token)
+                .ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            return false;
+        }
 
         if (firstRead <= 0)
         {

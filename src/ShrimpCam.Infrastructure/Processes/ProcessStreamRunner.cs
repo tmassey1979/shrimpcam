@@ -27,23 +27,30 @@ internal sealed class ProcessStreamRunner : IProcessStreamRunner
         return Task.FromResult<IProcessStreamHandle>(new ProcessStreamHandle(process));
     }
 
-    private sealed class ProcessStreamHandle(Process process) : IProcessStreamHandle
+    private sealed class ProcessStreamHandle : IProcessStreamHandle
     {
+        private readonly Process _process;
+        private readonly Task<string> _standardErrorTask;
         private bool _disposed;
 
-        public Stream StandardOutput => process.StandardOutput.BaseStream;
+        public ProcessStreamHandle(Process process)
+        {
+            _process = process;
+            _standardErrorTask = process.StandardError.ReadToEndAsync();
+        }
+
+        public Stream StandardOutput => _process.StandardOutput.BaseStream;
 
         public async Task<ProcessResult> WaitForExitAsync(CancellationToken cancellationToken)
         {
-            var standardOutputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-            var standardErrorTask = process.StandardError.ReadToEndAsync(cancellationToken);
+            var standardOutputTask = _process.StandardOutput.ReadToEndAsync(cancellationToken);
 
-            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+            await _process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
 
             var standardOutput = await standardOutputTask.ConfigureAwait(false);
-            var standardError = await standardErrorTask.ConfigureAwait(false);
+            var standardError = await _standardErrorTask.ConfigureAwait(false);
 
-            return new ProcessResult(process.ExitCode, standardOutput, standardError);
+            return new ProcessResult(_process.ExitCode, standardOutput, standardError);
         }
 
         public ValueTask DisposeAsync()
@@ -57,17 +64,17 @@ internal sealed class ProcessStreamRunner : IProcessStreamRunner
 
             try
             {
-                if (!process.HasExited)
+                if (!_process.HasExited)
                 {
-                    process.Kill(entireProcessTree: true);
-                    process.WaitForExit();
+                    _process.Kill(entireProcessTree: true);
+                    _process.WaitForExit();
                 }
             }
             catch (InvalidOperationException)
             {
             }
 
-            process.Dispose();
+            _process.Dispose();
             return ValueTask.CompletedTask;
         }
     }

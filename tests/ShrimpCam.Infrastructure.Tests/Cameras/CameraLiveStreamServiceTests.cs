@@ -199,6 +199,31 @@ public sealed class CameraLiveStreamServiceTests
         cameraStatusService.Received(1).ReportDegraded(CameraLiveStreamFailureReasons.CameraBusy);
     }
 
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task Startup_read_timeout_reports_camera_unavailable_instead_of_cancellation_text()
+    {
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var processStreamRunner = Substitute.For<IProcessStreamRunner>();
+        var options = CreateOptions(reconnectRetryAttempts: 0);
+        var command = new ProcessRequest("ffmpeg", "-stream");
+
+        commandFactory.BuildLiveStreamCommand(Arg.Any<CameraOptions>()).Returns(command);
+        processStreamRunner
+            .StartAsync(command, Arg.Any<CancellationToken>())
+            .Returns(new StubProcessStream(new CanceledReadStream(), new ProcessResult(1, string.Empty, "startup timed out")));
+
+        var hub = CreateHub(commandFactory, cameraStatusService, processStreamRunner);
+        var service = new CameraLiveStreamService(hub);
+
+        var result = await service.StartAsync(options, CancellationToken.None).ConfigureAwait(true);
+
+        result.Succeeded.Should().BeFalse();
+        result.FailureReason.Should().Be(CameraLiveStreamFailureReasons.CameraUnavailable);
+        cameraStatusService.Received(1).ReportDegraded(CameraLiveStreamFailureReasons.CameraUnavailable);
+    }
+
     private static SharedCameraStreamHub CreateHub(
         ICameraCommandFactory commandFactory,
         ICameraStatusService cameraStatusService,
@@ -213,7 +238,7 @@ public sealed class CameraLiveStreamServiceTests
             processStreamRunner,
             NullLogger<SharedCameraStreamHub>.Instance);
 
-    private static CameraOptions CreateOptions(int reconnectBackoffSeconds = 1) =>
+    private static CameraOptions CreateOptions(int reconnectBackoffSeconds = 1, int reconnectRetryAttempts = 2) =>
         new()
         {
             Platform = CameraPlatforms.Windows,
@@ -221,7 +246,7 @@ public sealed class CameraLiveStreamServiceTests
             StreamWidth = 1280,
             StreamHeight = 720,
             StreamFramesPerSecond = 15,
-            ReconnectRetryAttempts = 2,
+            ReconnectRetryAttempts = reconnectRetryAttempts,
             ReconnectBackoffSeconds = reconnectBackoffSeconds,
         };
 
@@ -391,6 +416,42 @@ public sealed class CameraLiveStreamServiceTests
             _availableBytes.Release();
             base.Dispose(disposing);
         }
+    }
+
+    private sealed class CanceledReadStream : Stream
+    {
+        public override bool CanRead => true;
+
+        public override bool CanSeek => false;
+
+        public override bool CanWrite => false;
+
+        public override long Length => throw new NotSupportedException();
+
+        public override long Position
+        {
+            get => throw new NotSupportedException();
+            set => throw new NotSupportedException();
+        }
+
+        public override void Flush()
+        {
+        }
+
+        public override int Read(byte[] buffer, int offset, int count) =>
+            throw new OperationCanceledException();
+
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default) =>
+            ValueTask.FromException<int>(new OperationCanceledException());
+
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) =>
+            Task.FromException<int>(new OperationCanceledException());
+
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+
+        public override void SetLength(long value) => throw new NotSupportedException();
+
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
     }
 }
 
