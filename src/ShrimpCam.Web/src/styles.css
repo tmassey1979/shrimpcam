@@ -9991,3 +9991,14 @@ body::after {
     align-items: start !important;
   }
 }
+/* Final live feed lock: the camera image itself must stay borderless. */
+.screen-live .stream-frame,
+.screen-live .stream-frame:has(img),
+.screen-live .stream-frame img {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
