@@ -163,6 +163,40 @@ public sealed class CameraLiveStreamServiceTests
 
     [Fact]
     [Trait("Category", "Unit")]
+    public async Task Shared_stream_restarts_provider_when_camera_settings_change()
+    {
+        var commandFactory = Substitute.For<ICameraCommandFactory>();
+        var cameraStatusService = Substitute.For<ICameraStatusService>();
+        var processStreamRunner = Substitute.For<IProcessStreamRunner>();
+        var provider = new RestartTrackingFrameSourceProvider();
+        var providerRegistry = new StaticFrameSourceProviderRegistry(provider);
+        var hub = CreateHub(
+            commandFactory,
+            cameraStatusService,
+            processStreamRunner,
+            providerRegistry: providerRegistry);
+        var initialOptions = CreateOptions(source: "Camera A", streamWidth: 1280, streamHeight: 720);
+        var updatedOptions = CreateOptions(source: "Camera B", streamWidth: 640, streamHeight: 480);
+
+        await hub.EnsureRunningAsync(initialOptions, CancellationToken.None).ConfigureAwait(true);
+        await EventuallyAsync(() => provider.StartedOptions.Should().ContainSingle()).ConfigureAwait(true);
+        var firstRun = provider.Runs.Single();
+
+        await hub.EnsureRunningAsync(updatedOptions, CancellationToken.None).ConfigureAwait(true);
+        await EventuallyAsync(() => provider.StartedOptions.Should().HaveCount(2)).ConfigureAwait(true);
+
+        firstRun.IsCancellationRequested.Should().BeTrue();
+        provider.StartedOptions[0].Source.Should().Be("Camera A");
+        provider.StartedOptions[1].Source.Should().Be("Camera B");
+        provider.StartedOptions[1].StreamWidth.Should().Be(640);
+        provider.StartedOptions[1].StreamHeight.Should().Be(480);
+        await processStreamRunner.DidNotReceiveWithAnyArgs().StartAsync(default!, default).ConfigureAwait(true);
+
+        await hub.DisposeAsync().ConfigureAwait(true);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
     public async Task Shared_stream_reports_online_when_provider_fails_but_process_fallback_streams()
     {
         var commandFactory = Substitute.For<ICameraCommandFactory>();
@@ -405,13 +439,18 @@ public sealed class CameraLiveStreamServiceTests
             processStreamRunner,
             NullLogger<SharedCameraStreamHub>.Instance);
 
-    private static CameraOptions CreateOptions(int reconnectBackoffSeconds = 1, int reconnectRetryAttempts = 2) =>
+    private static CameraOptions CreateOptions(
+        int reconnectBackoffSeconds = 1,
+        int reconnectRetryAttempts = 2,
+        string source = "Logi C270 HD WebCam",
+        int streamWidth = 1280,
+        int streamHeight = 720) =>
         new()
         {
             Platform = CameraPlatforms.Windows,
-            Source = "Logi C270 HD WebCam",
-            StreamWidth = 1280,
-            StreamHeight = 720,
+            Source = source,
+            StreamWidth = streamWidth,
+            StreamHeight = streamHeight,
             StreamFramesPerSecond = 15,
             ReconnectRetryAttempts = reconnectRetryAttempts,
             ReconnectBackoffSeconds = reconnectBackoffSeconds,
@@ -550,6 +589,38 @@ public sealed class CameraLiveStreamServiceTests
         }
 
         public void Publish(byte[] frame) => _publishFrame?.Invoke(frame);
+    }
+
+    private sealed class RestartTrackingFrameSourceProvider : ICameraFrameSourceProvider
+    {
+        public List<CameraOptions> StartedOptions { get; } = [];
+
+        public List<ProviderRun> Runs { get; } = [];
+
+        public CameraFrameSourceProviderDescriptor Descriptor { get; } = new(
+            "restart-tracking-provider",
+            "Restart tracking provider",
+            CameraPlatforms.Windows,
+            IsPrimary: true,
+            RequiresExternalProcess: false,
+            "restart-tracking-provider");
+
+        public CameraFrameSourceStartResult Start(
+            CameraOptions options,
+            Action<ReadOnlyMemory<byte>> publishFrame,
+            CancellationToken cancellationToken)
+        {
+            var run = new ProviderRun();
+            StartedOptions.Add(options);
+            Runs.Add(run);
+            cancellationToken.Register(() => run.IsCancellationRequested = true);
+            return CameraFrameSourceStartResult.Success(Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken));
+        }
+    }
+
+    private sealed class ProviderRun
+    {
+        public bool IsCancellationRequested { get; set; }
     }
 
     private sealed class DegradingFrameSourceProvider(
