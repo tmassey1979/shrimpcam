@@ -1,12 +1,10 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using ShrimpCam.Core.Settings;
 
 namespace ShrimpCam.Infrastructure.Cameras;
 
 internal sealed class CameraFrameEvaluationWorker(
-    IEditableSettingsService settingsService,
-    ISharedCameraStreamHub streamHub,
+    CameraFrameEvaluationService evaluationService,
     ILogger<CameraFrameEvaluationWorker> logger) : BackgroundService
 {
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(10);
@@ -22,11 +20,7 @@ internal sealed class CameraFrameEvaluationWorker(
         {
             try
             {
-                var settings = await settingsService.GetCurrentAsync(stoppingToken).ConfigureAwait(false);
-                if (settings.Camera.AlwaysOnStreamEnabled)
-                {
-                    await streamHub.EnsureRunningAsync(settings.Camera, stoppingToken).ConfigureAwait(false);
-                }
+                await evaluationService.RunOnceAsync(stoppingToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {

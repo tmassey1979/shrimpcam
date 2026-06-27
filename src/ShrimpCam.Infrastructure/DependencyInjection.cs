@@ -62,6 +62,7 @@ public static class DependencyInjection
         services.AddSingleton<ICameraResourceCoordinator, InMemoryCameraResourceCoordinator>();
         services.AddSingleton<ILiveFrameSnapshotStore, LiveFrameSnapshotStore>();
         services.AddSingleton<ISharedCameraStreamHub, SharedCameraStreamHub>();
+        services.AddSingleton<CameraFrameEvaluationService>();
         services.AddSingleton<ICameraStartupProbe, CameraStartupProbe>();
         services.AddSingleton<ICameraStatusService, CameraStatusService>();
         services.AddSingleton<ICameraLiveStreamService, CameraLiveStreamService>();
