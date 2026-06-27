@@ -205,7 +205,12 @@ internal sealed class SharedCameraStreamHub(
         var processStream = await processStreamRunner.StartAsync(command, cancellationToken).ConfigureAwait(false);
         await using var configuredProcessStream = processStream.ConfigureAwait(false);
         var buffer = new byte[16384];
-        using var framePump = new MjpegFramePump(recorder, Broadcast);
+        using var framePump = new JpegFramePump(
+            frame =>
+            {
+                recorder.Observe(frame);
+                Broadcast(CreateMjpegPart(frame.ToArray()));
+            });
 
         using var startupCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         startupCancellation.CancelAfter(StartupTimeout);
@@ -465,52 +470,6 @@ internal sealed class SharedCameraStreamHub(
             Dispose(disposing: true);
             return base.DisposeAsync();
         }
-    }
-
-    private sealed class MjpegFramePump(ILiveFrameSnapshotRecorder recorder, Action<ReadOnlyMemory<byte>> broadcast)
-        : IDisposable
-    {
-        private const byte JpegStartPrefix = 0xFF;
-        private const byte JpegStartMarker = 0xD8;
-        private const byte JpegEndMarker = 0xD9;
-        private readonly MemoryStream _currentFrame = new();
-        private bool _capturing;
-        private byte? _previousByte;
-
-        public void Observe(ReadOnlyMemory<byte> buffer)
-        {
-            foreach (var currentByte in buffer.Span)
-            {
-                if (!_capturing)
-                {
-                    if (_previousByte == JpegStartPrefix && currentByte == JpegStartMarker)
-                    {
-                        _capturing = true;
-                        _currentFrame.SetLength(0);
-                        _currentFrame.WriteByte(JpegStartPrefix);
-                        _currentFrame.WriteByte(JpegStartMarker);
-                    }
-
-                    _previousByte = currentByte;
-                    continue;
-                }
-
-                _currentFrame.WriteByte(currentByte);
-
-                if (_previousByte == JpegStartPrefix && currentByte == JpegEndMarker)
-                {
-                    var frame = _currentFrame.ToArray();
-                    recorder.Observe(frame);
-                    broadcast(CreateMjpegPart(frame));
-                    _currentFrame.SetLength(0);
-                    _capturing = false;
-                }
-
-                _previousByte = currentByte;
-            }
-        }
-
-        public void Dispose() => _currentFrame.Dispose();
     }
 
 }
